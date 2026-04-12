@@ -10,7 +10,46 @@
 (function () {
   'use strict';
 
+  const SESSION_PATTERNS = [
+    /\bcurrent session\b/,
+    /\bsession\b/,
+    /\bsesion actual\b/,
+    /\bsesion\b/,
+    /\bmensajes\b/,
+    /\bmessages\b/,
+    /\buso actual\b/,
+  ];
+
+  const WEEKLY_PATTERNS = [
+    /\bweekly\b/,
+    /\bweek\b/,
+    /\bweekly limits?\b/,
+    /\blimites? semanales?\b/,
+    /\bsemanal(?:es)?\b/,
+    /\btodos los modelos\b/,
+    /\ball models\b/,
+  ];
+
+  const RESET_PATTERNS = /\b(reset|resets|renew|renews|refresh|refreshes|restablece|restablecen|reinicia|reinician)\b/;
+
   // ── Helpers ───────────────────────────────────────────────────────────
+
+  function normalizeText(text) {
+    return (text || '')
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase()
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
+  function detectSection(text) {
+    const normalized = normalizeText(text);
+    if (!normalized) return null;
+    if (SESSION_PATTERNS.some((pattern) => pattern.test(normalized))) return 'session';
+    if (WEEKLY_PATTERNS.some((pattern) => pattern.test(normalized))) return 'weekly';
+    return null;
+  }
 
   /**
    * Pull numeric progress value from an element.
@@ -47,7 +86,7 @@
    */
   function parseResetTime(text) {
     if (!text) return null;
-    const t = text.toLowerCase();
+    const t = normalizeText(text);
     const now = Date.now();
 
     // "in X days"
@@ -64,11 +103,34 @@
       return now + parseInt(mins[1]) * 60000;
     }
 
+    const esDays = t.match(/en\s+(\d+)\s*d(?:ias?)?\b/);
+    if (esDays) return now + parseInt(esDays[1]) * 86400000;
+
+    const esHours = t.match(/en\s+(\d+)\s*h(?:oras?)?\b/);
+    const esMins = t.match(/(\d+)\s*m(?:in(?:utos?)?)?\b/);
+    if (esHours) {
+      return now + parseInt(esHours[1]) * 3600000 + (esMins ? parseInt(esMins[1]) * 60000 : 0);
+    }
+    if (esMins && !esHours) {
+      return now + parseInt(esMins[1]) * 60000;
+    }
+
     // "tomorrow" or day-of-week — rough estimate
     if (t.includes('tomorrow')) return now + 86400000;
+    if (t.includes('manana')) return now + 86400000;
     const dow = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
     for (let i = 0; i < dow.length; i++) {
       if (t.includes(dow[i])) {
+        const today = new Date().getDay();
+        let diff = i - today;
+        if (diff <= 0) diff += 7;
+        return now + diff * 86400000;
+      }
+    }
+
+    const dowEs = ['domingo','lunes','martes','miercoles','jueves','viernes','sabado'];
+    for (let i = 0; i < dowEs.length; i++) {
+      if (t.includes(dowEs[i])) {
         const today = new Date().getDay();
         let diff = i - today;
         if (diff <= 0) diff += 7;
@@ -119,7 +181,7 @@
         const w = el.style?.width;
         if (w && w.includes('%')) pct = parseFloat(w);
       }
-      const context = nearbyText(el, 5).toLowerCase();
+      const context = nearbyText(el, 5);
       return { pct, context, el };
     }).filter(d => d.pct !== null && d.pct >= 0 && d.pct <= 100);
 
@@ -136,27 +198,55 @@
 
     let sessionBlock = '';
     let weeklyBlock  = '';
-    let currentBlock = '';
+    let currentBlock = null;
+    const textPercentages = [];
 
     for (const line of lines) {
-      const l = line.toLowerCase();
-      if (l.includes('session') || l.includes('message') || l.includes('daily') || l.includes('today') || l.includes('usage')) {
-        currentBlock = 'session';
-      }
-      if (l.includes('week')) {
-        currentBlock = 'weekly';
-      }
+      const hint = detectSection(line);
+      if (hint) currentBlock = hint;
+
       if (currentBlock === 'session') sessionBlock += ' ' + line;
       if (currentBlock === 'weekly')  weeklyBlock  += ' ' + line;
+
+      const pct = extractPct(line);
+      if (pct !== null) {
+        textPercentages.push({
+          pct,
+          line,
+          section: hint || currentBlock,
+        });
+      }
     }
 
     // ── 4. Assign bar values heuristically ───────────────────────────
-    if (barData.length >= 2) {
-      // First bar → session, second → weekly (typical layout order)
-      result.session.percentage = barData[0].pct;
-      result.weekly.percentage  = barData[1].pct;
-    } else if (barData.length === 1) {
-      result.session.percentage = barData[0].pct;
+    const sessionTextMatch = textPercentages.find(entry => entry.section === 'session');
+    const weeklyTextMatch = textPercentages.find(entry => entry.section === 'weekly');
+
+    if (sessionTextMatch) result.session.percentage = sessionTextMatch.pct;
+    if (weeklyTextMatch) result.weekly.percentage  = weeklyTextMatch.pct;
+
+    if (result.session.percentage === null || result.weekly.percentage === null) {
+      const classifiedBars = barData.map((entry) => ({
+        ...entry,
+        section: detectSection(entry.context),
+      }));
+
+      if (result.session.percentage === null) {
+        result.session.percentage =
+          classifiedBars.find((entry) => entry.section === 'session')?.pct ?? null;
+      }
+
+      if (result.weekly.percentage === null) {
+        result.weekly.percentage =
+          classifiedBars.find((entry) => entry.section === 'weekly')?.pct ?? null;
+      }
+
+      if ((result.session.percentage === null || result.weekly.percentage === null) && classifiedBars.length >= 2) {
+        if (result.session.percentage === null) result.session.percentage = classifiedBars[0].pct;
+        if (result.weekly.percentage === null) result.weekly.percentage = classifiedBars[1].pct;
+      } else if (result.session.percentage === null && classifiedBars.length === 1) {
+        result.session.percentage = classifiedBars[0].pct;
+      }
     }
 
     // Cross-check: if text-extracted percentages differ significantly, prefer text
@@ -169,9 +259,8 @@
     // If we still have nothing, scan all lines for first two percentages
     if (result.session.percentage === null) {
       const allPcts = [];
-      for (const line of lines) {
-        const p = extractPct(line);
-        if (p !== null) allPcts.push(p);
+      for (const entry of textPercentages) {
+        allPcts.push(entry.pct);
         if (allPcts.length >= 2) break;
       }
       if (allPcts[0] != null) result.session.percentage = allPcts[0];
@@ -180,13 +269,13 @@
 
     // ── 5. Parse reset times ─────────────────────────────────────────
     for (const line of lines) {
-      const l = line.toLowerCase();
-      if (l.match(/reset|renew|refresh/)) {
+      const l = normalizeText(line);
+      if (RESET_PATTERNS.test(l)) {
         // Decide which block this belongs to
-        if (!result.session.resetTime && (l.includes('session') || l.includes('message') || l.includes('hour') || l.includes('minute') || l.includes('today') || l.includes('daily'))) {
+        if (!result.session.resetTime && (detectSection(line) === 'session' || l.includes('hour') || l.includes('minute') || l.includes('today') || l.includes('daily') || l.includes('hora') || l.includes('min'))) {
           result.session.resetTime = parseResetTime(line);
           result.session.label     = line;
-        } else if (!result.weekly.resetTime && (l.includes('week') || l.includes('day') || l.includes('tomorrow'))) {
+        } else if (!result.weekly.resetTime && (detectSection(line) === 'weekly' || l.includes('week') || l.includes('day') || l.includes('tomorrow') || l.includes('dia') || l.includes('manana'))) {
           result.weekly.resetTime = parseResetTime(line);
           result.weekly.label     = line;
         } else {
@@ -207,15 +296,16 @@
     const headings = Array.from(document.querySelectorAll('h1,h2,h3,h4,span,p,div'))
       .filter(el => {
         const t = el.innerText?.trim() || '';
-        return t.length > 5 && t.length < 120 && /usage|limit|message|session|week/i.test(t);
+        return t.length > 5 && t.length < 120 && detectSection(t);
       });
 
     for (const el of headings) {
-      const t = el.innerText.trim().toLowerCase();
-      if (!result.session.label && (t.includes('session') || t.includes('message') || t.includes('daily'))) {
+      const t = el.innerText.trim();
+      const section = detectSection(t);
+      if (!result.session.label && section === 'session') {
         result.session.label = el.innerText.trim();
       }
-      if (!result.weekly.label && t.includes('week')) {
+      if (!result.weekly.label && section === 'weekly') {
         result.weekly.label = el.innerText.trim();
       }
     }
