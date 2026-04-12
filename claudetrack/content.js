@@ -51,6 +51,14 @@
     return null;
   }
 
+  function hasSectionMarkers(text) {
+    const normalized = normalizeText(text);
+    return {
+      session: SESSION_PATTERNS.some((pattern) => pattern.test(normalized)),
+      weekly: WEEKLY_PATTERNS.some((pattern) => pattern.test(normalized)),
+    };
+  }
+
   /**
    * Pull numeric progress value from an element.
    * Tries: aria-valuenow → value attribute → style.width → inner text.
@@ -151,12 +159,25 @@
     return m ? parseFloat(m[1]) : null;
   }
 
+  function isValidPercentage(value) {
+    return Number.isFinite(value) && value >= 0 && value <= 100;
+  }
+
   // ── Main parsing ─────────────────────────────────────────────────────
 
   function parseUsage() {
     const result = {
       session: { percentage: null, resetTime: null, label: null },
       weekly:  { percentage: null, resetTime: null, label: null },
+      meta: {
+        ready: false,
+        confidence: 'low',
+        sessionSource: null,
+        weeklySource: null,
+        foundSessionMarker: false,
+        foundWeeklyMarker: false,
+        textPercentageCount: 0,
+      },
     };
 
     // ── 1. Find progress bar / meter elements ───────────────────────────
@@ -189,6 +210,9 @@
     // This is the fallback / cross-check when bars aren't found
     const bodyText = document.body?.innerText || '';
     const lines = bodyText.split('\n').map(l => l.trim()).filter(Boolean);
+    const markers = hasSectionMarkers(bodyText);
+    result.meta.foundSessionMarker = markers.session;
+    result.meta.foundWeeklyMarker = markers.weekly;
 
     // Cluster lines: session usage vs weekly usage
     // Key words to look for:
@@ -222,8 +246,14 @@
     const sessionTextMatch = textPercentages.find(entry => entry.section === 'session');
     const weeklyTextMatch = textPercentages.find(entry => entry.section === 'weekly');
 
-    if (sessionTextMatch) result.session.percentage = sessionTextMatch.pct;
-    if (weeklyTextMatch) result.weekly.percentage  = weeklyTextMatch.pct;
+    if (sessionTextMatch) {
+      result.session.percentage = sessionTextMatch.pct;
+      result.meta.sessionSource = 'text';
+    }
+    if (weeklyTextMatch) {
+      result.weekly.percentage  = weeklyTextMatch.pct;
+      result.meta.weeklySource = 'text';
+    }
 
     if (result.session.percentage === null || result.weekly.percentage === null) {
       const classifiedBars = barData.map((entry) => ({
@@ -232,20 +262,29 @@
       }));
 
       if (result.session.percentage === null) {
-        result.session.percentage =
-          classifiedBars.find((entry) => entry.section === 'session')?.pct ?? null;
+        const sessionBar = classifiedBars.find((entry) => entry.section === 'session');
+        result.session.percentage = sessionBar?.pct ?? null;
+        if (sessionBar) result.meta.sessionSource = 'classified-bar';
       }
 
       if (result.weekly.percentage === null) {
-        result.weekly.percentage =
-          classifiedBars.find((entry) => entry.section === 'weekly')?.pct ?? null;
+        const weeklyBar = classifiedBars.find((entry) => entry.section === 'weekly');
+        result.weekly.percentage = weeklyBar?.pct ?? null;
+        if (weeklyBar) result.meta.weeklySource = 'classified-bar';
       }
 
       if ((result.session.percentage === null || result.weekly.percentage === null) && classifiedBars.length >= 2) {
-        if (result.session.percentage === null) result.session.percentage = classifiedBars[0].pct;
-        if (result.weekly.percentage === null) result.weekly.percentage = classifiedBars[1].pct;
+        if (result.session.percentage === null) {
+          result.session.percentage = classifiedBars[0].pct;
+          result.meta.sessionSource = result.meta.sessionSource || 'fallback-bar';
+        }
+        if (result.weekly.percentage === null) {
+          result.weekly.percentage = classifiedBars[1].pct;
+          result.meta.weeklySource = result.meta.weeklySource || 'fallback-bar';
+        }
       } else if (result.session.percentage === null && classifiedBars.length === 1) {
         result.session.percentage = classifiedBars[0].pct;
+        result.meta.sessionSource = result.meta.sessionSource || 'fallback-bar';
       }
     }
 
@@ -253,8 +292,14 @@
     const sessionPctText = extractPct(sessionBlock);
     const weeklyPctText  = extractPct(weeklyBlock);
 
-    if (sessionPctText !== null) result.session.percentage = sessionPctText;
-    if (weeklyPctText  !== null) result.weekly.percentage  = weeklyPctText;
+    if (sessionPctText !== null) {
+      result.session.percentage = sessionPctText;
+      result.meta.sessionSource = 'block-text';
+    }
+    if (weeklyPctText  !== null) {
+      result.weekly.percentage  = weeklyPctText;
+      result.meta.weeklySource = 'block-text';
+    }
 
     // If we still have nothing, scan all lines for first two percentages
     if (result.session.percentage === null) {
@@ -263,8 +308,14 @@
         allPcts.push(entry.pct);
         if (allPcts.length >= 2) break;
       }
-      if (allPcts[0] != null) result.session.percentage = allPcts[0];
-      if (allPcts[1] != null) result.weekly.percentage  = allPcts[1];
+      if (allPcts[0] != null) {
+        result.session.percentage = allPcts[0];
+        result.meta.sessionSource = result.meta.sessionSource || 'global-text';
+      }
+      if (allPcts[1] != null) {
+        result.weekly.percentage  = allPcts[1];
+        result.meta.weeklySource = result.meta.weeklySource || 'global-text';
+      }
     }
 
     // ── 5. Parse reset times ─────────────────────────────────────────
@@ -310,22 +361,47 @@
       }
     }
 
+    result.meta.textPercentageCount = textPercentages.length;
+
+    const sessionValid = isValidPercentage(result.session.percentage);
+    const weeklyValid = isValidPercentage(result.weekly.percentage);
+    const hasBothMarkers = result.meta.foundSessionMarker && result.meta.foundWeeklyMarker;
+    const bothFromText =
+      ['text', 'block-text'].includes(result.meta.sessionSource) &&
+      ['text', 'block-text'].includes(result.meta.weeklySource);
+    const sessionFromText = ['text', 'block-text'].includes(result.meta.sessionSource);
+
+    result.meta.ready = hasBothMarkers && sessionValid;
+
+    if (hasBothMarkers && sessionValid && weeklyValid && bothFromText) {
+      result.meta.confidence = 'high';
+    } else if (hasBothMarkers && sessionValid && (weeklyValid || sessionFromText)) {
+      result.meta.confidence = 'medium';
+    } else {
+      result.meta.confidence = 'low';
+    }
+
     return result;
   }
 
   // ── Wait for React to render, then parse ────────────────────────────
 
   function waitAndParse(attempts = 0) {
-    const MAX = 20;
+    const MAX = 24;
     const INTERVAL = 500;  // ms
 
-    // A "ready" signal: at least one percentage is visible on the page
-    const pctVisible = /\d+\s*%/.test(document.body?.innerText || '');
+    const bodyText = document.body?.innerText || '';
+    const pctVisible = /\d+\s*%/.test(bodyText);
+    const markers = hasSectionMarkers(bodyText);
+    const ready = pctVisible && markers.session && markers.weekly;
 
-    if (pctVisible || attempts >= MAX) {
+    if (ready || attempts >= MAX) {
       const data = parseUsage();
-      // Send to background SW
-      chrome.runtime.sendMessage({ type: 'USAGE_DATA', data });
+      if (data.meta?.ready || attempts >= MAX) {
+        chrome.runtime.sendMessage({ type: 'USAGE_DATA', data });
+      } else {
+        setTimeout(() => waitAndParse(attempts + 1), INTERVAL);
+      }
     } else {
       setTimeout(() => waitAndParse(attempts + 1), INTERVAL);
     }

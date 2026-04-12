@@ -41,8 +41,8 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
   }
   if (msg.type === 'USAGE_DATA') {
     // Forwarded from the content script via tab messaging
-    persistAndBadge(msg.data);
-    sendResponse({ ok: true });
+    persistAndBadge(msg.data).then((stored) => sendResponse({ ok: true, stored }));
+    return true;
   }
 });
 
@@ -100,10 +100,85 @@ async function injectIntoTab(tabId) {
 
 // ── Badge helpers ─────────────────────────────────────────────────────────
 
-function persistAndBadge(data) {
-  data.lastUpdated = Date.now();
-  chrome.storage.local.set({ claudeUsage: data });
-  updateBadge(data);
+async function persistAndBadge(data) {
+  const next = sanitizeUsageData(data);
+  if (!next) return false;
+
+  const { claudeUsage: current } = await chrome.storage.local.get('claudeUsage');
+  if (!shouldPersist(next, current)) {
+    console.warn('[ClaudeTrack] Ignoring low-confidence usage update', {
+      nextMeta: next.meta,
+      currentMeta: current?.meta,
+      nextSession: next.session?.percentage,
+      currentSession: current?.session?.percentage,
+    });
+    return false;
+  }
+
+  next.lastUpdated = Date.now();
+  await chrome.storage.local.set({ claudeUsage: next });
+  updateBadge(next);
+  return true;
+}
+
+function sanitizeUsageData(data) {
+  if (!data || typeof data !== 'object') return null;
+
+  const clone = {
+    session: {
+      percentage: normalizePct(data.session?.percentage),
+      resetTime: data.session?.resetTime ?? null,
+      label: data.session?.label ?? null,
+    },
+    weekly: {
+      percentage: normalizePct(data.weekly?.percentage),
+      resetTime: data.weekly?.resetTime ?? null,
+      label: data.weekly?.label ?? null,
+    },
+    meta: {
+      ready: Boolean(data.meta?.ready),
+      confidence: data.meta?.confidence || 'low',
+      sessionSource: data.meta?.sessionSource || null,
+      weeklySource: data.meta?.weeklySource || null,
+      foundSessionMarker: Boolean(data.meta?.foundSessionMarker),
+      foundWeeklyMarker: Boolean(data.meta?.foundWeeklyMarker),
+      textPercentageCount: Number.isFinite(data.meta?.textPercentageCount) ? data.meta.textPercentageCount : 0,
+    },
+  };
+
+  if (clone.session.percentage === null && clone.weekly.percentage === null) return null;
+  return clone;
+}
+
+function normalizePct(value) {
+  const num = Number(value);
+  if (!Number.isFinite(num) || num < 0 || num > 100) return null;
+  return num;
+}
+
+function confidenceRank(level) {
+  if (level === 'high') return 3;
+  if (level === 'medium') return 2;
+  return 1;
+}
+
+function shouldPersist(next, current) {
+  if (!next?.meta?.ready || next.session?.percentage === null) return false;
+  if (!current) return true;
+
+  const nextRank = confidenceRank(next.meta?.confidence);
+  const currentRank = confidenceRank(current.meta?.confidence);
+  const nextSession = next.session?.percentage;
+  const currentSession = current.session?.percentage;
+
+  if (currentSession === null) return true;
+  if (nextRank > currentRank) return true;
+  if (nextRank === currentRank) return true;
+
+  const drop = currentSession - nextSession;
+  if (drop >= 20) return false;
+
+  return true;
 }
 
 function updateBadge(data) {
