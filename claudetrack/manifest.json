@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Claude Usage",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Shows Claude.ai usage stats (session & weekly) directly in your browser toolbar.",
   "permissions": ["tabs", "scripting", "storage", "alarms"],
   "host_permissions": ["https://claude.ai/*"],

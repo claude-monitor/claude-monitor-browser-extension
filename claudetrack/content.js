@@ -163,6 +163,63 @@
     return Number.isFinite(value) && value >= 0 && value <= 100;
   }
 
+  function collectLines(text) {
+    return (text || '')
+      .split('\n')
+      .map(line => line.trim())
+      .filter(Boolean);
+  }
+
+  function findSectionContainer(section) {
+    const candidates = Array.from(document.querySelectorAll('h1,h2,h3,h4,span,p,div'))
+      .filter((el) => {
+        const text = el.innerText?.trim() || '';
+        return text.length > 0 && text.length < 80 && detectSection(text) === section;
+      });
+
+    let best = null;
+    let bestScore = Number.POSITIVE_INFINITY;
+
+    for (const candidate of candidates) {
+      let node = candidate;
+      for (let depth = 0; depth < 6 && node; depth += 1) {
+        const text = node.innerText?.trim() || '';
+        const lines = collectLines(text);
+        const pctCount = lines.filter((line) => extractPct(line) !== null).length;
+        const hasReset = lines.some((line) => RESET_PATTERNS.test(normalizeText(line)));
+
+        if (pctCount > 0) {
+          const score = lines.length + depth * 10 + (hasReset ? 0 : 20);
+          if (score < bestScore) {
+            best = node;
+            bestScore = score;
+          }
+        }
+
+        node = node.parentElement;
+      }
+    }
+
+    return best;
+  }
+
+  function parseSectionFromContainer(section) {
+    const container = findSectionContainer(section);
+    if (!container) return null;
+
+    const lines = collectLines(container.innerText || container.textContent || '');
+    const percentageLine = lines.find((line) => extractPct(line) !== null);
+    const resetLine = lines.find((line) => RESET_PATTERNS.test(normalizeText(line))) || null;
+    const labelLine = lines.find((line) => detectSection(line) === section) || null;
+
+    return {
+      percentage: extractPct(percentageLine),
+      resetTime: resetLine ? parseResetTime(resetLine) : null,
+      label: labelLine,
+      resetLabel: resetLine,
+    };
+  }
+
   // ── Main parsing ─────────────────────────────────────────────────────
 
   function parseUsage() {
@@ -213,6 +270,8 @@
     const markers = hasSectionMarkers(bodyText);
     result.meta.foundSessionMarker = markers.session;
     result.meta.foundWeeklyMarker = markers.weekly;
+    const sessionContainerData = parseSectionFromContainer('session');
+    const weeklyContainerData = parseSectionFromContainer('weekly');
 
     // Cluster lines: session usage vs weekly usage
     // Key words to look for:
@@ -246,11 +305,27 @@
     const sessionTextMatch = textPercentages.find(entry => entry.section === 'session');
     const weeklyTextMatch = textPercentages.find(entry => entry.section === 'weekly');
 
-    if (sessionTextMatch) {
+    if (sessionContainerData?.percentage !== null && sessionContainerData?.percentage !== undefined) {
+      result.session.percentage = sessionContainerData.percentage;
+      result.meta.sessionSource = 'section-container';
+      if (sessionContainerData.resetTime) result.session.resetTime = sessionContainerData.resetTime;
+      if (sessionContainerData.resetLabel) result.session.label = sessionContainerData.resetLabel;
+      else if (sessionContainerData.label) result.session.label = sessionContainerData.label;
+    }
+
+    if (weeklyContainerData?.percentage !== null && weeklyContainerData?.percentage !== undefined) {
+      result.weekly.percentage = weeklyContainerData.percentage;
+      result.meta.weeklySource = 'section-container';
+      if (weeklyContainerData.resetTime) result.weekly.resetTime = weeklyContainerData.resetTime;
+      if (weeklyContainerData.resetLabel) result.weekly.label = weeklyContainerData.resetLabel;
+      else if (weeklyContainerData.label) result.weekly.label = weeklyContainerData.label;
+    }
+
+    if (sessionTextMatch && result.session.percentage === null) {
       result.session.percentage = sessionTextMatch.pct;
       result.meta.sessionSource = 'text';
     }
-    if (weeklyTextMatch) {
+    if (weeklyTextMatch && result.weekly.percentage === null) {
       result.weekly.percentage  = weeklyTextMatch.pct;
       result.meta.weeklySource = 'text';
     }
@@ -292,11 +367,11 @@
     const sessionPctText = extractPct(sessionBlock);
     const weeklyPctText  = extractPct(weeklyBlock);
 
-    if (sessionPctText !== null) {
+    if (sessionPctText !== null && result.meta.sessionSource !== 'section-container') {
       result.session.percentage = sessionPctText;
       result.meta.sessionSource = 'block-text';
     }
-    if (weeklyPctText  !== null) {
+    if (weeklyPctText  !== null && result.meta.weeklySource !== 'section-container') {
       result.weekly.percentage  = weeklyPctText;
       result.meta.weeklySource = 'block-text';
     }
@@ -366,10 +441,11 @@
     const sessionValid = isValidPercentage(result.session.percentage);
     const weeklyValid = isValidPercentage(result.weekly.percentage);
     const hasBothMarkers = result.meta.foundSessionMarker && result.meta.foundWeeklyMarker;
+    const reliableTextSources = ['text', 'block-text', 'section-container'];
     const bothFromText =
-      ['text', 'block-text'].includes(result.meta.sessionSource) &&
-      ['text', 'block-text'].includes(result.meta.weeklySource);
-    const sessionFromText = ['text', 'block-text'].includes(result.meta.sessionSource);
+      reliableTextSources.includes(result.meta.sessionSource) &&
+      reliableTextSources.includes(result.meta.weeklySource);
+    const sessionFromText = reliableTextSources.includes(result.meta.sessionSource);
 
     result.meta.ready = hasBothMarkers && sessionValid;
 
