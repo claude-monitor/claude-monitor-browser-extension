@@ -167,7 +167,7 @@ body {
 }
 
 .card-pct {
-  font-size: 22px;
+  font-size: 20px;
   font-weight: 700;
   letter-spacing: -0.03em;
   color: var(--text-pri);
@@ -239,13 +239,18 @@ body {
   flex-shrink: 0;
 }
 
-.pro-teaser-inner a {
+.pro-coming-soon {
   color: var(--accent-lt);
-  text-decoration: none;
   font-weight: 600;
+  font-size: 11px;
+  letter-spacing: 0.03em;
+  background: rgba(130, 80, 220, 0.18);
+  border: 1px solid rgba(130, 80, 220, 0.35);
+  border-radius: 4px;
+  padding: 1px 6px;
+  cursor: default;
+  user-select: none;
 }
-
-.pro-teaser-inner a:hover { text-decoration: underline; }
 
 /* ── Footer ──────────────────────────────────────────────────────────────── */
 

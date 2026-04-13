@@ -208,8 +208,19 @@
     if (!container) return null;
 
     const lines = collectLines(container.innerText || container.textContent || '');
-    const percentageLine = lines.find((line) => extractPct(line) !== null);
-    const resetLine = lines.find((line) => RESET_PATTERNS.test(normalizeText(line))) || null;
+    const percentageIdx = lines.findIndex((line) => extractPct(line) !== null);
+    const percentageLine = percentageIdx >= 0 ? lines[percentageIdx] : null;
+
+    // Find the closest reset line to the percentage (after it, to match UI order)
+    // This prevents picking up reset time from a different section
+    let resetLine = null;
+    if (percentageIdx >= 0) {
+      resetLine =
+        lines.slice(percentageIdx + 1).find((line) => RESET_PATTERNS.test(normalizeText(line))) ||
+        lines.slice(0, percentageIdx).find((line) => RESET_PATTERNS.test(normalizeText(line))) ||
+        null;
+    }
+
     const labelLine = lines.find((line) => detectSection(line) === section) || null;
 
     return {
@@ -271,217 +282,4 @@
     result.meta.foundSessionMarker = markers.session;
     result.meta.foundWeeklyMarker = markers.weekly;
     const sessionContainerData = parseSectionFromContainer('session');
-    const weeklyContainerData = parseSectionFromContainer('weekly');
-
-    // Cluster lines: session usage vs weekly usage
-    // Key words to look for:
-    //   session → "messages", "session", "daily", "today"
-    //   weekly  → "weekly", "week", "7 day"
-    //   reset   → "resets", "reset", "renews", "refreshes"
-
-    let sessionBlock = '';
-    let weeklyBlock  = '';
-    let currentBlock = null;
-    const textPercentages = [];
-
-    for (const line of lines) {
-      const hint = detectSection(line);
-      if (hint) currentBlock = hint;
-
-      if (currentBlock === 'session') sessionBlock += ' ' + line;
-      if (currentBlock === 'weekly')  weeklyBlock  += ' ' + line;
-
-      const pct = extractPct(line);
-      if (pct !== null) {
-        textPercentages.push({
-          pct,
-          line,
-          section: hint || currentBlock,
-        });
-      }
-    }
-
-    // ── 4. Assign bar values heuristically ───────────────────────────
-    const sessionTextMatch = textPercentages.find(entry => entry.section === 'session');
-    const weeklyTextMatch = textPercentages.find(entry => entry.section === 'weekly');
-
-    if (sessionContainerData?.percentage !== null && sessionContainerData?.percentage !== undefined) {
-      result.session.percentage = sessionContainerData.percentage;
-      result.meta.sessionSource = 'section-container';
-      if (sessionContainerData.resetTime) result.session.resetTime = sessionContainerData.resetTime;
-      if (sessionContainerData.resetLabel) result.session.label = sessionContainerData.resetLabel;
-      else if (sessionContainerData.label) result.session.label = sessionContainerData.label;
-    }
-
-    if (weeklyContainerData?.percentage !== null && weeklyContainerData?.percentage !== undefined) {
-      result.weekly.percentage = weeklyContainerData.percentage;
-      result.meta.weeklySource = 'section-container';
-      if (weeklyContainerData.resetTime) result.weekly.resetTime = weeklyContainerData.resetTime;
-      if (weeklyContainerData.resetLabel) result.weekly.label = weeklyContainerData.resetLabel;
-      else if (weeklyContainerData.label) result.weekly.label = weeklyContainerData.label;
-    }
-
-    if (sessionTextMatch && result.session.percentage === null) {
-      result.session.percentage = sessionTextMatch.pct;
-      result.meta.sessionSource = 'text';
-    }
-    if (weeklyTextMatch && result.weekly.percentage === null) {
-      result.weekly.percentage  = weeklyTextMatch.pct;
-      result.meta.weeklySource = 'text';
-    }
-
-    if (result.session.percentage === null || result.weekly.percentage === null) {
-      const classifiedBars = barData.map((entry) => ({
-        ...entry,
-        section: detectSection(entry.context),
-      }));
-
-      if (result.session.percentage === null) {
-        const sessionBar = classifiedBars.find((entry) => entry.section === 'session');
-        result.session.percentage = sessionBar?.pct ?? null;
-        if (sessionBar) result.meta.sessionSource = 'classified-bar';
-      }
-
-      if (result.weekly.percentage === null) {
-        const weeklyBar = classifiedBars.find((entry) => entry.section === 'weekly');
-        result.weekly.percentage = weeklyBar?.pct ?? null;
-        if (weeklyBar) result.meta.weeklySource = 'classified-bar';
-      }
-
-      if ((result.session.percentage === null || result.weekly.percentage === null) && classifiedBars.length >= 2) {
-        if (result.session.percentage === null) {
-          result.session.percentage = classifiedBars[0].pct;
-          result.meta.sessionSource = result.meta.sessionSource || 'fallback-bar';
-        }
-        if (result.weekly.percentage === null) {
-          result.weekly.percentage = classifiedBars[1].pct;
-          result.meta.weeklySource = result.meta.weeklySource || 'fallback-bar';
-        }
-      } else if (result.session.percentage === null && classifiedBars.length === 1) {
-        result.session.percentage = classifiedBars[0].pct;
-        result.meta.sessionSource = result.meta.sessionSource || 'fallback-bar';
-      }
-    }
-
-    // Cross-check: if text-extracted percentages differ significantly, prefer text
-    const sessionPctText = extractPct(sessionBlock);
-    const weeklyPctText  = extractPct(weeklyBlock);
-
-    if (sessionPctText !== null && result.meta.sessionSource !== 'section-container') {
-      result.session.percentage = sessionPctText;
-      result.meta.sessionSource = 'block-text';
-    }
-    if (weeklyPctText  !== null && result.meta.weeklySource !== 'section-container') {
-      result.weekly.percentage  = weeklyPctText;
-      result.meta.weeklySource = 'block-text';
-    }
-
-    // If we still have nothing, scan all lines for first two percentages
-    if (result.session.percentage === null) {
-      const allPcts = [];
-      for (const entry of textPercentages) {
-        allPcts.push(entry.pct);
-        if (allPcts.length >= 2) break;
-      }
-      if (allPcts[0] != null) {
-        result.session.percentage = allPcts[0];
-        result.meta.sessionSource = result.meta.sessionSource || 'global-text';
-      }
-      if (allPcts[1] != null) {
-        result.weekly.percentage  = allPcts[1];
-        result.meta.weeklySource = result.meta.weeklySource || 'global-text';
-      }
-    }
-
-    // ── 5. Parse reset times ─────────────────────────────────────────
-    for (const line of lines) {
-      const l = normalizeText(line);
-      if (RESET_PATTERNS.test(l)) {
-        // Decide which block this belongs to
-        if (!result.session.resetTime && (detectSection(line) === 'session' || l.includes('hour') || l.includes('minute') || l.includes('today') || l.includes('daily') || l.includes('hora') || l.includes('min'))) {
-          result.session.resetTime = parseResetTime(line);
-          result.session.label     = line;
-        } else if (!result.weekly.resetTime && (detectSection(line) === 'weekly' || l.includes('week') || l.includes('day') || l.includes('tomorrow') || l.includes('dia') || l.includes('manana'))) {
-          result.weekly.resetTime = parseResetTime(line);
-          result.weekly.label     = line;
-        } else {
-          // assign to whichever slot is empty
-          if (!result.session.resetTime) {
-            result.session.resetTime = parseResetTime(line);
-            result.session.label     = line;
-          } else if (!result.weekly.resetTime) {
-            result.weekly.resetTime = parseResetTime(line);
-            result.weekly.label     = line;
-          }
-        }
-      }
-    }
-
-    // ── 6. Fallback label extraction ─────────────────────────────────
-    // Try to find human-readable usage descriptions from prominent headings/spans
-    const headings = Array.from(document.querySelectorAll('h1,h2,h3,h4,span,p,div'))
-      .filter(el => {
-        const t = el.innerText?.trim() || '';
-        return t.length > 5 && t.length < 120 && detectSection(t);
-      });
-
-    for (const el of headings) {
-      const t = el.innerText.trim();
-      const section = detectSection(t);
-      if (!result.session.label && section === 'session') {
-        result.session.label = el.innerText.trim();
-      }
-      if (!result.weekly.label && section === 'weekly') {
-        result.weekly.label = el.innerText.trim();
-      }
-    }
-
-    result.meta.textPercentageCount = textPercentages.length;
-
-    const sessionValid = isValidPercentage(result.session.percentage);
-    const weeklyValid = isValidPercentage(result.weekly.percentage);
-    const hasBothMarkers = result.meta.foundSessionMarker && result.meta.foundWeeklyMarker;
-    const reliableTextSources = ['text', 'block-text', 'section-container'];
-    const bothFromText =
-      reliableTextSources.includes(result.meta.sessionSource) &&
-      reliableTextSources.includes(result.meta.weeklySource);
-    const sessionFromText = reliableTextSources.includes(result.meta.sessionSource);
-
-    result.meta.ready = hasBothMarkers && sessionValid;
-
-    if (hasBothMarkers && sessionValid && weeklyValid && bothFromText) {
-      result.meta.confidence = 'high';
-    } else if (hasBothMarkers && sessionValid && (weeklyValid || sessionFromText)) {
-      result.meta.confidence = 'medium';
-    } else {
-      result.meta.confidence = 'low';
-    }
-
-    return result;
-  }
-
-  // ── Wait for React to render, then parse ────────────────────────────
-
-  function waitAndParse(attempts = 0) {
-    const MAX = 24;
-    const INTERVAL = 500;  // ms
-
-    const bodyText = document.body?.innerText || '';
-    const pctVisible = /\d+\s*%/.test(bodyText);
-    const markers = hasSectionMarkers(bodyText);
-    const ready = pctVisible && markers.session && markers.weekly;
-
-    if (ready || attempts >= MAX) {
-      const data = parseUsage();
-      if (data.meta?.ready || attempts >= MAX) {
-        chrome.runtime.sendMessage({ type: 'USAGE_DATA', data });
-      } else {
-        setTimeout(() => waitAndParse(attempts + 1), INTERVAL);
-      }
-    } else {
-      setTimeout(() => waitAndParse(attempts + 1), INTERVAL);
-    }
-  }
-
-  waitAndParse();
-})();
+    const weekl

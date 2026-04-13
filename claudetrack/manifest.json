@@ -1,9 +1,9 @@
 {
   "manifest_version": 3,
   "name": "Claude Usage Monitor",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Track your Claude.ai usage in real time. See session and weekly limits, reset times, and color-coded progress — right in your toolbar.",
-  "author": "Martin Sadofschi",
+  "author": "Digital Advance Solutions",
   "minimum_chrome_version": "116",
   "permissions": ["tabs", "scripting", "storage", "alarms", "notifications"],
   "host_permissions": ["https://claude.ai/*"],

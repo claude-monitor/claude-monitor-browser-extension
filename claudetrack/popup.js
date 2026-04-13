@@ -16,7 +16,6 @@ const appVersionEl  = $('appVersion');
 const openUsageBtn  = $('openUsageBtn');
 const openUsagePage = $('openUsagePage');
 const proTeaser     = $('proTeaser');
-const proLink       = $('proLink');
 
 // Session
 const sessionPct   = $('sessionPct');
@@ -40,14 +39,7 @@ function initPlan() {
   } else {
     // Free: show teaser after data loads
     if (proTeaser) proTeaser.style.display = 'flex';
-    if (proLink) {
-      proLink.addEventListener('click', (e) => {
-        e.preventDefault();
-        // TODO: replace with your upgrade/pricing page URL when ready
-        // chrome.tabs.create({ url: 'https://your-upgrade-page.com', active: true });
-        // window.close();
-      });
-    }
+    // TODO: when ready, add a proLink element and open your pricing page here
   }
 }
 
