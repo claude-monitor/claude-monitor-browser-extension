@@ -67,6 +67,18 @@ function applyColor(pctEl, barEl, pct) {
 
 // ── Time formatting ───────────────────────────────────────────────────────
 
+function formatStartedAgo(resetEpoch) {
+  if (!resetEpoch) return '';
+  const SESSION_MS = 5 * 60 * 60 * 1000;
+  const startedAt  = resetEpoch - SESSION_MS;
+  const elapsed    = Date.now() - startedAt;
+  if (elapsed < 0 || elapsed > SESSION_MS) return '';
+  const h = Math.floor(elapsed / 3600000);
+  const m = Math.floor((elapsed % 3600000) / 60000);
+  if (h > 0) return `Started ${h}h ${m}m ago`;
+  return `Started ${m}m ago`;
+}
+
 function formatTimeUntil(epochMs) {
   if (!epochMs) return null;
   const diff = epochMs - Date.now();
@@ -131,7 +143,9 @@ function render(data) {
 
   const sReset = formatTimeUntil(session?.resetTime);
   sessionReset.textContent = sReset || (session?.label ? '' : 'Reset time unknown');
-  sessionLabel.textContent = (!sReset && session?.label) ? session.label : '';
+  sessionLabel.textContent = sReset
+    ? (formatStartedAgo(session?.resetTime) || '')
+    : (session?.label || '');
 
   // ── Weekly ───────────────────────────────────────────────────────────
   const wPct = weekly?.percentage ?? null;
