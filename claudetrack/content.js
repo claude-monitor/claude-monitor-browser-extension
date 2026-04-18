@@ -282,4 +282,84 @@
     result.meta.foundSessionMarker = markers.session;
     result.meta.foundWeeklyMarker = markers.weekly;
     const sessionContainerData = parseSectionFromContainer('session');
-    const weekl
+    const weeklyContainerData  = parseSectionFromContainer('weekly');
+
+    // ── 4. Match bar data to sections ─────────────────────────────────
+    for (const bar of barData) {
+      const section = detectSection(bar.context);
+      if (section === 'session' && result.session.percentage === null) {
+        result.session.percentage = bar.pct;
+        result.meta.sessionSource = 'bar';
+      } else if (section === 'weekly' && result.weekly.percentage === null) {
+        result.weekly.percentage = bar.pct;
+        result.meta.weeklySource = 'bar';
+      }
+    }
+
+    // ── 5. Merge container data (fills gaps left by bar matching) ──────
+    if (sessionContainerData) {
+      if (result.session.percentage === null && sessionContainerData.percentage !== null) {
+        result.session.percentage = sessionContainerData.percentage;
+        result.meta.sessionSource = 'container';
+      }
+      if (result.session.resetTime === null) result.session.resetTime = sessionContainerData.resetTime;
+      if (result.session.label    === null) result.session.label     = sessionContainerData.label;
+    }
+
+    if (weeklyContainerData) {
+      if (result.weekly.percentage === null && weeklyContainerData.percentage !== null) {
+        result.weekly.percentage = weeklyContainerData.percentage;
+        result.meta.weeklySource = 'container';
+      }
+      if (result.weekly.resetTime === null) result.weekly.resetTime = weeklyContainerData.resetTime;
+      if (result.weekly.label    === null) result.weekly.label     = weeklyContainerData.label;
+    }
+
+    // ── 6. Text-scan fallback ──────────────────────────────────────────
+    const pctLines = lines.filter(line => extractPct(line) !== null);
+    result.meta.textPercentageCount = pctLines.length;
+
+    if (result.session.percentage === null || result.weekly.percentage === null) {
+      for (const line of pctLines) {
+        const pct     = extractPct(line);
+        const section = detectSection(line);
+        if (section === 'session' && result.session.percentage === null) {
+          result.session.percentage = pct;
+          result.meta.sessionSource = 'text';
+        } else if (section === 'weekly' && result.weekly.percentage === null) {
+          result.weekly.percentage = pct;
+          result.meta.weeklySource = 'text';
+        }
+      }
+    }
+
+    // ── 7. Confidence & readiness ──────────────────────────────────────
+    const hasBoth   = result.session.percentage !== null && result.weekly.percentage !== null;
+    const hasMarkers = result.meta.foundSessionMarker && result.meta.foundWeeklyMarker;
+    const hasReset  = result.session.resetTime !== null || result.weekly.resetTime !== null;
+
+    if (hasBoth && hasMarkers && hasReset) {
+      result.meta.confidence = 'medium';
+    } else if (hasBoth && hasMarkers) {
+      result.meta.confidence = 'medium';
+    }
+
+    result.meta.ready = result.session.percentage !== null || result.weekly.percentage !== null;
+
+    return result;
+  }
+
+  // ── Entry point ───────────────────────────────────────────────────────
+
+  function run() {
+    const data = parseUsage();
+    chrome.runtime.sendMessage({ type: 'USAGE_DATA', data });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', run);
+  } else {
+    run();
+  }
+
+}());

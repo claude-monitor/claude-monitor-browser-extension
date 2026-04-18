@@ -175,6 +175,13 @@ function triggerRefresh() {
   refreshBtn.classList.add('spinning');
 
   chrome.runtime.sendMessage({ type: 'REFRESH' }, () => {
+    if (chrome.runtime.lastError) {
+      console.warn('[ClaudeTrack] Refresh message failed:', chrome.runtime.lastError.message);
+      refreshInFlight = false;
+      refreshBtn.classList.remove('spinning');
+      return;
+    }
+
     let waited = 0;
     const poll = setInterval(() => {
       waited += 500;
