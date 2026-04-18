@@ -2,7 +2,6 @@
 // Polls claude.ai/settings/usage every 5 minutes, parses usage data via a
 // content script, persists it to chrome.storage.local, and updates the badge.
 
-const USAGE_URL  = 'https://claude.ai/settings/usage';
 const API_BASE   = 'https://claude.ai/api';
 const ALARM_NAME = 'claudetrack-poll';
 const POLL_MIN   = 5;   // minutes between automatic refreshes
@@ -37,7 +36,7 @@ chrome.alarms.onAlarm.addListener((alarm) => {
 
 chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
   if (msg.type === 'REFRESH') {
-    refreshUsage({ allowOpenTab: true }).then((result) => sendResponse({ ok: true, ...result }));
+    refreshUsage().then((result) => sendResponse({ ok: true, ...result }));
     return true;   // keep channel open for async response
   }
   if (msg.type === 'USAGE_DATA') {
@@ -49,54 +48,20 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
 
 // ── Core refresh logic ────────────────────────────────────────────────────
 
-async function refreshUsage(options = {}) {
-  const { allowOpenTab = false } = options;
-
+async function refreshUsage() {
+  // Primary path: internal Claude API (works when user is logged in)
   const apiResult = await refreshUsageFromApi();
-  if (apiResult.refreshed) {
-    return { ...apiResult, source: 'api' };
-  }
+  if (apiResult.refreshed) return { ...apiResult, source: 'api' };
 
-  // 1. Try to find an already-open settings/usage tab
+  // Fallback: inject into an already-open usage tab (never open one automatically)
   const tabs = await chrome.tabs.query({ url: 'https://claude.ai/settings/usage*' });
-
   if (tabs.length > 0) {
     await injectIntoTab(tabs[0].id);
     return { refreshed: true, source: 'existing-tab' };
   }
 
-  if (!allowOpenTab) {
-    console.info('[ClaudeTrack] Skipping background refresh because usage page is not already open');
-    return { refreshed: false, reason: 'usage-tab-not-open' };
-  }
-
-  // 2. No open tab — create one visibly for user-initiated refreshes only
-  let tab;
-  try {
-    tab = await chrome.tabs.create({ url: USAGE_URL, active: true });
-  } catch (e) {
-    console.warn('[ClaudeTrack] Could not create tab:', e);
-    return { refreshed: false, reason: 'tab-create-failed' };
-  }
-
-  // 3. Wait for the tab to finish loading, then inject
-  const onUpdated = (tabId, info) => {
-    if (tabId !== tab.id || info.status !== 'complete') return;
-    chrome.tabs.onUpdated.removeListener(onUpdated);
-
-    injectIntoTab(tab.id).then(() => {
-      // Keep the page open because Claude appears to render accurate usage
-      // only when the tab is visible.
-    });
-  };
-  chrome.tabs.onUpdated.addListener(onUpdated);
-
-  // Safety: stop waiting after 15 s regardless
-  setTimeout(() => {
-    chrome.tabs.onUpdated.removeListener(onUpdated);
-  }, 15000);
-
-  return { refreshed: true, source: 'opened-tab' };
+  console.info('[ClaudeTrack] API unavailable and no usage page open — skipping refresh');
+  return { refreshed: false, reason: 'no-usage-tab-open' };
 }
 
 async function injectIntoTab(tabId) {
