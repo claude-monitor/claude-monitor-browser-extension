@@ -70,7 +70,6 @@ async function refreshUsage() {
     return { refreshed: true, source: 'existing-tab' };
   }
 
-  console.info('[ClaudeTrack] API unavailable and no usage page open — skipping refresh');
   return { refreshed: false, reason: 'no-usage-tab-open' };
 }
 
@@ -80,8 +79,8 @@ async function injectIntoTab(tabId) {
       target: { tabId },
       files: ['content.js'],
     });
-  } catch (e) {
-    console.warn('[ClaudeTrack] Script injection failed:', e);
+  } catch (_e) {
+    // injection fails when the tab navigates away — silently skip
   }
 }
 
@@ -113,7 +112,6 @@ async function refreshUsageFromApi() {
       reason: stored ? undefined : 'api-data-rejected',
     };
   } catch (error) {
-    console.warn('[ClaudeTrack] API refresh failed:', error);
     return { refreshed: false, reason: 'api-fetch-failed', error: String(error?.message || error) };
   }
 }
@@ -201,12 +199,6 @@ async function persistAndBadge(data) {
 
   const { claudeUsage: current } = await chrome.storage.local.get('claudeUsage');
   if (!shouldPersist(next, current)) {
-    console.warn('[ClaudeTrack] Ignoring low-confidence usage update', {
-      nextMeta: next.meta,
-      currentMeta: current?.meta,
-      nextSession: next.session?.percentage,
-      currentSession: current?.session?.percentage,
-    });
     return false;
   }
 

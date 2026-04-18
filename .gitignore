@@ -1,0 +1,9 @@
+# Local Claude Code settings
+.claude/settings.local.json
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Build output
+*.zip

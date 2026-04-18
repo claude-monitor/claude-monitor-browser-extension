@@ -62,17 +62,17 @@ Minimum: 1 screenshot at **1280×800px** or **640×400px**
 
 ## Store checklist before submitting
 
-- [ ] Privacy policy page live at https://msadofschi.github.io/claude-usage-monitor/
-- [ ] At least 1 screenshot (1280×800)
-- [ ] Extension loaded and tested in Chrome (verify badge updates, refresh button works)
-- [ ] `claudetrack/` folder zipped for upload (zip the folder contents, not the folder itself)
-- [ ] Developer account registered at https://chrome.google.com/webstore/devconsole ($5 one-time fee)
+- [x] Privacy policy page live at https://msadofschi.github.io/claude-usage-monitor/
+- [x] At least 1 screenshot (1280×800)
+- [x] Extension loaded and tested in Chrome (verify badge updates, refresh button works)
+- [x] `claudetrack/` folder zipped for upload (zip the folder contents, not the folder itself)
+- [x] Developer account registered at https://chrome.google.com/webstore/devconsole ($5 one-time fee)
 
 ## How to zip for upload
 
 ```
 cd claudetrack/
-zip -r ../claude-usage-monitor-v1.1.2.zip . --exclude "*.DS_Store"
+zip -r ../claude-usage-monitor-v1.2.0.zip . --exclude "*.DS_Store"
 ```
 
 Or on Windows: select all files inside the `claudetrack/` folder → right-click → Compress to ZIP.

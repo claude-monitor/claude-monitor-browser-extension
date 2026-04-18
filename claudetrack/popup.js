@@ -1,9 +1,7 @@
-// ─── Claude Usage Monitor — Popup Script ────────────────────────────────────
-// Plan tier: 'free' | 'pro'
-// Pro features (historial + notificaciones) are stubbed here — ready to unlock.
+// ─── Claude Usage Monitor — Popup Script ─────────────────────────────────────
 
 const USAGE_URL = 'https://claude.ai/settings/usage';
-const PLAN      = 'free';   // Change to 'pro' when monetisation is enabled
+const PLAN      = 'free';
 
 // ── DOM refs ──────────────────────────────────────────────────────────────
 
@@ -30,24 +28,19 @@ const weeklyBar   = $('weeklyBar');
 const weeklyReset = $('weeklyReset');
 const weeklyLabel = $('weeklyLabel');
 
-// ── Plan management (Pro stub) ────────────────────────────────────────────
+// ── Plan management ───────────────────────────────────────────────────────
 
 function initPlan() {
   if (PLAN === 'pro') {
-    // Pro: hide teaser, features are active
     if (proTeaser) proTeaser.style.display = 'none';
     initProFeatures();
   } else {
-    // Free: show teaser after data loads
     if (proTeaser) proTeaser.style.display = 'flex';
-    // TODO: when ready, add a proLink element and open your pricing page here
   }
 }
 
-// Pro feature stubs — implement when tier is unlocked
 function initProFeatures() {
-  // TODO: load usage history chart
-  // TODO: initialise notification thresholds UI
+  // Reserved for pro tier
 }
 
 // ── Colour helpers ────────────────────────────────────────────────────────
@@ -204,7 +197,6 @@ function triggerRefresh() {
 
   chrome.runtime.sendMessage({ type: 'REFRESH' }, () => {
     if (chrome.runtime.lastError) {
-      console.warn('[ClaudeTrack] Refresh message failed:', chrome.runtime.lastError.message);
       refreshInFlight = false;
       refreshBtn.classList.remove('spinning');
       return;
