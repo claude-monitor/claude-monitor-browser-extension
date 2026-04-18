@@ -98,6 +98,28 @@ body {
   flex-shrink: 0;
 }
 
+.interval-select {
+  height: 28px;
+  padding: 0 22px 0 8px;
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-sec);
+  font-size: 11px;
+  font-family: inherit;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%239090a8' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 6px center;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.interval-select:hover  { background-color: var(--bg-3); color: var(--text-pri); border-color: var(--accent); }
+.interval-select:focus  { outline: none; border-color: var(--accent); }
+.interval-select option { background: var(--bg-1); color: var(--text-pri); }
+
 .refresh-btn {
   width: 28px;
   height: 28px;

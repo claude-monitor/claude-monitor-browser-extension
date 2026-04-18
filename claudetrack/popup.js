@@ -13,8 +13,9 @@ const noDataEl      = $('noData');
 const refreshBtn    = $('refreshBtn');
 const lastUpdated   = $('lastUpdated');
 const appVersionEl  = $('appVersion');
-const openUsageBtn  = $('openUsageBtn');
-const openUsagePage = $('openUsagePage');
+const openUsageBtn    = $('openUsageBtn');
+const openUsagePage   = $('openUsagePage');
+const intervalSelect  = $('intervalSelect');
 const proTeaser     = $('proTeaser');
 
 // Session
@@ -186,7 +187,8 @@ function loadData() {
     appVersionEl.textContent = `v${manifestVersion}`;
   }
 
-  chrome.storage.local.get('claudeUsage', ({ claudeUsage }) => {
+  chrome.storage.local.get(['claudeUsage', 'refreshInterval'], ({ claudeUsage, refreshInterval }) => {
+    if (intervalSelect) intervalSelect.value = String(refreshInterval || 5);
     render(claudeUsage || null);
   });
 }
@@ -226,6 +228,11 @@ function triggerRefresh() {
 // ── Events ────────────────────────────────────────────────────────────────
 
 refreshBtn.addEventListener('click', triggerRefresh);
+
+intervalSelect?.addEventListener('change', () => {
+  const minutes = parseInt(intervalSelect.value, 10);
+  chrome.runtime.sendMessage({ type: 'SET_INTERVAL', minutes });
+});
 
 function openUsage() {
   chrome.tabs.create({ url: USAGE_URL, active: true });

@@ -18,11 +18,11 @@ chrome.runtime.onStartup.addListener(() => {
   refreshUsage();
 });
 
-function setupAlarm() {
+async function setupAlarm() {
+  const { refreshInterval } = await chrome.storage.local.get('refreshInterval');
+  const interval = refreshInterval || POLL_MIN;
   chrome.alarms.get(ALARM_NAME, (alarm) => {
-    if (!alarm) {
-      chrome.alarms.create(ALARM_NAME, { periodInMinutes: POLL_MIN });
-    }
+    if (!alarm) chrome.alarms.create(ALARM_NAME, { periodInMinutes: interval });
   });
 }
 
@@ -37,7 +37,17 @@ chrome.alarms.onAlarm.addListener((alarm) => {
 chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
   if (msg.type === 'REFRESH') {
     refreshUsage().then((result) => sendResponse({ ok: true, ...result }));
-    return true;   // keep channel open for async response
+    return true;
+  }
+  if (msg.type === 'SET_INTERVAL') {
+    const minutes = msg.minutes;
+    chrome.storage.local.set({ refreshInterval: minutes }).then(() => {
+      chrome.alarms.clear(ALARM_NAME, () => {
+        chrome.alarms.create(ALARM_NAME, { periodInMinutes: minutes });
+        sendResponse({ ok: true });
+      });
+    });
+    return true;
   }
   if (msg.type === 'USAGE_DATA') {
     // Forwarded from the content script via tab messaging
