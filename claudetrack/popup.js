@@ -69,16 +69,9 @@ function formatResetDate(epochMs) {
   return `${weekday} ${d.getDate()} ${month}`;
 }
 
-function formatStartedAgo(resetEpoch) {
-  if (!resetEpoch) return '';
-  const SESSION_MS = 5 * 60 * 60 * 1000;
-  const startedAt  = resetEpoch - SESSION_MS;
-  const elapsed    = Date.now() - startedAt;
-  if (elapsed < 0 || elapsed > SESSION_MS) return '';
-  const h = Math.floor(elapsed / 3600000);
-  const m = Math.floor((elapsed % 3600000) / 60000);
-  if (h > 0) return `Started ${h}h ${m}m ago`;
-  return `Started ${m}m ago`;
+function formatResetTime(epochMs) {
+  if (!epochMs) return '';
+  return new Date(epochMs).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
 }
 
 function formatTimeUntil(epochMs) {
@@ -144,7 +137,7 @@ function render(data) {
   }
 
   const sReset   = formatTimeUntil(session?.resetTime);
-  const sStarted = sReset ? formatStartedAgo(session?.resetTime) : '';
+  const sStarted = sReset ? formatResetTime(session?.resetTime) : '';
   sessionReset.textContent = sReset
     ? (sStarted ? `${sReset} · ${sStarted}` : sReset)
     : (session?.label || 'Reset time unknown');
