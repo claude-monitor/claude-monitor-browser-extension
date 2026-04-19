@@ -63,10 +63,11 @@ function applyColor(pctEl, barEl, pct) {
 
 function formatResetDate(epochMs) {
   if (!epochMs) return '';
-  const d = new Date(epochMs);
+  const d       = new Date(epochMs);
   const weekday = d.toLocaleDateString('en-US', { weekday: 'short' });
   const month   = d.toLocaleDateString('en-US', { month: 'long' });
-  return `${weekday} ${d.getDate()} ${month}`;
+  const time    = d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+  return `${weekday} ${d.getDate()} ${month} ${time}`;
 }
 
 function formatResetTime(epochMs) {
