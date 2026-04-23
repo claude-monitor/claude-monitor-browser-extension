@@ -346,7 +346,9 @@
     }
 
     if (designContainerData) {
-      if (result.design.percentage === null && designContainerData.percentage !== null) {
+      // Always prefer container-parsed value for design over bar matching,
+      // because unrelated ARIA bars with 0% can be misassigned via broad context.
+      if (designContainerData.percentage !== null) {
         result.design.percentage = designContainerData.percentage;
         result.meta.designSource = 'container';
       }
