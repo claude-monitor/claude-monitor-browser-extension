@@ -254,29 +254,41 @@
   }
 
   /**
-   * Scan body text lines to find design section data.
-   * Looks for a line matching DESIGN_PATTERNS then reads % and reset time
-   * from the next few lines. More reliable than container-based approach
-   * because it doesn't depend on DOM structure.
+   * Find Claude Design data by locating the smallest DOM element that:
+   *  - contains "claude design" text
+   *  - contains a percentage (e.g. "100% usado")
+   *  - does NOT contain markers from other sections ("todos los modelos", "sesion actual")
+   * Uses textContent (not innerText) so CSS visibility doesn't affect results.
    */
-  function parseDesignFromLines(lines) {
-    for (let i = 0; i < lines.length; i++) {
-      if (!DESIGN_PATTERNS.some(p => p.test(normalizeText(lines[i])))) continue;
-      let pct = null;
-      let resetTime = null;
-      for (let j = i; j < Math.min(i + 6, lines.length); j++) {
-        if (pct === null) {
-          const found = extractPct(lines[j]);
-          if (found !== null) pct = found;
-        }
-        if (resetTime === null && RESET_PATTERNS.test(normalizeText(lines[j]))) {
-          resetTime = parseResetTime(lines[j]);
-        }
-        if (pct !== null && resetTime !== null) break;
-      }
-      if (pct !== null) return { percentage: pct, resetTime, label: lines[i] };
+  function parseDesignFromDOM() {
+    const matching = [];
+    for (const el of document.querySelectorAll('*')) {
+      const tag = el.tagName;
+      if (!tag || tag === 'SCRIPT' || tag === 'STYLE' || tag === 'HEAD') continue;
+      const content = el.textContent || '';
+      if (content.length < 3 || content.length > 400) continue;
+      const norm = normalizeText(content);
+      if (!DESIGN_PATTERNS.some(p => p.test(norm))) continue;
+      if (extractPct(content) === null) continue;
+      // Stop if we've climbed into a broader section
+      if (/\btodos los modelos\b|\ball models\b/i.test(norm)) continue;
+      if (/\bsesion actual\b|\bcurrent session\b/i.test(norm)) continue;
+      matching.push(el);
     }
-    return null;
+    if (matching.length === 0) return null;
+    // Most specific = shortest textContent
+    matching.sort((a, b) => (a.textContent || '').length - (b.textContent || '').length);
+    const best = matching[0];
+    const content = best.textContent || '';
+    const pct = extractPct(content);
+    if (pct === null) return null;
+    const lines = content.split('\n').map(l => l.trim()).filter(Boolean);
+    const resetLine = lines.find(l => RESET_PATTERNS.test(normalizeText(l)));
+    return {
+      percentage: pct,
+      resetTime: resetLine ? parseResetTime(resetLine) : null,
+      label: 'Claude Design',
+    };
   }
 
   // ── Main parsing ─────────────────────────────────────────────────────
@@ -403,8 +415,8 @@
       }
     }
 
-    // ── 7. Design direct text scan (always overrides bar/container) ───
-    const designDirect = parseDesignFromLines(lines);
+    // ── 7. Design: DOM-based targeted search (always overrides bar/container) ──
+    const designDirect = parseDesignFromDOM();
     if (designDirect) {
       result.design.percentage = designDirect.percentage;
       result.design.resetTime  = designDirect.resetTime;
