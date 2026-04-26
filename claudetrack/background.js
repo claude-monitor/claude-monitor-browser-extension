@@ -176,7 +176,7 @@ function mapApiUsageToStoredShape(usage) {
     design: {
       percentage: normalizePct(usage?.seven_day_omelette?.utilization),
       resetTime: parseApiTime(usage?.seven_day_omelette?.resets_at),
-      label: null,
+      label: usage?.seven_day_omelette?.resets_at ? null : 'Not yet used',
     },
     meta: {
       ready: normalizePct(usage?.five_hour?.utilization) !== null,

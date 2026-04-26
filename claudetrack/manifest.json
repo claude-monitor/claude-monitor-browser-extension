@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Claude Usage Monitor",
-  "version": "1.3.6",
+  "version": "1.3.7",
   "description": "Track your Claude.ai usage in real time. See session and weekly limits, reset times, and color-coded progress — in your toolbar.",
   "author": "Digital Advanced Solutions",
   "minimum_chrome_version": "116",
