@@ -105,8 +105,6 @@ async function refreshUsageFromApi() {
       }
     }
 
-    console.warn('[ClaudeTrack] raw API usage keys:', Object.keys(usage || {}));
-    console.warn('[ClaudeTrack] raw API usage:', JSON.stringify(usage).slice(0, 500));
     const data = mapApiUsageToStoredShape(usage);
     const stored = await persistAndBadge(data);
     return {
@@ -176,8 +174,8 @@ function mapApiUsageToStoredShape(usage) {
       label: usage?.seven_day?.resets_at ? null : 'Weekly limit',
     },
     design: {
-      percentage: null,
-      resetTime: null,
+      percentage: normalizePct(usage?.seven_day_omelette?.utilization),
+      resetTime: parseApiTime(usage?.seven_day_omelette?.resets_at),
       label: null,
     },
     meta: {
@@ -209,11 +207,6 @@ async function persistAndBadge(data) {
   const { claudeUsage: current } = await chrome.storage.local.get('claudeUsage');
   if (!shouldPersist(next, current)) {
     return false;
-  }
-
-  // Preserve design data from content.js when the API path has none
-  if (next.design?.percentage === null && current?.design?.percentage > 0) {
-    next.design = { ...current.design };
   }
 
   next.lastUpdated = Date.now();

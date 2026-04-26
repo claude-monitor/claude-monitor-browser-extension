@@ -6,6 +6,10 @@
 // Strategy: Claude's UI is React-rendered with dynamic class names, so we
 // rely on semantic parsing (text, ARIA attributes, data attributes) rather
 // than CSS class selectors — making the script resilient to UI updates.
+//
+// Note: design (Claude Design / seven_day_omelette) data comes exclusively
+// from the API in background.js — the usage page loads its content
+// dynamically so DOM parsing is not viable for that section.
 
 (function () {
   'use strict';
@@ -30,11 +34,6 @@
     /\ball models\b/,
   ];
 
-  const DESIGN_PATTERNS = [
-    /\bclaude design\b/,
-    /\bdiseno de claude\b/,
-  ];
-
   const RESET_PATTERNS = /\b(reset|resets|renew|renews|refresh|refreshes|restablece|restablecen|reinicia|reinician)\b/;
 
   // ── Helpers ───────────────────────────────────────────────────────────
@@ -42,7 +41,7 @@
   function normalizeText(text) {
     return (text || '')
       .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[̀-ͯ]/g, '')
       .toLowerCase()
       .replace(/\s+/g, ' ')
       .trim();
@@ -53,7 +52,6 @@
     if (!normalized) return null;
     if (SESSION_PATTERNS.some((pattern) => pattern.test(normalized))) return 'session';
     if (WEEKLY_PATTERNS.some((pattern) => pattern.test(normalized))) return 'weekly';
-    if (DESIGN_PATTERNS.some((pattern) => pattern.test(normalized))) return 'design';
     return null;
   }
 
@@ -62,7 +60,6 @@
     return {
       session: SESSION_PATTERNS.some((pattern) => pattern.test(normalized)),
       weekly: WEEKLY_PATTERNS.some((pattern) => pattern.test(normalized)),
-      design: DESIGN_PATTERNS.some((pattern) => pattern.test(normalized)),
     };
   }
 
@@ -152,7 +149,6 @@
         if (diff <= 0) diff += 7;
         const target = new Date(today);
         target.setDate(today.getDate() + diff);
-        // Try to parse an explicit time like "2:00 p.m." or "10:00 p.m."
         const timeMatch = t.match(/(\d{1,2}):(\d{2})\s*(a\.?m\.?|p\.?m\.?)/);
         if (timeMatch) {
           let h = parseInt(timeMatch[1]);
@@ -179,10 +175,6 @@
     if (!text) return null;
     const m = text.match(/(\d+(?:\.\d+)?)\s*%/);
     return m ? parseFloat(m[1]) : null;
-  }
-
-  function isValidPercentage(value) {
-    return Number.isFinite(value) && value >= 0 && value <= 100;
   }
 
   function collectLines(text) {
@@ -233,8 +225,6 @@
     const percentageIdx = lines.findIndex((line) => extractPct(line) !== null);
     const percentageLine = percentageIdx >= 0 ? lines[percentageIdx] : null;
 
-    // Find the closest reset line to the percentage (after it, to match UI order)
-    // This prevents picking up reset time from a different section
     let resetLine = null;
     if (percentageIdx >= 0) {
       resetLine =
@@ -253,65 +243,19 @@
     };
   }
 
-  /**
-   * Find Claude Design data by locating the smallest DOM element that:
-   *  - contains "claude design" text
-   *  - contains a percentage (e.g. "100% usado")
-   *  - does NOT contain markers from other sections ("todos los modelos", "sesion actual")
-   * Uses textContent (not innerText) so CSS visibility doesn't affect results.
-   */
-  function parseDesignFromDOM() {
-    const matching = [];
-    let debugDesignEls = [];
-    for (const el of document.querySelectorAll('*')) {
-      const tag = el.tagName;
-      if (!tag || tag === 'SCRIPT' || tag === 'STYLE' || tag === 'HEAD') continue;
-      const content = el.textContent || '';
-      if (content.length < 3 || content.length > 400) continue;
-      const norm = normalizeText(content);
-      if (!DESIGN_PATTERNS.some(p => p.test(norm))) continue;
-      debugDesignEls.push({ tag, len: content.length, norm: norm.slice(0, 120) });
-      if (extractPct(content) === null) continue;
-      if (/\btodos los modelos\b|\ball models\b/i.test(norm)) continue;
-      if (/\bsesion actual\b|\bcurrent session\b/i.test(norm)) continue;
-      matching.push(el);
-    }
-    console.warn('[ClaudeTrack] design candidates (has "claude design", len<=400):', debugDesignEls);
-    console.warn('[ClaudeTrack] design matching (has % + no cross-section):', matching.map(e => ({
-      tag: e.tagName, len: (e.textContent||'').length, text: (e.textContent||'').slice(0, 120)
-    })));
-    if (matching.length === 0) return null;
-    matching.sort((a, b) => (a.textContent || '').length - (b.textContent || '').length);
-    const best = matching[0];
-    const content = best.textContent || '';
-    const pct = extractPct(content);
-    if (pct === null) return null;
-    const lines = content.split('\n').map(l => l.trim()).filter(Boolean);
-    const resetLine = lines.find(l => RESET_PATTERNS.test(normalizeText(l)));
-    console.warn('[ClaudeTrack] design result:', { pct, resetLine, content: content.slice(0, 150) });
-    return {
-      percentage: pct,
-      resetTime: resetLine ? parseResetTime(resetLine) : null,
-      label: 'Claude Design',
-    };
-  }
-
   // ── Main parsing ─────────────────────────────────────────────────────
 
   function parseUsage() {
     const result = {
       session: { percentage: null, resetTime: null, label: null },
       weekly:  { percentage: null, resetTime: null, label: null },
-      design:  { percentage: null, resetTime: null, label: null },
       meta: {
         ready: false,
         confidence: 'low',
         sessionSource: null,
         weeklySource: null,
-        designSource: null,
         foundSessionMarker: false,
         foundWeeklyMarker: false,
-        foundDesignMarker: false,
         textPercentageCount: 0,
       },
     };
@@ -321,8 +265,6 @@
       document.querySelectorAll('[role="progressbar"], meter, progress')
     );
 
-    // Also look for divs that are styled as progress fill bars
-    // (common pattern: a wrapper div with a child whose width is set to a %)
     const styleDivs = Array.from(document.querySelectorAll('div')).filter(d => {
       const w = d.style?.width;
       return w && w.endsWith('%') && parseFloat(w) > 0;
@@ -334,7 +276,6 @@
     const barData = allBars.map(el => {
       let pct = progressValue(el);
       if (pct === null) {
-        // try parsing width percentage
         const w = el.style?.width;
         if (w && w.includes('%')) pct = parseFloat(w);
       }
@@ -343,16 +284,13 @@
     }).filter(d => d.pct !== null && d.pct >= 0 && d.pct <= 100);
 
     // ── 3. Scan full page text for percentage mentions ─────────────────
-    // This is the fallback / cross-check when bars aren't found
     const bodyText = document.body?.innerText || '';
     const lines = bodyText.split('\n').map(l => l.trim()).filter(Boolean);
     const markers = hasSectionMarkers(bodyText);
     result.meta.foundSessionMarker = markers.session;
     result.meta.foundWeeklyMarker = markers.weekly;
-    result.meta.foundDesignMarker = markers.design;
     const sessionContainerData = parseSectionFromContainer('session');
     const weeklyContainerData  = parseSectionFromContainer('weekly');
-    const designContainerData  = parseSectionFromContainer('design');
 
     // ── 4. Match bar data to sections ─────────────────────────────────
     for (const bar of barData) {
@@ -363,9 +301,6 @@
       } else if (section === 'weekly' && result.weekly.percentage === null) {
         result.weekly.percentage = bar.pct;
         result.meta.weeklySource = 'bar';
-      } else if (section === 'design' && result.design.percentage === null) {
-        result.design.percentage = bar.pct;
-        result.meta.designSource = 'bar';
       }
     }
 
@@ -388,22 +323,11 @@
       if (result.weekly.label    === null) result.weekly.label     = weeklyContainerData.label;
     }
 
-    if (designContainerData) {
-      // Always prefer container-parsed value for design over bar matching,
-      // because unrelated ARIA bars with 0% can be misassigned via broad context.
-      if (designContainerData.percentage !== null) {
-        result.design.percentage = designContainerData.percentage;
-        result.meta.designSource = 'container';
-      }
-      if (result.design.resetTime === null) result.design.resetTime = designContainerData.resetTime;
-      if (result.design.label    === null) result.design.label     = designContainerData.label;
-    }
-
     // ── 6. Text-scan fallback ──────────────────────────────────────────
     const pctLines = lines.filter(line => extractPct(line) !== null);
     result.meta.textPercentageCount = pctLines.length;
 
-    if (result.session.percentage === null || result.weekly.percentage === null || result.design.percentage === null) {
+    if (result.session.percentage === null || result.weekly.percentage === null) {
       for (const line of pctLines) {
         const pct     = extractPct(line);
         const section = detectSection(line);
@@ -413,24 +337,11 @@
         } else if (section === 'weekly' && result.weekly.percentage === null) {
           result.weekly.percentage = pct;
           result.meta.weeklySource = 'text';
-        } else if (section === 'design' && result.design.percentage === null) {
-          result.design.percentage = pct;
-          result.meta.designSource = 'text';
         }
       }
     }
 
-    // ── 7. Design: DOM-based targeted search (always overrides bar/container) ──
-    const designDirect = parseDesignFromDOM();
-    if (designDirect) {
-      result.design.percentage = designDirect.percentage;
-      result.design.resetTime  = designDirect.resetTime;
-      result.design.label      = designDirect.label;
-      result.meta.designSource      = 'text-direct';
-      result.meta.foundDesignMarker = true;
-    }
-
-    // ── 8. Confidence & readiness ──────────────────────────────────────
+    // ── 7. Confidence & readiness ──────────────────────────────────────
     const hasBoth   = result.session.percentage !== null && result.weekly.percentage !== null;
     const hasMarkers = result.meta.foundSessionMarker && result.meta.foundWeeklyMarker;
     const hasReset  = result.session.resetTime !== null || result.weekly.resetTime !== null;
@@ -441,7 +352,7 @@
       result.meta.confidence = 'medium';
     }
 
-    result.meta.ready = result.session.percentage !== null || result.weekly.percentage !== null || result.design.percentage !== null;
+    result.meta.ready = result.session.percentage !== null || result.weekly.percentage !== null;
 
     return result;
   }
@@ -449,9 +360,7 @@
   // ── Entry point ───────────────────────────────────────────────────────
 
   function run() {
-    console.warn('[ClaudeTrack] content.js running, body text length:', document.body?.innerText?.length);
     const data = parseUsage();
-    console.warn('[ClaudeTrack] parsed data:', JSON.stringify({ session: data.session, weekly: data.weekly, design: data.design }));
     chrome.runtime.sendMessage({ type: 'USAGE_DATA', data });
   }
 
