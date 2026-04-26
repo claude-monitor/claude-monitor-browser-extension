@@ -59,29 +59,9 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
 // ── Core refresh logic ────────────────────────────────────────────────────
 
 async function refreshUsage() {
-  // Primary path: internal Claude API (works when user is logged in)
   const apiResult = await refreshUsageFromApi();
   if (apiResult.refreshed) return { ...apiResult, source: 'api' };
-
-  // Fallback: inject into an already-open usage tab (never open one automatically)
-  const tabs = await chrome.tabs.query({ url: 'https://claude.ai/settings/usage*' });
-  if (tabs.length > 0) {
-    await injectIntoTab(tabs[0].id);
-    return { refreshed: true, source: 'existing-tab' };
-  }
-
-  return { refreshed: false, reason: 'no-usage-tab-open' };
-}
-
-async function injectIntoTab(tabId) {
-  try {
-    await chrome.scripting.executeScript({
-      target: { tabId },
-      files: ['content.js'],
-    });
-  } catch (_e) {
-    // injection fails when the tab navigates away — silently skip
-  }
+  return { refreshed: false, reason: 'api-fetch-failed' };
 }
 
 async function refreshUsageFromApi() {
