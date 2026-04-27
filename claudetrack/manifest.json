@@ -8,7 +8,7 @@
   "minimum_chrome_version": "116",
   "permissions": ["storage", "alarms"],
   "host_permissions": ["https://claude.ai/*"],
-  "homepage_url": "https://msadofschi.github.io/claude-usage-monitor/",
+  "homepage_url": "https://claude-monitor.netlify.app/",
   "background": {
     "service_worker": "background.js"
   },
