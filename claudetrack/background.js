@@ -9,12 +9,10 @@ const POLL_MIN   = 5;   // minutes between badge refreshes from cache
 
 chrome.runtime.onInstalled.addListener(() => {
   setupAlarm();
-  refreshUsage();   // fetch immediately on install/update
 });
 
 chrome.runtime.onStartup.addListener(() => {
   setupAlarm();
-  refreshUsage();
 });
 
 async function setupAlarm() {
