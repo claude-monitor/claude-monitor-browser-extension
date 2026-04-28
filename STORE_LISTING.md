@@ -1,10 +1,10 @@
 # Chrome Web Store Listing — Claude Usage Monitor
 
 ## Extension name
-Claude Usage Monitor
+Claude Usage Monitor: Session, Weekly & Design
 
-## Short description (119 / 132 chars max)
-Track your Claude.ai usage in real time. Session & weekly limits, reset countdowns, color-coded badge — right in your toolbar.
+## Short description (max 132 chars)
+Track your Claude.ai session, weekly, and Design usage in real time. Reset times and color-coded progress in your toolbar.
 
 ## Category
 Productivity
@@ -13,33 +13,53 @@ Productivity
 English
 
 ## Privacy policy URL
-https://msadofschi.github.io/claude-usage-monitor/
+https://claude-monitor.netlify.app/privacy
 
 ---
 
 ## Long description
 
-Know when you're getting close to your Claude limit — without opening the settings page.
+Track your Claude.ai usage in real time. See session and weekly limits, reset times, and color-coded progress — in your toolbar.
 
-Claude Usage Monitor shows your session and weekly usage directly in your browser toolbar, with a color-coded badge that updates automatically at a configurable interval (default: every 5 minutes).
+The only Claude usage tracker that monitors Claude Design alongside your 5-hour session and 7-day weekly limits, all in your browser toolbar.
 
-**What you see at a glance:**
-- Session usage percentage (current 5-hour window)
-- Weekly usage percentage (all models combined)
-- Countdown to each reset time
-- Color-coded badge: green under 50%, yellow 50–80%, red above 80%
+Stop opening claude.ai/settings/usage. A color-coded badge tells you at a glance whether you can keep working or need to pace yourself, with countdowns to every reset.
 
-**How it works:**
-The extension reads your usage data directly from Claude.ai using your existing login session — the same way Claude's own settings page works. No separate account or sign-up required. All data is stored locally on your device and is never sent anywhere else.
+No account, no API key, no data leaves your browser. Reads your existing Claude session the same way the official settings page does.
 
-**Permissions used and why:**
-- *claude.ai access* — to read usage data from the Claude API using your existing session
-- *Storage* — to persist usage data between sessions so the badge survives browser restarts
-- *Alarms* — to schedule automatic refreshes at a configurable interval (default: every 5 minutes)
-- *Scripting* — to parse the Claude usage settings page as a fallback when the API is unavailable
+WHAT YOU SEE
+- Session usage (5-hour rolling window) with reset countdown
+- Weekly usage (all models combined) with reset day/time
+- Claude Design usage (most trackers ignore this)
+- Toolbar badge: green under 50%, yellow 50 to 80%, red above 80%
+- Configurable auto-refresh: 5, 10, 15, 30, or 60 minutes
 
-**Privacy:**
-Nothing leaves your device except requests to claude.ai (which you're already making when you use Claude). No tracking, no analytics, no third-party services. Full privacy policy: https://msadofschi.github.io/claude-usage-monitor/
+WHO IS THIS FOR
+Claude Pro, Max, and Team users who hit limits and want to plan their work. Especially useful for Claude Code users on Max plans and teams using Claude Design.
+
+PRIVACY
+- All data stored locally on your device
+- No analytics, no telemetry, no third parties
+- Cannot read your chats, projects, files, or any other Claude.ai content
+- Permissions are scoped to the absolute minimum: only the usage page and two specific API endpoints (organization list and usage stats)
+- Specifically excluded: chat_conversations, projects, members, and every other endpoint
+
+PERMISSIONS USED AND WHY
+- *Storage* — persist usage data locally so the badge survives browser restarts
+- *Alarms* — schedule automatic refreshes at the configured interval
+- *https://claude.ai/settings/usage* — read the usage settings page (content script)
+- *https://claude.ai/api/organizations* — list your organizations to identify the active one
+- *https://claude.ai/api/organizations/\*/usage* — read usage stats only
+
+HOW IT WORKS
+1. Install the extension and pin it to your toolbar
+2. Log into claude.ai (you probably already are)
+3. The badge starts showing your usage automatically
+4. Click the icon any time for the full breakdown
+
+Claude Usage Monitor is an independent project and is not affiliated with Anthropic.
+Learn more: https://claude-monitor.netlify.app/
+Full privacy policy: https://claude-monitor.netlify.app/privacy
 
 ---
 
@@ -48,9 +68,10 @@ Nothing leaves your device except requests to claude.ai (which you're already ma
 Minimum: 1 screenshot at **1280×800px** or **640×400px**
 
 ### Suggested shots:
-1. **Popup — healthy usage** (green badge, ~20% session, ~30% weekly, with reset countdowns showing)
+1. **Popup — healthy usage** (green badge, ~20% session, ~30% weekly, ~10% design, with reset countdowns showing)
 2. **Popup — high usage** (red badge, ~90% session, showing "Resets in 2h 15m")
-3. **Toolbar badge** — zoomed view showing the % badge on the Chrome toolbar
+3. **Popup — full breakdown** showing all three cards: session, weekly, and Claude Design
+4. **Toolbar badge** — zoomed view showing the % badge on the Chrome toolbar
 
 ### How to take them:
 1. Load the extension unpacked in Chrome (chrome://extensions → Load unpacked → select the `claudetrack/` folder)
@@ -62,17 +83,24 @@ Minimum: 1 screenshot at **1280×800px** or **640×400px**
 
 ## Store checklist before submitting
 
-- [x] Privacy policy page live at https://msadofschi.github.io/claude-usage-monitor/
-- [x] At least 1 screenshot (1280×800)
-- [x] Extension loaded and tested in Chrome (verify badge updates, refresh button works)
-- [x] `claudetrack/` folder zipped for upload (zip the folder contents, not the folder itself)
-- [x] Developer account registered at https://chrome.google.com/webstore/devconsole ($5 one-time fee)
+- [ ] Bump `version` in `claudetrack/manifest.json`
+- [ ] Test the unpacked extension in Chrome (badge updates, popup shows session/weekly/design, refresh works)
+- [ ] Build the ZIP from inside `claudetrack/` (files at root, not nested)
+- [ ] Privacy policy URL is live and accurate
+- [ ] At least 1 screenshot (1280×800)
+- [ ] Tag the release in git (`git tag v<version> && git push --tags`)
 
 ## How to zip for upload
 
 ```
 cd claudetrack/
-zip -r ../claude-usage-monitor-v1.2.1.zip . --exclude "*.DS_Store"
+zip -r ../claude-usage-monitor-v<version>.zip . --exclude "*.DS_Store"
 ```
 
-Or on Windows: select all files inside the `claudetrack/` folder → right-click → Compress to ZIP.
+PowerShell on Windows:
+```
+cd claudetrack
+Compress-Archive -Path * -DestinationPath ../claude-usage-monitor-v<version>.zip -Force
+```
+
+The ZIP must contain the files at the root, not inside a `claudetrack/` folder.
