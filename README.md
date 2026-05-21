@@ -1,6 +1,11 @@
-# Claude Usage
+# Claude Usage Monitor
 
-Claude Usage is a Manifest V3 browser extension for Claude.ai that shows your current usage directly from the toolbar popup.
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Version](https://img.shields.io/badge/version-1.4.2-blue.svg)](claudetrack/manifest.json)
+[![Chrome Web Store](https://img.shields.io/badge/Chrome-Web%20Store-brightgreen.svg)](https://chromewebstore.google.com/detail/claude-usage-monitor-sess/bfhdcfiigpaaopklllpobkheakpigbfo)
+[![Firefox Add-ons](https://img.shields.io/badge/Firefox-Add--ons-orange.svg)](https://addons.mozilla.org/firefox/addon/claude-usage-meter/)
+
+Claude Usage Monitor is a Manifest V3 browser extension for Claude.ai that shows your current usage directly from the toolbar popup. **Open source (MIT)** — all code in this repo is exactly what runs in your browser.
 
 It displays three usage buckets:
 
@@ -29,13 +34,10 @@ The extension refreshes usage through Claude.ai's internal authenticated API.
 
 ## Browser support
 
-This extension is designed for Chromium-based browsers that support Chrome Extensions Manifest V3, including:
+- **Google Chrome** — Manifest V3, uses `manifest.json`.
+- **Mozilla Firefox** — Manifest V3, uses `manifest.firefox.json` (packaged as `manifest.json` by the build script).
 
-- Google Chrome
-- Microsoft Edge
-- Brave
-
-The codebase uses the standard `chrome.*` extension APIs, so the local development flow is similar across all three browsers.
+The codebase uses the standard `chrome.*` extension APIs, which Firefox supports via the WebExtensions namespace.
 
 ## Run locally
 
@@ -55,21 +57,21 @@ The extension files are here:
 4. Select the `claudetrack/` folder inside this repo.
 5. Pin the extension if you want fast access from the toolbar.
 
-### Edge
+### Firefox
 
-1. Open `edge://extensions`.
-2. Enable **Developer mode**.
-3. Click **Load unpacked**.
-4. Select the `claudetrack/` folder inside this repo.
-5. Pin the extension from the Edge toolbar if needed.
+Firefox uses a separate manifest (`manifest.firefox.json`). The easiest path is to build the Firefox ZIP and load it temporarily:
 
-### Brave
+1. From the repo root, run:
+   ```powershell
+   ./build-firefox.ps1
+   ```
+   This produces `claude-usage-monitor-firefox-v<version>.zip`.
+2. Open `about:debugging#/runtime/this-firefox`.
+3. Click **Load Temporary Add-on...**.
+4. Select the generated ZIP (or any file inside the unpacked ZIP).
+5. The add-on stays loaded until you restart Firefox.
 
-1. Open `brave://extensions`.
-2. Enable **Developer mode**.
-3. Click **Load unpacked**.
-4. Select the `claudetrack/` folder inside this repo.
-5. Pin the extension from the Brave toolbar if needed.
+For a permanent install, use the published add-on at <https://addons.mozilla.org/firefox/addon/claude-usage-meter/>.
 
 ## Notes for local testing
 
@@ -86,3 +88,27 @@ The extension files are here:
 - `claudetrack/popup.html`: popup markup.
 - `claudetrack/popup.css`: popup styling.
 - `claudetrack/popup.js`: popup rendering, manual refresh flow, and storage listeners.
+
+## Privacy
+
+- All data is stored locally on your device via `chrome.storage.local`.
+- No analytics, no telemetry, no third parties.
+- The extension cannot read your chats, projects, files, or any other Claude.ai content.
+- Host permissions are scoped to the usage page and two specific API endpoints. See the [Chrome](STORE_LISTING_CHROME.md) and [Firefox](STORE_LISTING_FIREFOX.md) listings for the full permission breakdown.
+- Full privacy policy: <https://claude-monitor.netlify.app/privacy>
+
+## Contributing
+
+Bug reports and feature requests are welcome via [GitHub Issues](https://github.com/msadofschi/claudetrack/issues).
+
+Pull requests are welcome. For non-trivial changes, please open an issue first to discuss the scope.
+
+## Security
+
+If you find a security issue, please email <martin.sadofschi@gmail.com> instead of opening a public issue.
+
+## License
+
+[MIT](LICENSE) © Digital Advanced Solutions
+
+Claude Usage Monitor is an independent project and is not affiliated with Anthropic.
