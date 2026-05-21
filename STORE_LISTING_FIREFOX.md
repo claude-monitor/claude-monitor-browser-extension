@@ -47,8 +47,9 @@ No account, no API key, no data leaves your browser. Reads your existing Claude 
 WHAT YOU SEE
 - Session usage (5-hour rolling window) with reset countdown
 - Weekly usage (all models combined) with reset day/time
-- Opus weekly usage with reset day/time (when in use)
-- Claude Design usage (when in use — most trackers ignore this)
+- Sonnet weekly usage (when your plan includes a Sonnet sub-cap)
+- Opus weekly usage (when your plan includes an Opus sub-cap)
+- Claude Design usage (when your plan includes it — most trackers ignore this)
 - Paid extra credits used vs. monthly cap (when enabled on your plan)
 - Inline banner when your claude.ai session expires — last-known data stays visible
 - Toolbar badge: green under 50%, yellow 50 to 80%, red above 80%

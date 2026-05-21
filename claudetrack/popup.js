@@ -29,6 +29,13 @@ const weeklyBar   = $('weeklyBar');
 const weeklyReset = $('weeklyReset');
 const weeklyLabel = $('weeklyLabel');
 
+// Sonnet
+const sonnetCard  = $('sonnetCard');
+const sonnetPct   = $('sonnetPct');
+const sonnetBar   = $('sonnetBar');
+const sonnetReset = $('sonnetReset');
+const sonnetLabel = $('sonnetLabel');
+
 // Opus
 const opusCard  = $('opusCard');
 const opusPct   = $('opusPct');
@@ -146,10 +153,11 @@ function render(data) {
     return;
   }
 
-  const { session, weekly, opus, design, extra, lastUpdated: ts } = data;
+  const { session, weekly, sonnet, opus, design, extra, lastUpdated: ts } = data;
   const hasSomething =
     session?.percentage !== null ||
     weekly?.percentage  !== null ||
+    sonnet?.percentage  !== null ||
     opus?.percentage    !== null ||
     design?.percentage  !== null;
 
@@ -197,6 +205,24 @@ function render(data) {
     ? (wDate ? `${wReset} (${wDate})` : wReset)
     : (weekly?.label || 'Reset day unknown');
   weeklyLabel.textContent = '';
+
+  // ── Sonnet weekly ────────────────────────────────────────────────────
+  const snPct = sonnet?.percentage ?? null;
+  if (snPct !== null) {
+    sonnetCard.style.display = 'block';
+    const p = Math.min(100, Math.max(0, Math.round(snPct)));
+    sonnetPct.textContent = `${p}%`;
+    sonnetBar.style.width = `${p}%`;
+    applyColor(sonnetPct, sonnetBar, snPct);
+    const snReset = formatTimeUntil(sonnet?.resetTime);
+    const snDate  = snReset ? formatResetDate(sonnet?.resetTime) : '';
+    sonnetReset.textContent = snReset
+      ? (snDate ? `${snReset} (${snDate})` : snReset)
+      : (sonnet?.label || 'Reset time unknown');
+    sonnetLabel.textContent = '';
+  } else {
+    sonnetCard.style.display = 'none';
+  }
 
   // ── Opus weekly ──────────────────────────────────────────────────────
   const oPct = opus?.percentage ?? null;

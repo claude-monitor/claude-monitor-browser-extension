@@ -199,6 +199,11 @@ function mapApiUsageToStoredShape(usage) {
       resetTime: parseApiTime(usage?.seven_day_opus?.resets_at),
       label: usage?.seven_day_opus?.resets_at ? null : 'Not yet used',
     },
+    sonnet: {
+      percentage: normalizePct(usage?.seven_day_sonnet?.utilization),
+      resetTime: parseApiTime(usage?.seven_day_sonnet?.resets_at),
+      label: usage?.seven_day_sonnet?.resets_at ? null : 'Not yet used',
+    },
     design: {
       percentage: normalizePct(usage?.seven_day_omelette?.utilization),
       resetTime: parseApiTime(usage?.seven_day_omelette?.resets_at),
@@ -211,10 +216,12 @@ function mapApiUsageToStoredShape(usage) {
       sessionSource: 'api',
       weeklySource: 'api',
       opusSource: 'api',
+      sonnetSource: 'api',
       designSource: 'api',
       foundSessionMarker: true,
       foundWeeklyMarker: true,
       foundOpusMarker: true,
+      foundSonnetMarker: true,
       foundDesignMarker: true,
       textPercentageCount: 0,
     },
@@ -223,6 +230,7 @@ function mapApiUsageToStoredShape(usage) {
 
 function mapExtraUsage(extra) {
   if (!extra || typeof extra !== 'object') return null;
+  if (extra.used_credits == null || extra.monthly_limit == null) return null;
   const usedCredits = Number(extra.used_credits);
   const monthlyLimit = Number(extra.monthly_limit);
   if (!Number.isFinite(usedCredits) || !Number.isFinite(monthlyLimit)) return null;
@@ -276,6 +284,11 @@ function sanitizeUsageData(data) {
       resetTime: data.opus?.resetTime ?? null,
       label: data.opus?.label ?? null,
     },
+    sonnet: {
+      percentage: normalizePct(data.sonnet?.percentage),
+      resetTime: data.sonnet?.resetTime ?? null,
+      label: data.sonnet?.label ?? null,
+    },
     design: {
       percentage: normalizePct(data.design?.percentage),
       resetTime: data.design?.resetTime ?? null,
@@ -288,10 +301,12 @@ function sanitizeUsageData(data) {
       sessionSource: data.meta?.sessionSource || null,
       weeklySource: data.meta?.weeklySource || null,
       opusSource: data.meta?.opusSource || null,
+      sonnetSource: data.meta?.sonnetSource || null,
       designSource: data.meta?.designSource || null,
       foundSessionMarker: Boolean(data.meta?.foundSessionMarker),
       foundWeeklyMarker: Boolean(data.meta?.foundWeeklyMarker),
       foundOpusMarker: Boolean(data.meta?.foundOpusMarker),
+      foundSonnetMarker: Boolean(data.meta?.foundSonnetMarker),
       foundDesignMarker: Boolean(data.meta?.foundDesignMarker),
       textPercentageCount: Number.isFinite(data.meta?.textPercentageCount) ? data.meta.textPercentageCount : 0,
     },
@@ -303,6 +318,7 @@ function sanitizeUsageData(data) {
 
 function sanitizeExtra(extra) {
   if (!extra || typeof extra !== 'object') return null;
+  if (extra.usedCredits == null || extra.monthlyLimit == null) return null;
   const usedCredits = Number(extra.usedCredits);
   const monthlyLimit = Number(extra.monthlyLimit);
   if (!Number.isFinite(usedCredits) || !Number.isFinite(monthlyLimit)) return null;
@@ -315,6 +331,10 @@ function sanitizeExtra(extra) {
 }
 
 function normalizePct(value) {
+  // Treat null/undefined/empty as "no data" — Number(null) is 0, which would
+  // otherwise pollute a bucket with a fake 0% when the API returns the whole
+  // bucket as null (meaning the bucket does not apply to the user's plan).
+  if (value === null || value === undefined || value === '') return null;
   const num = Number(value);
   if (!Number.isFinite(num) || num < 0 || num > 100) return null;
   return num;

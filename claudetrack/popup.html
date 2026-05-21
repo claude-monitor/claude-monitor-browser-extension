@@ -121,7 +121,28 @@
         <div class="reset-label" id="weeklyLabel"></div>
       </div>
 
-      <!-- Opus weekly card (hidden when not in use) -->
+      <!-- Sonnet weekly card (hidden when not in plan) -->
+      <div class="card" id="sonnetCard" style="display:none">
+        <div class="card-header">
+          <div class="card-title-row">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+            </svg>
+            <span class="card-title">Sonnet Weekly</span>
+          </div>
+          <span class="card-pct" id="sonnetPct">—</span>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill" id="sonnetBar" style="width:0%"></div>
+        </div>
+        <div class="reset-row">
+          <span id="sonnetReset">—</span>
+        </div>
+        <div class="reset-label" id="sonnetLabel"></div>
+      </div>
+
+      <!-- Opus weekly card (hidden when not in plan) -->
       <div class="card" id="opusCard" style="display:none">
         <div class="card-header">
           <div class="card-title-row">
