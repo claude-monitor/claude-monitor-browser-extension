@@ -43,6 +43,10 @@ WHAT YOU SEE
 WHO IS THIS FOR
 Claude Pro, Max, and Team users who hit limits and want to plan their work. Especially useful for Claude Code users on Max plans and teams using Claude Design.
 
+OPEN SOURCE
+- Full source code published on GitHub (MIT license): https://github.com/msadofschi/claudetrack
+- Verify exactly what the extension does — every line that runs in your browser is in the public repo, unminified.
+
 PRIVACY
 - All data stored locally on your device
 - No analytics, no telemetry, no third parties
@@ -64,6 +68,7 @@ HOW IT WORKS
 4. Click the icon any time for the full breakdown
 
 Claude Usage Monitor is an independent project and is not affiliated with Anthropic.
+Source code: https://github.com/msadofschi/claudetrack
 Learn more: https://claude-monitor.netlify.app/
 Full privacy policy: https://claude-monitor.netlify.app/privacy
 
