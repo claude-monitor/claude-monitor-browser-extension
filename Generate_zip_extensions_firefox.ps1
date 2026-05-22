@@ -17,6 +17,7 @@ New-Item -ItemType Directory -Path $staging | Out-Null
 
 Copy-Item -Path 'claudetrack/*' -Destination $staging -Recurse
 
+# Firefox uses manifest.firefox.json renamed to manifest.json.
 Remove-Item (Join-Path $staging 'manifest.json')
 Move-Item (Join-Path $staging 'manifest.firefox.json') (Join-Path $staging 'manifest.json')
 
