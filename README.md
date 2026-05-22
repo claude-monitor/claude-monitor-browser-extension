@@ -1,7 +1,7 @@
 # Claude Usage Monitor
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-1.4.2-blue.svg)](claudetrack/manifest.json)
+[![Version](https://img.shields.io/badge/version-1.4.3-blue.svg)](claudetrack/manifest.json)
 [![Chrome Web Store](https://img.shields.io/badge/Chrome-Web%20Store-brightgreen.svg)](https://chromewebstore.google.com/detail/claude-usage-monitor-sess/bfhdcfiigpaaopklllpobkheakpigbfo)
 [![Firefox Add-ons](https://img.shields.io/badge/Firefox-Add--ons-orange.svg)](https://addons.mozilla.org/firefox/addon/claude-usage-meter/)
 
@@ -63,7 +63,7 @@ Firefox uses a separate manifest (`manifest.firefox.json`). The easiest path is 
 
 1. From the repo root, run:
    ```powershell
-   ./build-firefox.ps1
+   ./Generate_zip_extensions_firefox.ps1
    ```
    This produces `claude-usage-monitor-firefox-v<version>.zip`.
 2. Open `about:debugging#/runtime/this-firefox`.
@@ -72,6 +72,31 @@ Firefox uses a separate manifest (`manifest.firefox.json`). The easiest path is 
 5. The add-on stays loaded until you restart Firefox.
 
 For a permanent install, use the published add-on at <https://addons.mozilla.org/firefox/addon/claude-usage-meter/>.
+
+## Build release ZIPs
+
+Three PowerShell scripts in the repo root package the extension for the stores. Each reads the version from `claudetrack/manifest.json` by default, or accepts an explicit `-Version` argument.
+
+| Script | Output | Notes |
+| --- | --- | --- |
+| `Generate_zip_extensions_chrome.ps1` | `claude-usage-monitor-v<version>.zip` | Strips `manifest.firefox.json` before zipping. |
+| `Generate_zip_extensions_firefox.ps1` | `claude-usage-monitor-firefox-v<version>.zip` | Swaps `manifest.firefox.json` in as `manifest.json` before zipping. |
+| `Generate_zip_extensions_all_platforms.ps1` | Both ZIPs above | Calls the two scripts above in sequence. |
+
+Examples (run from the repo root):
+
+```powershell
+# Both ZIPs for the version in manifest.json
+./Generate_zip_extensions_all_platforms.ps1
+
+# Chrome only
+./Generate_zip_extensions_chrome.ps1
+
+# Firefox only, with an explicit version override
+./Generate_zip_extensions_firefox.ps1 -Version 1.4.3
+```
+
+Each ZIP lands in the repo root and overwrites any existing file with the same name.
 
 ## Notes for local testing
 
