@@ -211,7 +211,9 @@ function mapApiUsageToStoredShape(usage) {
     },
     extra: mapExtraUsage(usage?.extra_usage),
     meta: {
-      ready: normalizePct(usage?.five_hour?.utilization) !== null,
+      ready:
+        normalizePct(usage?.five_hour?.utilization) !== null ||
+        normalizePct(usage?.seven_day?.utilization) !== null,
       confidence: 'high',
       sessionSource: 'api',
       weeklySource: 'api',
@@ -347,7 +349,7 @@ function confidenceRank(level) {
 }
 
 function shouldPersist(next, current) {
-  if (!next?.meta?.ready || next.session?.percentage === null) return false;
+  if (!next?.meta?.ready) return false;
   if (!current) return true;
 
   const nextRank = confidenceRank(next.meta?.confidence);
@@ -356,7 +358,11 @@ function shouldPersist(next, current) {
   if (nextRank > currentRank) return true;
   if (current.session?.percentage === null) return true;
 
-  // Same or lower confidence: reject implausible drops (likely partial/stale parse).
+  // High-confidence (API) data is authoritative — accept drops (session resets, plan changes).
+  if (next.meta?.confidence === 'high') return true;
+
+  // Lower confidence (DOM parse): need session data to validate the drop.
+  if (next.session?.percentage === null) return false;
   const drop = current.session.percentage - next.session.percentage;
   if (drop >= 20) return false;
 
