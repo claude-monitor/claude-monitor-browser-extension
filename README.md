@@ -1,7 +1,7 @@
 # Claude Usage Monitor
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-1.4.3-blue.svg)](claudetrack/manifest.json)
+[![Version](https://img.shields.io/badge/version-1.4.4-blue.svg)](claudetrack/manifest.json)
 [![Chrome Web Store](https://img.shields.io/badge/Chrome-Web%20Store-brightgreen.svg)](https://chromewebstore.google.com/detail/claude-usage-monitor-sess/bfhdcfiigpaaopklllpobkheakpigbfo)
 [![Firefox Add-ons](https://img.shields.io/badge/Firefox-Add--ons-orange.svg)](https://addons.mozilla.org/firefox/addon/claude-usage-meter/)
 
@@ -93,7 +93,7 @@ Examples (run from the repo root):
 ./Generate_zip_extensions_chrome.ps1
 
 # Firefox only, with an explicit version override
-./Generate_zip_extensions_firefox.ps1 -Version 1.4.3
+./Generate_zip_extensions_firefox.ps1 -Version 1.4.4
 ```
 
 Each ZIP lands in the repo root and overwrites any existing file with the same name.

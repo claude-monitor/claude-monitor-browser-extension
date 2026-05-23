@@ -187,7 +187,7 @@ function mapApiUsageToStoredShape(usage) {
     session: {
       percentage: normalizePct(usage?.five_hour?.utilization),
       resetTime: parseApiTime(usage?.five_hour?.resets_at),
-      label: usage?.five_hour?.resets_at ? null : 'Current session',
+      label: usage?.five_hour?.resets_at ? null : 'Not yet used',
     },
     weekly: {
       percentage: normalizePct(usage?.seven_day?.utilization),
