@@ -11,7 +11,7 @@ const base = path.join(__dirname, '..', 'claudetrack');
 const stub = `<script>
 window.chrome = {
   runtime: {
-    getManifest: () => ({ version: '1.4.5' }),
+    getManifest: () => ({ version: '1.4.6' }),
     sendMessage: (m, cb) => { if (cb) cb({ ok: true }); },
     onMessage: { addListener() {} },
   },
@@ -22,13 +22,14 @@ window.chrome = {
           session: { percentage: 58, resetTime: Date.now() + 8.0e6, label: null },
           weekly:  { percentage: 73, resetTime: Date.now() + 3.6e8, label: null },
           sonnet:  { percentage: 0,  resetTime: Date.now() + 2.4e8, label: null },
-          opus:    { percentage: 12, resetTime: Date.now() + 3.6e8, label: null },
-          design:  { percentage: 3,  resetTime: Date.now() + 3.6e8, label: null },
+          opus:    null,
+          design:  null,
           extra: null, lastUpdated: Date.now(), meta: { ready: true },
         },
         refreshInterval: 5,
         authBackoff: null,
-        cardPrefs: { sonnet: true, opus: false, design: true },
+        cardPrefs: {},
+        claudePlan: { tier: 'default_claude_max_5x', label: 'Max 5x', subcaps: { opus: true, sonnet: true, design: true } },
       }),
       set() {}, remove() {},
     },

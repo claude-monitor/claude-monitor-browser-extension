@@ -1,17 +1,18 @@
 # Claude Usage Monitor
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-1.4.5-blue.svg)](claudetrack/manifest.json)
+[![Version](https://img.shields.io/badge/version-1.4.6-blue.svg)](claudetrack/manifest.json)
 [![Chrome Web Store](https://img.shields.io/badge/Chrome-Web%20Store-brightgreen.svg)](https://chromewebstore.google.com/detail/claude-usage-monitor-sess/bfhdcfiigpaaopklllpobkheakpigbfo)
 [![Firefox Add-ons](https://img.shields.io/badge/Firefox-Add--ons-orange.svg)](https://addons.mozilla.org/firefox/addon/claude-usage-meter/)
 
 Claude Usage Monitor is a Manifest V3 browser extension for Claude.ai that shows your current usage directly from the toolbar popup. **Open source (MIT)** — all code in this repo is exactly what runs in your browser.
 
-It displays three usage buckets:
+It displays your usage buckets:
 
-- **Current Session**: the current short-window Claude usage percentage.
-- **Weekly Limit**: the weekly Claude usage percentage.
-- **Claude Design**: the weekly Claude Design usage percentage (only shown when in use).
+- **Current Session**: the current 5-hour-window Claude usage percentage.
+- **Weekly limit**: the weekly usage percentage across all models.
+- **Per-model weekly sub-limits**: Opus, Sonnet and Claude Design weekly usage (on paid plans) — show or hide each from the **Models** menu in the popup.
+- **Your plan**: a badge in the popup header shows your Claude subscription (e.g. *Max 5x*).
 
 ## How it works
 
@@ -20,13 +21,16 @@ The extension refreshes usage through Claude.ai's internal authenticated API.
 - Automatic refresh runs every 5 minutes.
 - Manual refresh is available from the popup.
 - The popup shows the extension version so you can confirm which local build is loaded.
+- A badge in the header shows your Claude plan (e.g. Max 5x).
 
 ## Features
 
 - Toolbar badge showing the current session percentage.
 - Popup with current session and weekly usage cards.
+- Per-model weekly sub-limit cards — Opus, Sonnet and Claude Design — offered on paid plans.
+- **Models** menu to show/hide the optional per-model cards, with a Select all / Deselect all toggle; your choice is remembered.
+- Subscription badge in the header (Max, Pro, Team, etc.).
 - Reset countdowns when Claude returns reset timestamps.
-- Claude Design usage card (hidden until Design is active).
 - Manual refresh button.
 - Quick link to `https://claude.ai/settings/usage`.
 - Local storage caching so the last known value remains visible between refreshes.
@@ -92,7 +96,7 @@ Examples (run from the repo root):
 ./Generate_zip_extensions_chrome.ps1
 
 # Firefox only, with an explicit version override
-./Generate_zip_extensions_firefox.ps1 -Version 1.4.5
+./Generate_zip_extensions_firefox.ps1 -Version 1.4.6
 ```
 
 Each ZIP lands in the repo root and overwrites any existing file with the same name.

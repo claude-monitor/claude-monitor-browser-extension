@@ -5,7 +5,10 @@ const SIGN_IN_URL = 'https://claude.ai/login';
 const PLAN        = 'free';
 
 const SUBCARDS = ['sonnet', 'opus', 'design'];
-let cardPrefs  = { sonnet: true, opus: true, design: true };
+// Per-sub-cap visibility. Tri-state: true = always show, false = always hide,
+// undefined = auto (show only when the API returns data for it this week).
+let cardPrefs  = {};
+let planSubcaps = {};   // which sub-caps the plan offers: { opus, sonnet, design }
 let lastData   = null;
 
 // ── DOM refs ──────────────────────────────────────────────────────────────
@@ -16,6 +19,7 @@ const noDataEl      = $('noData');
 const refreshBtn    = $('refreshBtn');
 const lastUpdated   = $('lastUpdated');
 const appVersionEl  = $('appVersion');
+const planBadgeEl   = $('planBadge');
 const openUsageBtn    = $('openUsageBtn');
 const openUsagePage   = $('openUsagePage');
 const intervalSelect  = $('intervalSelect');
@@ -58,6 +62,7 @@ const designLabel = $('designLabel');
 const viewWrap       = $('viewWrap');
 const viewBtn        = $('viewBtn');
 const viewMenu       = $('viewMenu');
+const viewAllBtn     = $('viewAllBtn');
 const sonnetMenuItem = $('sonnetMenuItem');
 const opusMenuItem   = $('opusMenuItem');
 const designMenuItem = $('designMenuItem');
@@ -224,59 +229,10 @@ function render(data) {
     : (weekly?.label || 'Reset day unknown');
   weeklyLabel.textContent = '';
 
-  // ── Sonnet weekly ────────────────────────────────────────────────────
-  const snPct = sonnet?.percentage ?? null;
-  if (snPct !== null) {
-    sonnetCard.style.display = cardPrefs.sonnet ? 'block' : 'none';
-    const p = Math.min(100, Math.max(0, Math.round(snPct)));
-    sonnetPct.textContent = `${p}%`;
-    sonnetBar.style.width = `${p}%`;
-    applyColor(sonnetPct, sonnetBar, snPct);
-    const snReset = formatTimeUntil(sonnet?.resetTime);
-    const snDate  = snReset ? formatResetDate(sonnet?.resetTime) : '';
-    sonnetReset.textContent = snReset
-      ? (snDate ? `${snReset} (${snDate})` : snReset)
-      : (sonnet?.label || 'Reset time unknown');
-    sonnetLabel.textContent = '';
-  } else {
-    sonnetCard.style.display = 'none';
-  }
-
-  // ── Opus weekly ──────────────────────────────────────────────────────
-  const oPct = opus?.percentage ?? null;
-  if (oPct !== null) {
-    opusCard.style.display = cardPrefs.opus ? 'block' : 'none';
-    const p = Math.min(100, Math.max(0, Math.round(oPct)));
-    opusPct.textContent = `${p}%`;
-    opusBar.style.width = `${p}%`;
-    applyColor(opusPct, opusBar, oPct);
-    const oReset = formatTimeUntil(opus?.resetTime);
-    const oDate  = oReset ? formatResetDate(opus?.resetTime) : '';
-    opusReset.textContent = oReset
-      ? (oDate ? `${oReset} (${oDate})` : oReset)
-      : (opus?.label || 'Reset time unknown');
-    opusLabel.textContent = '';
-  } else {
-    opusCard.style.display = 'none';
-  }
-
-  // ── Design ───────────────────────────────────────────────────────────
-  const dPct = design?.percentage ?? null;
-  if (dPct !== null) {
-    designCard.style.display = cardPrefs.design ? 'block' : 'none';
-    const p = Math.min(100, Math.max(0, Math.round(dPct)));
-    designPct.textContent = `${p}%`;
-    designBar.style.width = `${p}%`;
-    applyColor(designPct, designBar, dPct);
-    const dReset = formatTimeUntil(design?.resetTime);
-    const dDate  = dReset ? formatResetDate(design?.resetTime) : '';
-    designReset.textContent = dReset
-      ? (dDate ? `${dReset} (${dDate})` : dReset)
-      : (design?.label || 'Reset time unknown');
-    designLabel.textContent = '';
-  } else {
-    designCard.style.display = 'none';
-  }
+  // ── Weekly sub-caps (always selectable from the filter menu) ─────────
+  renderSubCard('sonnet', sonnet, sonnetCard, sonnetPct, sonnetBar, sonnetReset, weekly?.resetTime);
+  renderSubCard('opus',   opus,   opusCard,   opusPct,   opusBar,   opusReset, weekly?.resetTime);
+  renderSubCard('design', design, designCard, designPct, designBar, designReset, weekly?.resetTime);
 
   // ── Extra usage credits ──────────────────────────────────────────────
   if (extra && extra.isEnabled && extra.monthlyLimit > 0) {
@@ -294,34 +250,99 @@ function render(data) {
   renderViewMenu(data);
 }
 
+// ── Sub-card rendering ──────────────────────────────────────────────────────
+
+// A sub-cap is offered (listed in the filter / eligible to show) when the plan
+// includes it, or when the API is already returning data for it.
+function subcapOffered(key, hasData) {
+  return Boolean(planSubcaps[key]) || hasData;
+}
+
+// Tri-state visibility: explicit pref wins, otherwise show only when there's data.
+function cardVisible(key, hasData) {
+  const pref = cardPrefs[key];
+  return pref === true ? true : pref === false ? false : hasData;
+}
+
+function renderSubCard(key, bucket, cardEl, pctEl, barEl, resetEl, weeklyResetTime) {
+  const pct = bucket?.percentage ?? null;
+  const hasData = pct !== null;
+  if (!subcapOffered(key, hasData) || !cardVisible(key, hasData)) {
+    cardEl.style.display = 'none';
+    return;
+  }
+  cardEl.style.display = 'block';
+
+  // The plan includes this sub-cap, so no data this week means 0% used.
+  const p = hasData ? Math.min(100, Math.max(0, Math.round(pct))) : 0;
+  pctEl.textContent = `${p}%`;
+  barEl.style.width = `${p}%`;
+  applyColor(pctEl, barEl, hasData ? pct : 0);
+
+  // Sub-caps reset with the weekly window, so fall back to the weekly reset.
+  const resetTime = bucket?.resetTime ?? weeklyResetTime ?? null;
+  const reset = formatTimeUntil(resetTime);
+  const date  = reset ? formatResetDate(resetTime) : '';
+  resetEl.textContent = reset
+    ? (date ? `${reset} (${date})` : reset)
+    : (bucket?.label || 'Reset day unknown');
+}
+
 // ── Optional-cards menu ─────────────────────────────────────────────────────
 
 function renderViewMenu(data) {
-  const avail = {
-    sonnet: (data?.sonnet?.percentage ?? null) !== null,
-    opus:   (data?.opus?.percentage   ?? null) !== null,
-    design: (data?.design?.percentage ?? null) !== null,
+  // Only sub-caps the plan offers (or that already have data) are listed.
+  const offered = {
+    opus:   subcapOffered('opus',   (data?.opus?.percentage   ?? null) !== null),
+    sonnet: subcapOffered('sonnet', (data?.sonnet?.percentage ?? null) !== null),
+    design: subcapOffered('design', (data?.design?.percentage ?? null) !== null),
   };
-  const anyAvail = avail.sonnet || avail.opus || avail.design;
+  const anyOffered = offered.opus || offered.sonnet || offered.design;
+  if (viewWrap) viewWrap.style.display = anyOffered ? 'flex' : 'none';
+  if (!anyOffered) closeViewMenu();
 
-  if (viewWrap) viewWrap.style.display = anyAvail ? 'flex' : 'none';
-  if (!anyAvail) closeViewMenu();
+  updateMenuItem('opus',   offered.opus,   data?.opus?.percentage,   opusMenuItem,   opusMenuPct);
+  updateMenuItem('sonnet', offered.sonnet, data?.sonnet?.percentage, sonnetMenuItem, sonnetMenuPct);
+  updateMenuItem('design', offered.design, data?.design?.percentage, designMenuItem, designMenuPct);
 
-  updateMenuItem('sonnet', avail.sonnet, data?.sonnet?.percentage, sonnetMenuItem, sonnetMenuPct);
-  updateMenuItem('opus',   avail.opus,   data?.opus?.percentage,   opusMenuItem,   opusMenuPct);
-  updateMenuItem('design', avail.design, data?.design?.percentage, designMenuItem, designMenuPct);
+  if (viewAllBtn) {
+    const keys = SUBCARDS.filter(k => offered[k]);
+    const allShown = keys.length > 0 && keys.every(k => cardVisible(k, (data?.[k]?.percentage ?? null) !== null));
+    viewAllBtn.textContent = allShown ? 'Deselect all' : 'Select all';
+  }
 }
 
-function updateMenuItem(key, available, pct, itemEl, pctEl) {
+function updateMenuItem(key, offered, pct, itemEl, pctEl) {
   if (!itemEl) return;
-  itemEl.style.display = available ? 'flex' : 'none';
-  itemEl.classList.toggle('on', Boolean(cardPrefs[key]));
-  if (pctEl) pctEl.textContent = (pct ?? null) !== null ? `${Math.round(pct)}%` : '—';
+  itemEl.style.display = offered ? 'flex' : 'none';
+  if (!offered) return;
+  const hasData = (pct ?? null) !== null;
+  itemEl.classList.toggle('on', cardVisible(key, hasData));
+  itemEl.classList.toggle('no-usage', !hasData);
+  if (pctEl) pctEl.textContent = hasData ? `${Math.round(pct)}%` : '—';
 }
 
 function toggleCard(key) {
   if (!SUBCARDS.includes(key)) return;
-  cardPrefs[key] = !cardPrefs[key];
+  const bucket = lastData ? lastData[key] : null;
+  const hasData = (bucket?.percentage ?? null) !== null;
+  // Flip current effective visibility into an explicit, persisted preference.
+  cardPrefs[key] = !cardVisible(key, hasData);
+  chrome.storage.local.set({ cardPrefs });
+  if (lastData) render(lastData);
+}
+
+function toggleAllCards() {
+  const keys = SUBCARDS.filter(k => {
+    const pct = lastData ? (lastData[k]?.percentage ?? null) : null;
+    return subcapOffered(k, pct !== null);
+  });
+  const allShown = keys.length > 0 && keys.every(k => {
+    const pct = lastData ? (lastData[k]?.percentage ?? null) : null;
+    return cardVisible(k, pct !== null);
+  });
+  const next = !allShown;
+  keys.forEach(k => { cardPrefs[k] = next; });
   chrome.storage.local.set({ cardPrefs });
   if (lastData) render(lastData);
 }
@@ -356,6 +377,24 @@ function renderAuthState(authBackoff, lastUpdatedTs) {
     : 'No data captured yet';
 }
 
+// ── Subscription badge ──────────────────────────────────────────────────────
+
+function renderPlanBadge(plan) {
+  if (!planBadgeEl) return;
+  const label = plan && typeof plan === 'object' ? plan.label : null;
+  if (label) {
+    planBadgeEl.textContent = label;
+    planBadgeEl.hidden = false;
+  } else {
+    planBadgeEl.hidden = true;
+  }
+}
+
+function applyPlan(plan) {
+  planSubcaps = (plan && plan.subcaps && typeof plan.subcaps === 'object') ? plan.subcaps : {};
+  renderPlanBadge(plan);
+}
+
 // ── Load from storage ─────────────────────────────────────────────────────
 
 function loadData() {
@@ -365,11 +404,12 @@ function loadData() {
   }
 
   chrome.storage.local.get(
-    ['claudeUsage', 'refreshInterval', 'authBackoff', 'cardPrefs'],
-    ({ claudeUsage, refreshInterval, authBackoff, cardPrefs: storedPrefs }) => {
+    ['claudeUsage', 'refreshInterval', 'authBackoff', 'cardPrefs', 'claudePlan'],
+    ({ claudeUsage, refreshInterval, authBackoff, cardPrefs: storedPrefs, claudePlan }) => {
       if (storedPrefs && typeof storedPrefs === 'object') {
-        cardPrefs = { sonnet: true, opus: true, design: true, ...storedPrefs };
+        cardPrefs = { ...storedPrefs };
       }
+      applyPlan(claudePlan);
       if (intervalSelect) intervalSelect.value = String(refreshInterval || 5);
       render(claudeUsage || null);
       renderAuthState(authBackoff, claudeUsage?.lastUpdated);
@@ -418,6 +458,11 @@ viewMenu?.addEventListener('click', (e) => {
   toggleCard(item.dataset.card);
 });
 
+viewAllBtn?.addEventListener('click', (e) => {
+  e.stopPropagation();
+  toggleAllCards();
+});
+
 document.addEventListener('click', (e) => {
   if (viewMenu && !viewMenu.hidden && viewWrap && !viewWrap.contains(e.target)) {
     closeViewMenu();
@@ -446,6 +491,10 @@ chrome.storage.onChanged.addListener((changes) => {
     chrome.storage.local.get(['claudeUsage', 'authBackoff'], ({ claudeUsage, authBackoff }) => {
       renderAuthState(authBackoff, claudeUsage?.lastUpdated);
     });
+  }
+  if (changes.claudePlan) {
+    applyPlan(changes.claudePlan.newValue);
+    if (lastData) render(lastData);
   }
 });
 

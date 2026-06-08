@@ -132,29 +132,61 @@ async function refreshUsageFromApi() {
 }
 
 async function getClaudeOrgId() {
-  const { claudeOrgId, claudeOrgIdAt } = await chrome.storage.local.get(['claudeOrgId', 'claudeOrgIdAt']);
+  const { claudeOrgId, claudeOrgIdAt, claudePlan } = await chrome.storage.local.get(['claudeOrgId', 'claudeOrgIdAt', 'claudePlan']);
   const fresh = claudeOrgIdAt && (Date.now() - claudeOrgIdAt) < ORG_ID_TTL_MS;
-  if (claudeOrgId && fresh) return claudeOrgId;
+  // Only short-circuit when the plan is also cached, so an existing install
+  // (org id already cached) still fetches the org list once to populate the plan badge.
+  if (claudeOrgId && fresh && claudePlan && claudePlan.subcaps) return claudeOrgId;
 
   const organizations = await fetchClaudeJson(`${API_BASE}/organizations`);
-  const orgId = selectOrgId(organizations);
+  const org = selectOrg(organizations);
+  const orgId = (org && (org.uuid || org.organization_uuid || org.id)) || null;
   if (orgId) {
     await chrome.storage.local.set({ claudeOrgId: orgId, claudeOrgIdAt: Date.now() });
   }
+  await chrome.storage.local.set({ claudePlan: derivePlan(org) });
   return orgId;
 }
 
-function selectOrgId(payload) {
-  if (Array.isArray(payload) && payload.length > 0) {
-    return payload[0]?.uuid || payload[0]?.organization_uuid || payload[0]?.id || null;
-  }
-
+function selectOrg(payload) {
+  if (Array.isArray(payload) && payload.length > 0) return payload[0] || null;
   if (Array.isArray(payload?.organizations) && payload.organizations.length > 0) {
-    const org = payload.organizations[0];
-    return org?.uuid || org?.organization_uuid || org?.id || null;
+    return payload.organizations[0] || null;
   }
-
   return null;
+}
+
+// Extract a displayable subscription label from the org payload. The
+// /api/organizations response (already fetched for the org id) carries
+// rate_limit_tier + capabilities — no extra request or permission needed.
+function derivePlan(org) {
+  const tier = org?.rate_limit_tier || null;
+  const caps = Array.isArray(org?.capabilities) ? org.capabilities : [];
+  return { tier, label: planLabel(tier, caps), subcaps: availableSubcaps(tier, caps) };
+}
+
+// Which weekly sub-caps this plan should offer. The API exposes no reliable
+// per-model signal (capabilities only carries the tier; the omelette flag is
+// null even on Max), so we offer the model sub-caps on paid plans and none on free.
+function availableSubcaps(tier, caps) {
+  const t = String(tier || '').toLowerCase();
+  const paid = caps.includes('claude_max') || caps.includes('claude_pro') ||
+               /max|pro|team|enterprise/.test(t);
+  return { opus: paid, sonnet: paid, design: paid };
+}
+
+function planLabel(tier, caps) {
+  const t = String(tier || '').toLowerCase();
+  if (t.includes('max_20x'))    return 'Max 20x';
+  if (t.includes('max_5x'))     return 'Max 5x';
+  if (t.includes('max'))        return 'Max';
+  if (t.includes('team'))       return 'Team';
+  if (t.includes('enterprise')) return 'Enterprise';
+  if (t.includes('pro'))        return 'Pro';
+  if (caps.includes('claude_max')) return 'Max';
+  if (caps.includes('claude_pro')) return 'Pro';
+  if (t.includes('free') || t === 'default') return 'Free';
+  return null; // unknown tier → show nothing rather than a wrong label
 }
 
 async function fetchClaudeJson(url) {

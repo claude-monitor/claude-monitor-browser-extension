@@ -20,7 +20,10 @@
       </div>
       <div class="title-block">
         <span class="app-name">Claude Usage Monitor</span>
-        <span class="app-version" id="appVersion">v-</span>
+        <span class="meta-row">
+          <span class="app-version" id="appVersion">v-</span>
+          <span class="plan-badge" id="planBadge" hidden></span>
+        </span>
       </div>
     </div>
     <div class="header-actions">
@@ -41,15 +44,10 @@
           </svg>
         </button>
         <div class="view-menu" id="viewMenu" hidden>
-          <div class="view-menu-title">Show cards</div>
-          <button class="view-menu-item" data-card="sonnet" id="sonnetMenuItem">
-            <span class="view-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
-            <span class="view-menu-label">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-              Sonnet weekly
-            </span>
-            <span class="view-menu-pct" id="sonnetMenuPct">—</span>
-          </button>
+          <div class="view-menu-head">
+            <span class="view-menu-title">Models</span>
+            <button class="view-menu-all" id="viewAllBtn" type="button">Select all</button>
+          </div>
           <button class="view-menu-item" data-card="opus" id="opusMenuItem">
             <span class="view-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
             <span class="view-menu-label">
@@ -57,6 +55,14 @@
               Opus weekly
             </span>
             <span class="view-menu-pct" id="opusMenuPct">—</span>
+          </button>
+          <button class="view-menu-item" data-card="sonnet" id="sonnetMenuItem">
+            <span class="view-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+            <span class="view-menu-label">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+              Sonnet weekly
+            </span>
+            <span class="view-menu-pct" id="sonnetMenuPct">—</span>
           </button>
           <button class="view-menu-item" data-card="design" id="designMenuItem">
             <span class="view-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
@@ -159,27 +165,6 @@
         <div class="reset-label" id="weeklyLabel"></div>
       </div>
 
-      <!-- Sonnet weekly card (hidden when not in plan) -->
-      <div class="card" id="sonnetCard" style="display:none">
-        <div class="card-header">
-          <div class="card-title-row">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
-                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
-            </svg>
-            <span class="card-title">Sonnet only</span>
-          </div>
-          <span class="card-pct" id="sonnetPct">—</span>
-        </div>
-        <div class="progress-track">
-          <div class="progress-fill" id="sonnetBar" style="width:0%"></div>
-        </div>
-        <div class="reset-row">
-          <span id="sonnetReset">—</span>
-        </div>
-        <div class="reset-label" id="sonnetLabel"></div>
-      </div>
-
       <!-- Opus weekly card (hidden when not in plan) -->
       <div class="card" id="opusCard" style="display:none">
         <div class="card-header">
@@ -190,7 +175,7 @@
               <path d="M2 17l10 5 10-5"/>
               <path d="M2 12l10 5 10-5"/>
             </svg>
-            <span class="card-title">Opus only</span>
+            <span class="card-title">Opus weekly</span>
           </div>
           <span class="card-pct" id="opusPct">—</span>
         </div>
@@ -201,6 +186,27 @@
           <span id="opusReset">—</span>
         </div>
         <div class="reset-label" id="opusLabel"></div>
+      </div>
+
+      <!-- Sonnet weekly card (hidden when not in plan) -->
+      <div class="card" id="sonnetCard" style="display:none">
+        <div class="card-header">
+          <div class="card-title-row">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+            </svg>
+            <span class="card-title">Sonnet weekly</span>
+          </div>
+          <span class="card-pct" id="sonnetPct">—</span>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill" id="sonnetBar" style="width:0%"></div>
+        </div>
+        <div class="reset-row">
+          <span id="sonnetReset">—</span>
+        </div>
+        <div class="reset-label" id="sonnetLabel"></div>
       </div>
 
       <!-- Claude Design card -->

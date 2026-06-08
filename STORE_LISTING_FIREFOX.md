@@ -47,9 +47,11 @@ No account, no API key, no data leaves your browser. Reads your existing Claude 
 WHAT YOU SEE
 - Session usage (5-hour rolling window) with reset countdown
 - Weekly usage (all models combined) with reset day/time
-- Sonnet weekly usage (when your plan includes a Sonnet sub-cap)
-- Opus weekly usage (when your plan includes an Opus sub-cap)
-- Claude Design usage (when your plan includes it — most trackers ignore this)
+- Opus weekly usage (per-model weekly sub-limit, on paid plans)
+- Sonnet weekly usage (per-model weekly sub-limit, on paid plans)
+- Claude Design usage (most trackers ignore this)
+- Show or hide each per-model card from the Models menu (with Select all / Deselect all)
+- Your Claude plan shown as a badge in the header (Max, Pro, Team, etc.)
 - Paid extra credits used vs. monthly cap (when enabled on your plan)
 - Inline banner when your claude.ai session expires — last-known data stays visible
 - Toolbar badge: green under 50%, yellow 50 to 80%, red above 80%

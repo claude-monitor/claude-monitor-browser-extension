@@ -91,6 +91,22 @@ body {
   text-transform: uppercase;
 }
 
+.meta-row { display: flex; align-items: center; gap: 6px; }
+
+.plan-badge {
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--accent-lt);
+  background: rgba(130, 80, 220, 0.18);
+  border: 1px solid rgba(130, 80, 220, 0.35);
+  border-radius: 4px;
+  padding: 1px 5px;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+}
+
+.plan-badge[hidden] { display: none; }
+
 .header-actions {
   display: flex;
   align-items: center;
@@ -166,12 +182,12 @@ body {
   position: absolute;
   top: calc(100% + 7px);
   right: 0;
-  width: 202px;
+  width: 186px;
   background: var(--bg-2);
   border: 1px solid var(--border);
   border-radius: 9px;
   box-shadow: 0 14px 34px rgba(0, 0, 0, 0.6);
-  padding: 5px;
+  padding: 4px;
   z-index: 20;
 }
 
@@ -190,26 +206,47 @@ body {
   transform: rotate(45deg);
 }
 
+.view-menu-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
 .view-menu-title {
-  font-size: 9.5px;
+  font-size: 9px;
   text-transform: uppercase;
   letter-spacing: 0.07em;
   color: var(--text-dim);
   font-weight: 600;
-  padding: 5px 8px 6px;
+  padding: 3px 8px 4px;
 }
+
+.view-menu-all {
+  font-size: 9.5px;
+  font-weight: 600;
+  color: var(--accent-lt);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  padding: 3px 8px 4px;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.view-menu-all:hover { color: #c4a3ff; text-decoration: underline; }
 
 .view-menu-item {
   display: flex;
   align-items: center;
-  gap: 9px;
+  gap: 8px;
   width: 100%;
-  padding: 7px 8px;
+  padding: 4px 8px;
   border: none;
   background: none;
   border-radius: 6px;
   cursor: pointer;
-  font-size: 12.5px;
+  font-size: 12px;
   font-family: inherit;
   color: var(--text-pri);
   text-align: left;
@@ -238,9 +275,10 @@ body {
   align-items: center;
   gap: 6px;
   color: var(--text-pri);
+  white-space: nowrap;
 }
 
-.view-menu-label svg { opacity: 0.6; flex-shrink: 0; color: var(--text-sec); }
+.view-menu-label svg { width: 12px; height: 12px; opacity: 0.6; flex-shrink: 0; color: var(--text-sec); }
 
 .view-menu-pct {
   font-size: 11px;
@@ -248,12 +286,17 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
+/* Sub-cap with no usage this week: still selectable, shown dimmed */
+.view-menu-item.no-usage .view-menu-label { color: var(--text-sec); }
+.view-menu-item.no-usage .view-menu-label svg { opacity: 0.4; }
+.view-menu-item.no-usage .view-menu-pct { color: var(--text-dim); }
+
 /* ── Cards ───────────────────────────────────────────────────────────────── */
 
 .cards {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 7px;
   padding: 8px 14px;
 }
 
@@ -261,7 +304,7 @@ body {
   background: var(--bg-1);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 13px 14px;
+  padding: 12px 14px;
   transition: border-color 0.2s;
 }
 
