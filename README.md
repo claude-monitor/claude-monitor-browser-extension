@@ -1,7 +1,7 @@
 # Claude Usage Monitor
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-1.4.6-blue.svg)](claudetrack/manifest.json)
+[![Version](https://img.shields.io/badge/version-1.4.7-blue.svg)](claudetrack/manifest.json)
 [![Chrome Web Store](https://img.shields.io/badge/Chrome-Web%20Store-brightgreen.svg)](https://chromewebstore.google.com/detail/claude-usage-monitor-sess/bfhdcfiigpaaopklllpobkheakpigbfo)
 [![Firefox Add-ons](https://img.shields.io/badge/Firefox-Add--ons-orange.svg)](https://addons.mozilla.org/firefox/addon/claude-usage-meter/)
 
@@ -96,7 +96,7 @@ Examples (run from the repo root):
 ./Generate_zip_extensions_chrome.ps1
 
 # Firefox only, with an explicit version override
-./Generate_zip_extensions_firefox.ps1 -Version 1.4.6
+./Generate_zip_extensions_firefox.ps1 -Version 1.4.7
 ```
 
 Each ZIP lands in the repo root and overwrites any existing file with the same name.
@@ -122,7 +122,7 @@ Each ZIP lands in the repo root and overwrites any existing file with the same n
 - No analytics, no telemetry, no third parties.
 - The extension cannot read your chats, projects, files, or any other Claude.ai content.
 - Host permissions are scoped to two specific API endpoints. See the [Chrome](STORE_LISTING_CHROME.md) and [Firefox](STORE_LISTING_FIREFOX.md) listings for the full permission breakdown.
-- Full privacy policy: <https://claude-monitor.netlify.app/privacy>
+- Full privacy policy: <https://www.claude-monitor.com/privacy>
 
 ## Contributing
 

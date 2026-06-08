@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Claude Usage Monitor: Session, Weekly & Design",
   "short_name": "Claude Usage",
-  "version": "1.4.6",
+  "version": "1.4.7",
   "description": "Track your Claude.ai usage in real time. See session and weekly limits, reset times, and color-coded progress — in your toolbar.",
   "author": "Digital Advanced Solutions",
   "minimum_chrome_version": "116",
@@ -11,7 +11,7 @@
     "https://claude.ai/api/organizations",
     "https://claude.ai/api/organizations/*/usage"
   ],
-  "homepage_url": "https://claude-monitor.netlify.app/",
+  "homepage_url": "https://www.claude-monitor.com/",
   "background": {
     "service_worker": "background.js"
   },

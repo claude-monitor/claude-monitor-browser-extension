@@ -29,3 +29,18 @@ Work needed:
 Open question: is the routine cap shared across plans, or only on specific tiers?
 (Affects whether the card should auto-hide when the bucket is absent, like the
 weekly sub-caps do.)
+
+## Update landing page for v1.4.6 + custom domain
+
+The website lives in a separate repo (served via Netlify). After v1.4.6 ships it
+needs to reflect the new feature set and move to the custom domain.
+
+- [ ] **New features copy** — document the subscription **plan badge**
+  (Max 5x, Pro, Team…) and the **per-model weekly sub-caps** (Opus / Sonnet /
+  Design) with the **Models** show/hide menu (Select all / Deselect all), plus
+  plan-gated sub-caps (only on paid plans).
+- [ ] **Refresh screenshots** to show the plan badge, sub-caps row and the
+  Models menu.
+- [ ] **Custom domain** — point the Netlify site at the new domain and update the
+  privacy-policy URL path.
+- [ ] Bump any version references on the page to 1.4.6.

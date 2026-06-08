@@ -15,7 +15,7 @@ Productivity
 English
 
 ## Privacy policy URL
-https://claude-monitor.netlify.app/privacy
+https://www.claude-monitor.com/privacy
 
 ---
 
@@ -70,8 +70,8 @@ HOW IT WORKS
 
 Claude Usage Monitor is an independent project and is not affiliated with Anthropic.
 Source code: https://github.com/msadofschi/claudetrack
-Learn more: https://claude-monitor.netlify.app/
-Full privacy policy: https://claude-monitor.netlify.app/privacy
+Learn more: https://www.claude-monitor.com/
+Full privacy policy: https://www.claude-monitor.com/privacy
 
 ---
 
@@ -110,6 +110,6 @@ Run from the repo root:
 ./Generate_zip_extensions_chrome.ps1
 ```
 
-Produces `claude-usage-monitor-chrome-v<version>.zip` at the repo root. Reads the version from `claudetrack/manifest.json` by default, or pass `-Version 1.4.6` to override.
+Produces `claude-usage-monitor-chrome-v<version>.zip` at the repo root. Reads the version from `claudetrack/manifest.json` by default, or pass `-Version 1.4.7` to override.
 
 The ZIP must contain the files at the root, not inside a `claudetrack/` folder.

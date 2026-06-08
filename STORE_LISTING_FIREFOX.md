@@ -23,10 +23,10 @@ MIT License
 martin.sadofschi@gmail.com
 
 ## Support website
-https://claude-monitor.netlify.app/
+https://www.claude-monitor.com/
 
 ## Privacy policy URL
-https://claude-monitor.netlify.app/privacy
+https://www.claude-monitor.com/privacy
 
 ## Compatibility
 - Firefox: Yes
@@ -85,8 +85,8 @@ HOW IT WORKS
 
 Claude Usage Monitor is an independent project and is not affiliated with Anthropic.
 Source code: https://github.com/msadofschi/claudetrack
-Learn more: https://claude-monitor.netlify.app/
-Full privacy policy: https://claude-monitor.netlify.app/privacy
+Learn more: https://www.claude-monitor.com/
+Full privacy policy: https://www.claude-monitor.com/privacy
 
 ---
 
