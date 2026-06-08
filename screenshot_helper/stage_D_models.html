@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<title>Store screenshot A — hero (1280x800)</title>
+<title>Store screenshot D — Models menu (1280x800)</title>
 <link rel="stylesheet" href="_popup_partial.css" />
 <style>
   html, body { width: 1280px; height: 800px; overflow: hidden; }
@@ -89,25 +89,25 @@
 <body>
 
   <div class="hero">
-    <span class="hero-eyebrow"><span class="dot"></span>Built for Claude Max</span>
-    <h1>Track every Claude limit <span class="accent">at a glance.</span></h1>
-    <p class="lede">Session, Weekly, Sonnet, Opus &amp; Claude Design — plus paid extra credits — live in your toolbar. No account, no API key.</p>
+    <span class="hero-eyebrow"><span class="dot"></span>Customizable cards</span>
+    <h1>Show only the limits <span class="accent">you care about.</span></h1>
+    <p class="lede">Opus, Sonnet and Claude Design each get their own weekly card on paid plans. Use the Models menu to show or hide any of them — your choice is remembered.</p>
     <ul class="feature-list">
       <li>
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-        <span><b>Five usage cards</b> — Session, Weekly · all models, Sonnet, Opus, Claude Design</span>
+        <span><b>Models menu</b> — show or hide each per-model weekly card</span>
       </li>
       <li>
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-        <span><b>Color-coded badge</b> in your toolbar — green, yellow, red</span>
+        <span><b>Select all / Deselect all</b> in one click</span>
       </li>
       <li>
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-        <span><b>Extra credits tracker</b> — see paid usage vs monthly cap</span>
+        <span><b>Plan badge</b> in the header — Max, Pro, Team</span>
       </li>
       <li>
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-        <span><b>Open source.</b> All data stays on your device.</span>
+        <span><b>Remembered</b> — your card choices persist across sessions</span>
       </li>
     </ul>
   </div>
@@ -130,6 +130,46 @@
         </div>
         <div class="header-actions">
           <select class="interval-select"><option>5m</option></select>
+          <div class="view-wrap">
+            <button class="view-btn active">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/>
+                <line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/>
+                <line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/>
+                <line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/>
+              </svg>
+            </button>
+            <div class="view-menu">
+              <div class="view-menu-head">
+                <span class="view-menu-title">Models</span>
+                <button class="view-menu-all">Select all</button>
+              </div>
+              <button class="view-menu-item on">
+                <span class="view-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+                <span class="view-menu-label">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+                  Opus weekly
+                </span>
+                <span class="view-menu-pct">28%</span>
+              </button>
+              <button class="view-menu-item on">
+                <span class="view-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+                <span class="view-menu-label">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                  Sonnet weekly
+                </span>
+                <span class="view-menu-pct">71%</span>
+              </button>
+              <button class="view-menu-item">
+                <span class="view-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+                <span class="view-menu-label">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                  Claude Design
+                </span>
+                <span class="view-menu-pct">12%</span>
+              </button>
+            </div>
+          </div>
           <button class="refresh-btn">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
           </button>
@@ -173,18 +213,6 @@
         <div class="card">
           <div class="card-header">
             <div class="card-title-row">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-              <span class="card-title">Sonnet weekly</span>
-            </div>
-            <span class="card-pct yellow">71%</span>
-          </div>
-          <div class="progress-track"><div class="progress-fill yellow" style="width:71%"></div></div>
-          <div class="reset-row">Resets in 4d 8h · Sun 25 May</div>
-        </div>
-
-        <div class="card">
-          <div class="card-header">
-            <div class="card-title-row">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
               <span class="card-title">Opus weekly</span>
             </div>
@@ -197,12 +225,12 @@
         <div class="card">
           <div class="card-header">
             <div class="card-title-row">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-              <span class="card-title">Claude Design</span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+              <span class="card-title">Sonnet weekly</span>
             </div>
-            <span class="card-pct green">12%</span>
+            <span class="card-pct yellow">71%</span>
           </div>
-          <div class="progress-track"><div class="progress-fill" style="width:12%"></div></div>
+          <div class="progress-track"><div class="progress-fill yellow" style="width:71%"></div></div>
           <div class="reset-row">Resets in 4d 8h · Sun 25 May</div>
         </div>
       </div>

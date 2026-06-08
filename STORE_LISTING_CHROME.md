@@ -82,8 +82,9 @@ Minimum: 1 screenshot at **1280×800px** or **640×400px**
 ### Suggested shots:
 1. **Popup — healthy usage** (green badge, ~20% session, ~30% weekly, ~10% design, with reset countdowns showing)
 2. **Popup — high usage** (red badge, ~90% session, showing "Resets in 2h 15m")
-3. **Popup — full breakdown** showing all three cards: session, weekly, and Claude Design
-4. **Toolbar badge** — zoomed view showing the % badge on the Chrome toolbar
+3. **Popup — full breakdown** showing every card: session, weekly, and the per-model weekly sub-limits (Opus, Sonnet, Claude Design), with the plan badge (e.g. *Max 5x*) in the header
+4. **Popup — Models menu** open, showing the per-model cards being toggled (Select all / Deselect all)
+5. **Toolbar badge** — zoomed view showing the % badge on the Chrome toolbar
 
 ### How to take them:
 1. Load the extension unpacked in Chrome (chrome://extensions → Load unpacked → select the `claudetrack/` folder)
@@ -96,7 +97,7 @@ Minimum: 1 screenshot at **1280×800px** or **640×400px**
 ## Store checklist before submitting
 
 - [ ] Bump `version` in `claudetrack/manifest.json`
-- [ ] Test the unpacked extension in Chrome (badge updates, popup shows session/weekly/design, refresh works)
+- [ ] Test the unpacked extension in Chrome (badge updates, popup shows session/weekly/sub-caps + plan badge, Models menu toggles, refresh works)
 - [ ] Build the ZIP from inside `claudetrack/` (files at root, not nested)
 - [ ] Privacy policy URL is live and accurate
 - [ ] At least 1 screenshot (1280×800)
