@@ -67,10 +67,12 @@ sub-caps).
 - v1.4.9 (routine-runs card + **View** menu, plus the View-menu idle-dim fix —
   rows with no usage no longer render bold) is implemented and committed, but
   **not released yet**. Hold the ZIP build + store submission until the version
-  currently in review clears on **both Chrome and Firefox**, then ship v1.4.9.
-- A full visual restyle of the extension **and** the landing is planned
-  separately (see "Polish UI" below); the v1.4.9 screenshots may be re-shot as
-  part of that, so don't over-invest in screenshot polish before the restyle.
+  currently in review clears on **both Chrome and Firefox**, then ship — now as
+  **v1.6.0**, which bundles the 1.4.9 work, the restyle, and the theme picker below.
+- The popup visual restyle + a 6-theme picker are **done at v1.6.0** — a new warm-dark
+  "Anthropic-honest" clay theme via the Impeccable skill (see "Polish UI" below;
+  strategy in `PRODUCT.md`, spec in `DESIGN.md`). Store screenshots and the
+  landing page still need re-doing to match the new look.
 
 ## Landing page — pending (separate repo)
 
@@ -100,15 +102,23 @@ set and move to the custom domain.
 
 ## Polish UI with the Impeccable design skill
 
-Use the **Impeccable** design skill (<https://impeccable.style/>) to refine the
+Use the **Impeccable** design skill (<https://impeccable.style/>) to restyle the
 popup UI and the store/landing visuals, removing the generic "AI slop" look and
 tightening hierarchy, contrast and spacing.
 
-- [ ] Install for Claude Code: `/plugin marketplace add pbakaus/impeccable`
-  (or `npx impeccable skills install`).
-- [ ] Run its commands (e.g. `/typeset`, `/colorize`) over `claudetrack/popup.html`
-  + `popup.css` — it edits real code, so review diffs and keep the existing
-  design system rather than letting it overwrite.
-- [ ] Re-run the store screenshots (`screenshot_helper/`, `screenshots/`) after
-  the polish so the listing reflects the refined look.
-- [ ] Optionally run its 41-rule anti-pattern detector as a PR check.
+- [x] Install for Claude Code: done via `npx impeccable skills install`
+  (gitignored under `.claude/skills/` — dev tooling, not part of the extension).
+- [x] **Popup restyled at v1.6.0** — chose a *new* visual direction (not a light
+  polish): warm-dark "Anthropic-honest" clay theme, replacing the old dark+purple
+  look (purple was the generic "AI" reflex, never Anthropic's color). Strategy in
+  `PRODUCT.md`, token/component spec in `DESIGN.md`. Validated in-browser via the
+  `screenshot_helper/_serve.js` harness (contrast AA, no console errors).
+- [x] **Theme picker (6 palettes)** — Clay (default), Slate, Violet, Midnight,
+  Paper, Cool light. Swatch row in the always-visible options menu, persisted in
+  `chrome.storage.local`. All AA-verified; light themes use a deeper semantic set.
+  Spec in `DESIGN.md`; mockup of all six in `screenshot_helper/theme_preview.html`.
+- [ ] Re-shoot the store screenshots (`screenshot_helper/`, `screenshots/`) for
+  the new look so the listing matches.
+- [ ] Restyle the landing page to match (separate repo; reuse `DESIGN.md` tokens).
+- [ ] Optional: wire the anti-pattern detector (`npx impeccable detect` or
+  `.claude/skills/impeccable/scripts/detect.mjs`) into a PR check.

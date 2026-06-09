@@ -35,7 +35,8 @@ WHAT YOU SEE
 - Opus weekly usage (per-model weekly sub-limit, on paid plans)
 - Sonnet weekly usage (per-model weekly sub-limit, on paid plans)
 - Claude Design usage (most trackers ignore this)
-- Show or hide each optional card from the View menu (with Select all / Deselect all)
+- Show or hide each optional card from the Display options menu (Metrics section, with Select all / Deselect all)
+- Six color themes — Clay (default), Slate, Violet, Midnight, Paper, Cool light — switchable in the popup
 - Your Claude plan shown as a badge in the header (Max, Pro, Team, etc.)
 - Daily included routine runs as a used / limit count (on plans that include Claude Code routines)
 - Paid extra credits used vs. monthly cap (when enabled on your plan)
@@ -85,7 +86,7 @@ Minimum: 1 screenshot at **1280×800px** or **640×400px**
 1. **Popup — healthy usage** (green badge, ~20% session, ~30% weekly, ~10% design, with reset countdowns showing)
 2. **Popup — high usage** (red badge, ~90% session, showing "Resets in 2h 15m")
 3. **Popup — full breakdown** showing every card: session, weekly, and the per-model weekly sub-limits (Opus, Sonnet, Claude Design), with the plan badge (e.g. *Max 5x*) in the header
-4. **Popup — View menu** open, showing the optional cards being toggled (Select all / Deselect all)
+4. **Popup — Display options menu** open, showing the Metrics cards toggled and the Theme swatches
 5. **Toolbar badge** — zoomed view showing the % badge on the Chrome toolbar
 
 ### How to take them:
@@ -99,7 +100,7 @@ Minimum: 1 screenshot at **1280×800px** or **640×400px**
 ## Store checklist before submitting
 
 - [ ] Bump `version` in `claudetrack/manifest.json`
-- [ ] Test the unpacked extension in Chrome (badge updates, popup shows session/weekly/sub-caps + plan badge, View menu toggles, refresh works)
+- [ ] Test the unpacked extension in Chrome (badge updates, popup shows session/weekly/sub-caps + plan badge, Display options menu (Metrics + Theme) works, refresh works)
 - [ ] Build the ZIP from inside `claudetrack/` (files at root, not nested)
 - [ ] Privacy policy URL is live and accurate
 - [ ] At least 1 screenshot (1280×800)
@@ -113,6 +114,6 @@ Run from the repo root:
 ./Generate_zip_extensions_chrome.ps1
 ```
 
-Produces `claude-usage-monitor-chrome-v<version>.zip` at the repo root. Reads the version from `claudetrack/manifest.json` by default, or pass `-Version 1.4.9` to override.
+Produces `claude-usage-monitor-chrome-v<version>.zip` at the repo root. Reads the version from `claudetrack/manifest.json` by default, or pass `-Version 1.6.0` to override.
 
 The ZIP must contain the files at the root, not inside a `claudetrack/` folder.

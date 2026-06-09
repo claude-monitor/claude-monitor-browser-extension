@@ -1,6 +1,10 @@
 # Local Claude Code settings
 .claude/settings.local.json
 
+# impeccable design skill (dev tooling, not part of the extension)
+.claude/skills/
+.agents/
+
 # OS files
 .DS_Store
 Thumbs.db

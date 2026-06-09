@@ -74,6 +74,9 @@ const viewWrap       = $('viewWrap');
 const viewBtn        = $('viewBtn');
 const viewMenu       = $('viewMenu');
 const viewAllBtn     = $('viewAllBtn');
+const cardsSection   = $('cardsSection');
+const themeDivider   = $('themeDivider');
+const themeSwatches  = $('themeSwatches');
 const sonnetMenuItem = $('sonnetMenuItem');
 const opusMenuItem   = $('opusMenuItem');
 const designMenuItem = $('designMenuItem');
@@ -119,6 +122,26 @@ function applyColor(pctEl, barEl, pct) {
     pctEl.classList.toggle(c, c === cls);
     barEl.classList.toggle(c, c === cls);
   });
+}
+
+// ── Theme ───────────────────────────────────────────────────────────────────
+
+const THEMES = ['clay', 'slate', 'violet', 'midnight', 'paper', 'cool'];
+
+function applyTheme(theme) {
+  const t = THEMES.includes(theme) ? theme : 'clay';
+  document.documentElement.setAttribute('data-theme', t);
+  themeSwatches?.querySelectorAll('.theme-swatch').forEach(sw => {
+    const on = sw.dataset.theme === t;
+    sw.classList.toggle('active', on);
+    sw.setAttribute('aria-pressed', on ? 'true' : 'false');
+  });
+}
+
+function setTheme(theme) {
+  const t = THEMES.includes(theme) ? theme : 'clay';
+  applyTheme(t);
+  chrome.storage.local.set({ theme: t });
 }
 
 // ── Time formatting ───────────────────────────────────────────────────────
@@ -178,8 +201,6 @@ function formatTimestamp(epochMs) {
 // ── Render ────────────────────────────────────────────────────────────────
 
 function render(data) {
-  if (viewWrap) viewWrap.style.display = 'none';
-
   if (!data) {
     mainEl.style.display   = 'none';
     noDataEl.style.display = 'block';
@@ -300,6 +321,8 @@ function renderSubCard(key, bucket, cardEl, pctEl, barEl, resetEl, weeklyResetTi
   resetEl.textContent = reset
     ? (date ? `${reset} (${date})` : reset)
     : (bucket?.label || 'Reset day unknown');
+  // Compact sub-caps hide the reset row; expose it on hover instead.
+  cardEl.title = resetEl.textContent;
 }
 
 // ── Routine-runs card ───────────────────────────────────────────────────────
@@ -329,6 +352,7 @@ function renderRoutineCard(routine) {
   routineBar.style.width = `${pct}%`;
   applyColor(routinePct, routineBar, pct);
   routineReset.textContent = 'Resets daily';
+  routineCard.title = 'Resets daily';
 }
 
 // ── Optional-cards menu ─────────────────────────────────────────────────────
@@ -342,8 +366,10 @@ function renderViewMenu(data) {
   };
   const routineOff = routineOffered(data?.routine);
   const anyOffered = offered.opus || offered.sonnet || offered.design || routineOff;
-  if (viewWrap) viewWrap.style.display = anyOffered ? 'flex' : 'none';
-  if (!anyOffered) closeViewMenu();
+  // The options menu is always available (it hosts the theme picker); only the
+  // card-toggle section follows the plan's sub-caps.
+  if (cardsSection) cardsSection.style.display = anyOffered ? 'block' : 'none';
+  if (themeDivider) themeDivider.style.display = anyOffered ? 'block' : 'none';
 
   updateMenuItem('opus',   offered.opus,   data?.opus?.percentage,   opusMenuItem,   opusMenuPct);
   updateMenuItem('sonnet', offered.sonnet, data?.sonnet?.percentage, sonnetMenuItem, sonnetMenuPct);
@@ -468,8 +494,9 @@ function loadData() {
   }
 
   chrome.storage.local.get(
-    ['claudeUsage', 'refreshInterval', 'authBackoff', 'cardPrefs', 'claudePlan'],
-    ({ claudeUsage, refreshInterval, authBackoff, cardPrefs: storedPrefs, claudePlan }) => {
+    ['claudeUsage', 'refreshInterval', 'authBackoff', 'cardPrefs', 'claudePlan', 'theme'],
+    ({ claudeUsage, refreshInterval, authBackoff, cardPrefs: storedPrefs, claudePlan, theme }) => {
+      applyTheme(theme);
       if (storedPrefs && typeof storedPrefs === 'object') {
         cardPrefs = { ...storedPrefs };
       }
@@ -527,6 +554,13 @@ viewAllBtn?.addEventListener('click', (e) => {
   toggleAllCards();
 });
 
+themeSwatches?.addEventListener('click', (e) => {
+  const sw = e.target.closest('.theme-swatch');
+  if (!sw) return;
+  e.stopPropagation();
+  setTheme(sw.dataset.theme);
+});
+
 document.addEventListener('click', (e) => {
   if (viewMenu && !viewMenu.hidden && viewWrap && !viewWrap.contains(e.target)) {
     closeViewMenu();
@@ -559,6 +593,9 @@ chrome.storage.onChanged.addListener((changes) => {
   if (changes.claudePlan) {
     applyPlan(changes.claudePlan.newValue);
     if (lastData) render(lastData);
+  }
+  if (changes.theme) {
+    applyTheme(changes.theme.newValue);
   }
 });
 
