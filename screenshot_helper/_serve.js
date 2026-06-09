@@ -11,7 +11,7 @@ const base = path.join(__dirname, '..', 'claudetrack');
 const stub = `<script>
 window.chrome = {
   runtime: {
-    getManifest: () => ({ version: '1.6.1' }),
+    getManifest: () => ({ version: '1.6.2' }),
     sendMessage: (m, cb) => { if (cb) cb({ ok: true }); },
     onMessage: { addListener() {} },
   },

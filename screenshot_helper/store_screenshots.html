@@ -141,7 +141,7 @@ function popup(theme,state,withMenu){
     ?{s:92,w:76,o:58,so:22,d:9,r:[12,80],rt:'Resets in 1h 02m (12:00 PM)'}
     :{s:22,w:41,o:8,so:15,d:3,r:[2,13],rt:'Resets in 3h 41m (12:00 PM)'};
   return `<div class="popup t-${theme}">
-    <div class="header"><div class="header-left"><div class="logo">${IC.pulse}</div><div class="title-block"><span class="app-name">Claude Usage Monitor</span><span class="meta-row"><span class="app-version">v1.6.1</span><span class="plan-badge">Max 5x</span></span></div></div>
+    <div class="header"><div class="header-left"><div class="logo">${IC.pulse}</div><div class="title-block"><span class="app-name">Claude Usage Monitor</span><span class="meta-row"><span class="app-version">v1.6.2</span><span class="plan-badge">Max 5x</span></span></div></div>
       <div class="header-actions"><div class="pill">60m</div><div class="view-wrap"><div class="icon-btn">${IC.sliders}</div>${withMenu?menu():''}</div><div class="icon-btn">${IC.refresh}</div></div></div>
     <div class="cards">
       ${full(IC.clock,'Current Session',S.s,S.rt)}
