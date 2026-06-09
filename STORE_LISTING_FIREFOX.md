@@ -36,13 +36,13 @@ https://www.claude-monitor.com/privacy
 
 ## Long description
 
-Track your Claude.ai usage in real time. See session and weekly limits, reset times, and color-coded progress — in your toolbar.
-
 The only Claude usage tracker that monitors Claude Design and Opus weekly limits alongside your 5-hour session and 7-day weekly limits — plus paid extra credits — all in your browser toolbar.
 
 Stop opening claude.ai/settings/usage. A color-coded badge tells you at a glance whether you can keep working or need to pace yourself, with countdowns to every reset.
 
 No account, no API key, no data leaves your browser. Reads your existing Claude session the same way the official settings page does.
+
+Pick from six color themes, from the default warm dark to a clean light mode, switchable right in the popup.
 
 WHAT YOU SEE
 - Session usage (5-hour rolling window) with reset countdown
