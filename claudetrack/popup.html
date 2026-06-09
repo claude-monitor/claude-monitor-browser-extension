@@ -34,8 +34,8 @@
         <option value="10">10m</option>
         <option value="60">60m</option>
       </select>
-      <div class="view-wrap" id="viewWrap" style="display:none">
-        <button class="view-btn" id="viewBtn" title="Show or hide cards" aria-haspopup="true" aria-expanded="false">
+      <div class="view-wrap" id="viewWrap">
+        <button class="view-btn" id="viewBtn" title="Display options" aria-haspopup="true" aria-expanded="false">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/>
             <line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/>
@@ -44,8 +44,9 @@
           </svg>
         </button>
         <div class="view-menu" id="viewMenu" hidden>
+          <div class="view-menu-section" id="cardsSection" style="display:none">
           <div class="view-menu-head">
-            <span class="view-menu-title">View</span>
+            <span class="view-menu-title">Metrics</span>
             <button class="view-menu-all" id="viewAllBtn" type="button">Select all</button>
           </div>
           <button class="view-menu-item" data-card="opus" id="opusMenuItem">
@@ -80,6 +81,19 @@
             </span>
             <span class="view-menu-pct" id="routineMenuCount">—</span>
           </button>
+          </div><!-- /cardsSection -->
+          <div class="view-menu-divider" id="themeDivider" style="display:none"></div>
+          <div class="view-menu-section">
+            <div class="view-menu-head"><span class="view-menu-title">Theme</span></div>
+            <div class="theme-swatches" id="themeSwatches">
+              <button class="theme-swatch" data-theme="clay" title="Clay" aria-label="Clay theme" aria-pressed="false"></button>
+              <button class="theme-swatch" data-theme="slate" title="Slate" aria-label="Slate theme" aria-pressed="false"></button>
+              <button class="theme-swatch" data-theme="violet" title="Violet" aria-label="Violet theme" aria-pressed="false"></button>
+              <button class="theme-swatch" data-theme="midnight" title="Midnight" aria-label="Midnight theme" aria-pressed="false"></button>
+              <button class="theme-swatch" data-theme="paper" title="Paper" aria-label="Paper theme" aria-pressed="false"></button>
+              <button class="theme-swatch" data-theme="cool" title="Cool light" aria-label="Cool light theme" aria-pressed="false"></button>
+            </div>
+          </div>
         </div>
       </div>
       <button class="refresh-btn" id="refreshBtn" title="Refresh usage data">
@@ -174,7 +188,7 @@
       </div>
 
       <!-- Opus weekly card (hidden when not in plan) -->
-      <div class="card" id="opusCard" style="display:none">
+      <div class="card compact" id="opusCard" style="display:none">
         <div class="card-header">
           <div class="card-title-row">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
@@ -197,7 +211,7 @@
       </div>
 
       <!-- Sonnet weekly card (hidden when not in plan) -->
-      <div class="card" id="sonnetCard" style="display:none">
+      <div class="card compact" id="sonnetCard" style="display:none">
         <div class="card-header">
           <div class="card-title-row">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
@@ -218,7 +232,7 @@
       </div>
 
       <!-- Claude Design card -->
-      <div class="card" id="designCard" style="display:none">
+      <div class="card compact" id="designCard" style="display:none">
         <div class="card-header">
           <div class="card-title-row">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
@@ -240,7 +254,7 @@
       </div>
 
       <!-- Daily routine runs (count-based; shown only when the plan exposes it) -->
-      <div class="card" id="routineCard" style="display:none">
+      <div class="card compact" id="routineCard" style="display:none">
         <div class="card-header">
           <div class="card-title-row">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
@@ -294,7 +308,7 @@
   <div id="noData">
     <div class="no-data">
       <svg width="38" height="38" viewBox="0 0 24 24" fill="none"
-           stroke="#5a5a70" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+           stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
         <polyline points="2,12 5,12 7.5,6 10,18 12.5,9 15,12 18,12"/>
       </svg>
       <p>No usage data yet.<br/>Click below to load your stats.</p>

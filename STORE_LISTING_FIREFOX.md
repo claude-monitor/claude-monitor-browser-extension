@@ -50,7 +50,8 @@ WHAT YOU SEE
 - Opus weekly usage (per-model weekly sub-limit, on paid plans)
 - Sonnet weekly usage (per-model weekly sub-limit, on paid plans)
 - Claude Design usage (most trackers ignore this)
-- Show or hide each optional card from the View menu (with Select all / Deselect all)
+- Show or hide each optional card from the Display options menu (Metrics section, with Select all / Deselect all)
+- Six color themes — Clay (default), Slate, Violet, Midnight, Paper, Cool light — switchable in the popup
 - Your Claude plan shown as a badge in the header (Max, Pro, Team, etc.)
 - Daily included routine runs as a used / limit count (on plans that include Claude Code routines)
 - Paid extra credits used vs. monthly cap (when enabled on your plan)
