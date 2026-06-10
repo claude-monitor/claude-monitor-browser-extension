@@ -21,7 +21,7 @@ https://www.claude-monitor.com/privacy
 
 ## Long description
 
-The only Claude usage tracker that shows Claude Design and per-model weekly limits (Opus, Sonnet) alongside your 5-hour session and 7-day weekly limits — all in your browser toolbar.
+The only Claude usage tracker that monitors Claude Design and Opus weekly limits alongside your 5-hour session and 7-day weekly limits — plus paid extra credits — all in your browser toolbar.
 
 Stop opening claude.ai/settings/usage. A color-coded badge tells you at a glance whether you can keep working or need to pace yourself, with countdowns to every reset.
 
