@@ -4,13 +4,10 @@
   Renders the real popup (mirrors claudetrack/popup.css) composed on a 1280x800
   stage. Parametrized by ?shot=hero|high|menu|themes.
 
-  Regenerate the store PNGs (headless Chrome, transparent not needed here):
-    1. Copy this file to a path WITHOUT spaces (e.g. %TEMP%) so the file:// URL works.
-    2. For each shot, run:
-       chrome --headless --disable-gpu --hide-scrollbars --force-device-scale-factor=1 \
-         --window-size=1280,800 --user-data-dir=%TEMP%\cap_<shot> \
-         --screenshot=%TEMP%\<shot>.png "file:///<temp>/store_screenshots.html?shot=<shot>"
-    3. Move the PNGs into screenshot_helper/store-v1.6.0/.
+  Regenerate the store PNGs by running, from the repo root:
+      powershell -ExecutionPolicy Bypass -File Generate_screenshots.ps1
+  That renders every shot via headless Chrome and writes the canonical set to
+  screenshots/ (01-overview, 02-themes, 03-display-options, 04-high-usage).
   Keep the inlined CSS in sync with claudetrack/popup.css (tokens, compact cards, footer).
 -->
 <html lang="en"><head><meta charset="utf-8"><title>stage</title>
@@ -58,6 +55,7 @@
   .card-pct.green{color:var(--green)}.card-pct.yellow{color:var(--yellow)}.card-pct.red{color:var(--red)}
   .card-pct.count{font-size:16px}
   .card-subtitle{color:var(--text-dim);font-size:10.5px;margin-top:-5px;margin-bottom:7px;letter-spacing:.01em}
+  .card-note{color:var(--text-dim);font-size:10px;font-style:italic;margin-top:-6px;margin-bottom:7px}
   .progress-track{height:6px;background:var(--bg-3);border-radius:99px;overflow:hidden;margin-bottom:9px}
   .progress-fill{height:100%;border-radius:99px;background:var(--green)}
   .progress-fill.yellow{background:var(--yellow)}.progress-fill.red{background:var(--red)}
@@ -127,7 +125,7 @@ const IC={
   check:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>'
 };
 const cls=p=>p<50?'green':p<80?'yellow':'red';
-function full(icon,title,pct,reset,sub){return `<div class="card"><div class="card-header"><div class="card-title-row">${icon}<span class="card-title">${title}</span></div><span class="card-pct ${cls(pct)}">${pct}%</span></div>${sub?`<div class="card-subtitle">${sub}</div>`:''}<div class="progress-track"><div class="progress-fill ${cls(pct)}" style="width:${pct}%"></div></div><div class="reset-row">${reset}</div></div>`;}
+function full(icon,title,pct,reset,sub,note){return `<div class="card"><div class="card-header"><div class="card-title-row">${icon}<span class="card-title">${title}</span></div><span class="card-pct ${cls(pct)}">${pct}%</span></div>${sub?`<div class="card-subtitle">${sub}</div>`:''}${note?`<div class="card-note">${note}</div>`:''}<div class="progress-track"><div class="progress-fill ${cls(pct)}" style="width:${pct}%"></div></div><div class="reset-row">${reset}</div></div>`;}
 function comp(icon,title,pct,countTxt){const c=countTxt?cls(Math.round(pct)):cls(pct);return `<div class="card compact"><div class="card-header"><div class="card-title-row">${icon}<span class="card-title">${title}</span></div><span class="card-pct ${countTxt?'count ':''}${c}">${countTxt||pct+'%'}</span></div><div class="progress-track"><div class="progress-fill ${c}" style="width:${pct}%"></div></div></div>`;}
 function menu(){return `<div class="view-menu"><div class="vm-head"><span class="vm-title">METRICS</span><span class="vm-all">Select all</span></div>
   <div class="vm-item on"><span class="vm-check">${IC.check}</span><span class="vm-label">${IC.layers}Opus weekly</span><span class="vm-pct">8%</span></div>
@@ -141,11 +139,11 @@ function popup(theme,state,withMenu){
     ?{s:92,w:76,o:58,so:22,d:9,r:[12,80],rt:'Resets in 1h 02m (12:00 PM)'}
     :{s:22,w:41,o:8,so:15,d:3,r:[2,13],rt:'Resets in 3h 41m (12:00 PM)'};
   return `<div class="popup t-${theme}">
-    <div class="header"><div class="header-left"><div class="logo">${IC.pulse}</div><div class="title-block"><span class="app-name">Claude Usage Monitor</span><span class="meta-row"><span class="app-version">v1.6.4</span><span class="plan-badge">Max 5x</span></span></div></div>
+    <div class="header"><div class="header-left"><div class="logo">${IC.pulse}</div><div class="title-block"><span class="app-name">Claude Usage Monitor</span><span class="meta-row"><span class="app-version">v1.6.5</span><span class="plan-badge">Max 5x</span></span></div></div>
       <div class="header-actions"><div class="pill">60m</div><div class="view-wrap"><div class="icon-btn">${IC.sliders}</div>${withMenu?menu():''}</div><div class="icon-btn">${IC.refresh}</div></div></div>
     <div class="cards">
       ${full(IC.clock,'Current Session',S.s,S.rt)}
-      ${full(IC.cal,'Weekly · all models',S.w,'Resets in 6d 1h (Mon 15 June 12:00 PM)','Includes Opus, Sonnet &amp; Haiku')}
+      ${full(IC.cal,'Weekly · all models',S.w,'Resets in 6d 1h (Mon 15 June 12:00 PM)','Includes Fable, Opus, Sonnet &amp; Haiku','Fable draws down 2&times; faster than Opus')}
       ${comp(IC.layers,'Opus weekly',S.o)}
       ${comp(IC.zap,'Sonnet weekly',S.so)}
       ${comp(IC.pen,'Claude Design',S.d)}
