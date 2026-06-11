@@ -461,6 +461,14 @@ body {
   letter-spacing: 0.01em;
 }
 
+.card-note {
+  color: var(--text-dim);
+  font-size: 10px;
+  font-style: italic;
+  margin-top: -6px;
+  margin-bottom: 7px;
+}
+
 /* ── Compact secondary cards (weekly sub-caps + routine runs) ─────────────────
    Session + Weekly stay full-size (primary); these collapse to a dense row:
    icon + name + value + a thin bar, no redundant reset (sub-caps reset with the
