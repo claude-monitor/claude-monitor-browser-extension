@@ -11,3 +11,6 @@ Thumbs.db
 
 # Build output
 *.zip
+
+# impeccable critique snapshots (internal design notes)
+.impeccable/

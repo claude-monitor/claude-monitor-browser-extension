@@ -72,11 +72,11 @@ Accents avoid the green/red/amber hue ranges so they never read as usage state. 
 ## Components
 
 - **Card**: `--bg-1` surface, 1px `--border`, 12px radius, 13×14 padding. No hover state (cards are not interactive). One card per usage bucket.
-- **Compact card** (`.card.compact`): the weekly sub-caps (Opus / Sonnet / Design) and routine runs collapse to a dense ~40px row (smaller value, 4px bar, reset row hidden) so the full set fits the popup under Chrome's ~600px height cap without scrolling. Session and Weekly stay full-size as the primary metrics; the sub-caps' reset is redundant with Weekly (they share the weekly window) and routine's title already says "Daily".
+- **Compact card** (`.card.compact`): the weekly sub-caps (Opus / Sonnet / Design) and routine runs collapse to a dense ~40px row (smaller value, 4px bar, reset row hidden) so the full set fits the popup under Chrome's ~600px height cap without scrolling. Session and Weekly stay full-size as the primary metrics; the sub-caps' reset is redundant with Weekly (they share the weekly window) and routine's title already says "Daily". One shared `.subcap-note` line ("Per-model caps reset with the weekly window") renders under the sub-cap group whenever at least one is visible, so the shared window is stated rather than recalled.
 - **Progress bar**: 6px `--bg-3` track, pill radius, semantic fill, `width` transition 0.35s. (Animating `width` is the idiomatic exception to the no-layout-animation rule: the fill is the only child of an `overflow:hidden` track, so no sibling reflow, and it animates only on refresh. `scaleX` was rejected because it distorts the rounded cap.)
 - **Controls** (select / refresh / view buttons): `--bg-2` + `--border-lt`; hover `--bg-3` + clay border + `--text-pri`.
 - **Options menu** (the header's Display options popover): `--bg-2`; the selected item's checkbox is filled clay; "no usage" items dim to `--text-sec` / `--text-dim`.
-- **Badges & tinted banners** (plan badge, extra credits, pro teaser): flat clay tint `rgba(217,119,87,0.08–0.16)` plus a matching border. No gradients.
+- **Badges & tinted banners** (plan badge, extra credits): flat clay tint `rgba(217,119,87,0.08–0.16)` plus a matching border. No gradients. (The "coming soon" pro teaser was removed at v1.6.7: clay is action/selection only, and the popup ends on data, not promotion.)
 - **Stale / auth banner**: amber tint (a warning), not clay.
 - **Primary button** (empty state): clay fill + `--accent-ink` text.
 - **Focus**: `:focus-visible` 2px `--accent-bright` outline on every interactive control.

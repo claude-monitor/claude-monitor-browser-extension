@@ -12,6 +12,12 @@
       "runtimeExecutable": "node",
       "runtimeArgs": ["-e", "require('http').createServer((q,r)=>{r.writeHead(200,{'Content-Type':'text/html; charset=utf-8'});r.end(require('fs').readFileSync('screenshot_helper/theme_preview.html'))}).listen(4180,()=>console.log('themes 4180'))"],
       "port": 4180
+    },
+    {
+      "name": "landing",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["-m", "http.server", "8765", "--directory", "../claude-usage-monitor-landing"],
+      "port": 8765
     }
   ]
 }
