@@ -52,6 +52,13 @@ OPEN SOURCE
 - Full source code published on GitHub (MIT license): https://github.com/msadofschi/claudetrack
 - Verify exactly what the extension does — every line that runs in your browser is in the public repo, unminified.
 
+SECURITY
+- Minimal permissions: storage + alarms only — no access to your cookies, tabs, or other sites
+- Read-only: every request is a GET, so it can never change your account or spend your quota
+- No content scripts: it never runs inside a page, so your chats, projects and files stay untouchable
+- No remote code, no injection surface, and unreachable from any website
+- Open source and unminified — every line that runs in your browser is on GitHub
+
 PRIVACY
 - All data stored locally on your device
 - No analytics, no telemetry, no third parties
