@@ -145,6 +145,17 @@ The script:
 
 ---
 
+## Screenshots (`screenshots/`)
+
+| File | Caption for store submission |
+|------|------------------------------|
+| `01-overview.png` | Session, weekly (Fable · Opus · Sonnet · Haiku), per-model sub-caps, Claude Design, and daily routine runs — all with reset countdowns. No more opening Settings. |
+| `02-themes.png` | Six built-in themes: Clay, Slate, Violet, Midnight, Paper, and Cool light. Switch anytime from the popup. |
+| `03-display-options.png` | Show or hide any card from the Display options menu. Per-model sub-caps, Claude Design, and daily routine runs are all optional. |
+| `04-high-usage.png` | Color-coded the moment you're close — red badge and live countdowns so you can pace yourself before hitting a limit. |
+
+---
+
 ## Version notes template
 
 ```

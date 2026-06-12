@@ -83,14 +83,16 @@ Full privacy policy: https://claude-monitor.com/privacy
 
 Minimum: 1 screenshot at **1280×800px** or **640×400px**
 
-### Suggested shots:
-1. **Popup — healthy usage** (green badge, ~20% session, ~30% weekly, ~10% design, with reset countdowns showing)
-2. **Popup — high usage** (red badge, ~90% session, showing "Resets in 2h 15m")
-3. **Popup — full breakdown** showing every card: session, weekly, and the per-model weekly sub-limits (Opus, Sonnet, Claude Design), with the plan badge (e.g. *Max 5x*) in the header
-4. **Popup — Display options menu** open, showing the Metrics cards toggled and the Theme swatches
-5. **Toolbar badge** — zoomed view showing the % badge on the Chrome toolbar
+### Current screenshots (`screenshots/`)
 
-### How to take them:
+| File | Caption for store submission |
+|------|------------------------------|
+| `01-overview.png` | Session, weekly (Fable · Opus · Sonnet · Haiku), per-model sub-caps, Claude Design, and daily routine runs — all with reset countdowns. No more opening Settings. |
+| `02-themes.png` | Six built-in themes: Clay, Slate, Violet, Midnight, Paper, and Cool light. Switch anytime from the popup. |
+| `03-display-options.png` | Show or hide any card from the Display options menu. Per-model sub-caps, Claude Design, and daily routine runs are all optional. |
+| `04-high-usage.png` | Color-coded the moment you're close — red badge and live countdowns so you can pace yourself before hitting a limit. |
+
+### How to retake if needed:
 1. Load the extension unpacked in Chrome (chrome://extensions → Load unpacked → select the `claudetrack/` folder)
 2. Open `https://claude.ai` so the extension can fetch your real data
 3. Click the extension icon to open the popup
