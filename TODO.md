@@ -74,13 +74,17 @@ sub-caps).
   strategy in `PRODUCT.md`, spec in `DESIGN.md`). Store screenshots and the
   landing page still need re-doing to match the new look.
 
-## Landing page — pending (separate repo)
+## Landing page — ✅ done 2026-06-12 (synced to v1.6.6, separate repo)
 
 Repo: <https://github.com/msadofschi/claude-usage-monitor-landing> (Cloudflare).
 
-- [ ] Propagate the **Models → View** menu rename.
-- [ ] Add the **Daily routine runs** card to the feature copy + screenshots.
-- [ ] Restyle alongside the extension (see "Polish UI with the Impeccable design skill" below).
+- [x] Propagate the **Models → View** menu rename (shipped with the v1.6 redesign).
+- [x] Add the **Daily routine runs** card to the feature copy + screenshots.
+- [x] Restyle alongside the extension (v1.6 warm-dark clay redesign).
+- [x] 2026-06-12: hero mock + screenshot resynced to v1.6.6 (Fable note), Fable
+  copy added, privacy policy updated to list all three endpoints + stored data,
+  FAQ section with FAQPage schema, dedicated 1200×630 OG image, `uploads/`
+  removed from the deployed site.
 
 ## Update landing page for v1.4.6 + custom domain — ✅ done 2026-06-08 (shipped at v1.4.7)
 
@@ -117,8 +121,8 @@ tightening hierarchy, contrast and spacing.
   Paper, Cool light. Swatch row in the always-visible options menu, persisted in
   `chrome.storage.local`. All AA-verified; light themes use a deeper semantic set.
   Spec in `DESIGN.md`; mockup of all six in `screenshot_helper/theme_preview.html`.
-- [ ] Re-shoot the store screenshots (`screenshot_helper/`, `screenshots/`) for
-  the new look so the listing matches.
-- [ ] Restyle the landing page to match (separate repo; reuse `DESIGN.md` tokens).
+- [x] Re-shoot the store screenshots (`screenshot_helper/`, `screenshots/`) for
+  the new look so the listing matches (regenerated at v1.6.5, again at v1.6.6).
+- [x] Restyle the landing page to match (separate repo; reuse `DESIGN.md` tokens).
 - [ ] Optional: wire the anti-pattern detector (`npx impeccable detect` or
   `.claude/skills/impeccable/scripts/detect.mjs`) into a PR check.

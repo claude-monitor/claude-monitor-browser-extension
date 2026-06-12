@@ -15,13 +15,13 @@ Productivity
 English
 
 ## Privacy policy URL
-https://www.claude-monitor.com/privacy
+https://claude-monitor.com/privacy
 
 ---
 
 ## Long description
 
-The only Claude usage tracker that monitors Claude Design and Opus weekly limits alongside your 5-hour session and 7-day weekly limits — plus paid extra credits — all in your browser toolbar.
+The first Claude usage tracker to monitor Claude Design and Opus weekly limits alongside your 5-hour session and 7-day weekly limits — plus paid extra credits — all in your browser toolbar.
 
 Stop opening claude.ai/settings/usage. A color-coded badge tells you at a glance whether you can keep working or need to pace yourself, with countdowns to every reset.
 
@@ -74,8 +74,8 @@ HOW IT WORKS
 
 Claude Usage Monitor is an independent project and is not affiliated with Anthropic.
 Source code: https://github.com/msadofschi/claudetrack
-Learn more: https://www.claude-monitor.com/
-Full privacy policy: https://www.claude-monitor.com/privacy
+Learn more: https://claude-monitor.com/
+Full privacy policy: https://claude-monitor.com/privacy
 
 ---
 

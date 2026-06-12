@@ -8,23 +8,28 @@ const path = require('path');
 
 const base = path.join(__dirname, '..', 'claudetrack');
 
+// Keep the stubbed version in sync with the real manifest automatically.
+const manifestVersion = JSON.parse(
+  fs.readFileSync(path.join(base, 'manifest.json'), 'utf8')
+).version;
+
 const stub = `<script>
 window.chrome = {
   runtime: {
-    getManifest: () => ({ version: '1.6.4' }),
-    sendMessage: (m, cb) => { if (cb) cb({ ok: true }); },
+    getManifest: () => ({ version: '${manifestVersion}' }),
+    sendMessage: (m, cb) => { if (cb) cb({ ok: true, refreshed: true }); },
     onMessage: { addListener() {} },
   },
   storage: {
     local: {
       get: (keys, cb) => cb({
         claudeUsage: {
-          session: { percentage: 58, resetTime: Date.now() + 8.0e6, label: null },
-          weekly:  { percentage: 73, resetTime: Date.now() + 3.6e8, label: null },
-          sonnet:  { percentage: 0,  resetTime: Date.now() + 2.4e8, label: null },
-          opus:    null,
-          design:  null,
-          extra: null, routine: { used: 3, limit: 15 }, lastUpdated: Date.now(), meta: { ready: true },
+          session: { percentage: 34, resetTime: Date.now() + 1.4e7, label: null },
+          weekly:  { percentage: 64, resetTime: Date.now() + 3.8e8, label: null },
+          sonnet:  { percentage: 71, resetTime: Date.now() + 3.8e8, label: null },
+          opus:    { percentage: 28, resetTime: Date.now() + 3.8e8, label: null },
+          design:  { percentage: 12, resetTime: Date.now() + 3.8e8, label: null },
+          extra: null, routine: { used: 2, limit: 15 }, lastUpdated: Date.now(), meta: { ready: true },
         },
         refreshInterval: 5,
         authBackoff: null,
@@ -39,7 +44,8 @@ window.chrome = {
 };
 </script>`;
 
-// After popup.js runs, force the menu open so the screenshot shows it expanded.
+// With ?menu=1, force the menu open after popup.js runs so the screenshot
+// shows it expanded; default is the popup as it opens.
 const opener = `<script>setTimeout(function(){var m=document.getElementById('viewMenu');if(m)m.hidden=false;var b=document.getElementById('viewBtn');if(b)b.classList.add('active');},80);</script>`;
 
 const TYPES = { css: 'text/css', js: 'text/javascript', svg: 'image/svg+xml', html: 'text/html' };
@@ -49,13 +55,16 @@ http.createServer((q, r) => {
   try {
     if (f === '/popup.html') {
       let body = fs.readFileSync(path.join(base, f), 'utf8');
-      body = body.replace('</head>', stub + '</head>').replace('</body>', opener + '</body>');
+      const withMenu = /[?&]menu=1/.test(q.url);
+      body = body.replace('</head>', stub + '</head>')
+                 .replace('</body>', (withMenu ? opener : '') + '</body>');
       r.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
       r.end(body);
     } else {
       const ext = f.split('.').pop();
+      const data = fs.readFileSync(path.join(base, f)); // read before writeHead so a miss 404s cleanly
       r.writeHead(200, { 'Content-Type': (TYPES[ext] || 'application/octet-stream') + '; charset=utf-8' });
-      r.end(fs.readFileSync(path.join(base, f)));
+      r.end(data);
     }
   } catch (e) {
     r.writeHead(404);
