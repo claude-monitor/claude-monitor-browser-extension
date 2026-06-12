@@ -134,7 +134,9 @@ Pull requests are welcome. For non-trivial changes, please open an issue first t
 
 ## Security
 
-If you find a security issue, please email <martin.sadofschi@gmail.com> instead of opening a public issue.
+The full security model, threat model, and vulnerability-reporting process are documented in **[SECURITY.md](SECURITY.md)**.
+
+To report a vulnerability, email <martin.sadofschi@gmail.com> instead of opening a public issue.
 
 ## License
 
