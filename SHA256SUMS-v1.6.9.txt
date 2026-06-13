@@ -1,0 +1,2 @@
+51a1aa754942886b68a6457aa4bb229381537841ae8c8a7f0f873cf9dffac64b  claude-usage-monitor-chrome-v1.6.9.zip
+e97173bb562c776d1542d25f121b3cfbf2a2f9c696442883fa13b40b3a1a1158  claude-usage-monitor-firefox-v1.6.9.zip
