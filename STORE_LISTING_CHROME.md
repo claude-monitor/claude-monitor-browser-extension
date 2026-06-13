@@ -40,7 +40,7 @@ WHAT YOU SEE
 - Six color themes — Clay (default), Slate, Violet, Midnight, Paper, Cool light — switchable in the popup
 - Your Claude plan shown as a badge in the header (Max, Pro, Team, etc.)
 - Daily included routine runs as a used / limit count (on plans that include Claude Code routines)
-- Paid extra credits used vs. monthly cap (when enabled on your plan)
+- Paid extra credits — spend vs. monthly cap with a usage %, your remaining prepaid balance, and the monthly reset date (when enabled on your plan)
 - Inline banner when your claude.ai session expires — last-known data stays visible
 - Toolbar badge: green under 50%, yellow 50 to 80%, red above 80%
 - Configurable auto-refresh: 1, 2, 5, 10, or 60 minutes
@@ -63,7 +63,7 @@ PRIVACY
 - All data stored locally on your device
 - No analytics, no telemetry, no third parties
 - Cannot read your chats, projects, files, or any other Claude.ai content
-- Permissions are scoped to the absolute minimum: three specific API endpoints (organization list, usage stats, and routine-run budget)
+- Permissions are scoped to the absolute minimum: four specific API endpoints (organization list, usage stats, prepaid credit balance, and routine-run budget)
 - Specifically excluded: chat_conversations, projects, members, and every other endpoint
 
 PERMISSIONS USED AND WHY
@@ -71,6 +71,7 @@ PERMISSIONS USED AND WHY
 - *Alarms* — schedule automatic refreshes at the configured interval
 - *https://claude.ai/api/organizations* — list your organizations to identify the active one
 - *https://claude.ai/api/organizations/\*/usage* — read usage stats only
+- *https://claude.ai/api/organizations/\*/prepaid/credits* — read your prepaid usage-credit balance only
 - *https://claude.ai/v1/code/routines/run-budget* — read your daily routine-run count only
 
 HOW IT WORKS
@@ -94,7 +95,7 @@ Minimum: 1 screenshot at **1280×800px** or **640×400px**
 
 | File | Caption for store submission |
 |------|------------------------------|
-| `01-overview.png` | Session, weekly (Fable · Opus · Sonnet · Haiku), per-model sub-caps, Claude Design, and daily routine runs — all with reset countdowns. No more opening Settings. |
+| `01-overview.png` | Session, weekly (Fable · Opus · Sonnet · Haiku), per-model sub-caps, Claude Design, daily routine runs, and paid extra credits — all with reset countdowns. No more opening Settings. |
 | `02-themes.png` | Six built-in themes: Clay, Slate, Violet, Midnight, Paper, and Cool light. Switch anytime from the popup. |
 | `03-display-options.png` | Show or hide any card from the Display options menu. Per-model sub-caps, Claude Design, and daily routine runs are all optional. |
 | `04-high-usage.png` | Color-coded the moment you're close — red badge and live countdowns so you can pace yourself before hitting a limit. |
