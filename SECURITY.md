@@ -270,9 +270,9 @@ For contributors using Claude Code:
   the repo.
 - `.claude/settings.local.json` is git-ignored (see [`.gitignore`](.gitignore)).
   It holds local tool-permission preferences, not secrets.
-- The only tracked file under `.claude/` is `launch.json` (preview-server
-  config). No API key (`sk-ant-…` / `ANTHROPIC_API_KEY`) has ever appeared in
-  this repository's git history.
+- No file under `.claude/` is tracked in this repository, and no API key
+  (`sk-ant-…` / `ANTHROPIC_API_KEY`) has ever appeared in this repository's git
+  history.
 
 If you add anything that could hold a secret, git-ignore it before committing,
 and never paste keys into tracked files.
@@ -292,7 +292,7 @@ repo:
    `claudetrack/`.
 3. There is no build step — no transpilation, bundling, or minification — so the
    files should match byte-for-byte aside from the Firefox manifest swap
-   documented in the store-listing notes.
+   (`manifest.firefox.json` shipped as `manifest.json`).
 
 ---
 

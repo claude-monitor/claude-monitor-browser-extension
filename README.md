@@ -64,44 +64,15 @@ The extension files are here:
 
 ### Firefox
 
-Firefox uses a separate manifest (`manifest.firefox.json`). The easiest path is to build the Firefox ZIP and load it temporarily:
+Firefox uses a separate manifest (`manifest.firefox.json`). To load it temporarily:
 
-1. From the repo root, run:
-   ```powershell
-   ./Generate_zip_extensions_firefox.ps1
-   ```
-   This produces `claude-usage-monitor-firefox-v<version>.zip`.
+1. In a copy of the `claudetrack/` folder, replace `manifest.json` with the contents of `manifest.firefox.json` (Firefox reads `manifest.json`).
 2. Open `about:debugging#/runtime/this-firefox`.
 3. Click **Load Temporary Add-on...**.
-4. Select the generated ZIP (or any file inside the unpacked ZIP).
+4. Select the `manifest.json` inside that copied folder.
 5. The add-on stays loaded until you restart Firefox.
 
 For a permanent install, use the published add-on at <https://addons.mozilla.org/firefox/addon/claude-usage-meter/>.
-
-## Build release ZIPs
-
-Three PowerShell scripts in the repo root package the extension for the stores. Each reads the version from `claudetrack/manifest.json` by default, or accepts an explicit `-Version` argument.
-
-| Script | Output | Notes |
-| --- | --- | --- |
-| `Generate_zip_extensions_chrome.ps1` | `claude-usage-monitor-chrome-v<version>.zip` | Strips `manifest.firefox.json` before zipping. |
-| `Generate_zip_extensions_firefox.ps1` | `claude-usage-monitor-firefox-v<version>.zip` | Swaps `manifest.firefox.json` in as `manifest.json` before zipping. |
-| `Generate_zip_extensions_all_platforms.ps1` | Both ZIPs above | Calls the two scripts above in sequence. |
-
-Examples (run from the repo root):
-
-```powershell
-# Both ZIPs for the version in manifest.json
-./Generate_zip_extensions_all_platforms.ps1
-
-# Chrome only
-./Generate_zip_extensions_chrome.ps1
-
-# Firefox only, with an explicit version override
-./Generate_zip_extensions_firefox.ps1 -Version 1.7.0
-```
-
-Each ZIP lands in the repo root and overwrites any existing file with the same name.
 
 ## Notes for local testing
 
@@ -123,7 +94,7 @@ Each ZIP lands in the repo root and overwrites any existing file with the same n
 - All data is stored locally on your device via `chrome.storage.local`.
 - No analytics, no telemetry, no third parties.
 - The extension cannot read your chats, projects, files, or any other Claude.ai content.
-- Host permissions are scoped to three specific Claude.ai API endpoints. See the [Chrome](STORE_LISTING_CHROME.md) and [Firefox](STORE_LISTING_FIREFOX.md) listings for the full permission breakdown.
+- Host permissions are scoped to specific Claude.ai API endpoints. See [SECURITY.md](SECURITY.md) for the full permission breakdown.
 - Full privacy policy: <https://claude-monitor.com/privacy>
 
 ## Contributing
