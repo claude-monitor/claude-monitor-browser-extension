@@ -303,33 +303,36 @@ key:
 
 - **Identity:** `Martin Sadofschi <martin.sadofschi@gmail.com>`
 - **Fingerprint:** `FD4D 1902 4C6B 44CA 0252  25C3 165E 7A7F C8BB 817D`
-- **Public key:** [`signing-key.asc`](signing-key.asc) in this repository (also
-  added to the maintainer's GitHub account).
+- **Public key:** [`signing/signing-key.asc`](signing/signing-key.asc) in this
+  repository (also added to the maintainer's GitHub account).
 
 Import the key once:
 
 ```sh
-gpg --import signing-key.asc
+gpg --import signing/signing-key.asc
 ```
 
 ### Verify a release package
 
 Each release publishes a `SHA256SUMS-v<version>.txt` checksums file and a
-detached signature `SHA256SUMS-v<version>.txt.asc`. To verify:
+detached signature `SHA256SUMS-v<version>.txt.asc`. Both are kept in this repo
+under `signing/` and attached to each GitHub release. To verify from the repo
+root (drop the `signing/` prefix if you downloaded the files into the current
+folder):
 
 ```sh
 # 1. Confirm the checksums file was signed by the key above:
-gpg --verify SHA256SUMS-v1.7.0.txt.asc SHA256SUMS-v1.7.0.txt
+gpg --verify signing/SHA256SUMS-v1.7.0.txt.asc signing/SHA256SUMS-v1.7.0.txt
 
 # 2. Confirm the ZIP matches the signed hash:
-sha256sum -c SHA256SUMS-v1.7.0.txt          # Linux / macOS
+sha256sum -c signing/SHA256SUMS-v1.7.0.txt  # Linux / macOS
 ```
 
 On Windows:
 
 ```powershell
 Get-FileHash -Algorithm SHA256 claude-usage-monitor-chrome-v1.7.0.zip
-# compare the hash against the line in SHA256SUMS-v1.7.0.txt
+# compare the hash against the line in signing/SHA256SUMS-v1.7.0.txt
 ```
 
 A "Good signature" from the fingerprint above plus a matching hash means the
