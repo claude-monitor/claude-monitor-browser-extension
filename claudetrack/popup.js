@@ -173,9 +173,12 @@ function formatTimeUntil(epochMs) {
 
 function formatCredits(amount, currency) {
   const symbol = currency === 'USD' ? '$' : (currency || '');
-  // Whole dollars when amount is integer, two decimals otherwise.
-  const rounded = Number.isInteger(amount) ? amount : Number(amount.toFixed(2));
-  const formatted = rounded.toLocaleString('en-US');
+  // Always two decimals: this is a money value, so $5.50 must not render as
+  // "$5.5" and a $100 cap reads as "$100.00".
+  const formatted = amount.toLocaleString('en-US', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
   return `${symbol}${formatted}`;
 }
 
