@@ -559,6 +559,13 @@ body {
 
 .extra-banner-reset:empty { display: none; }
 
+.extra-banner-track { height: 5px; margin-bottom: 0; }
+
+.extra-banner-pct { font-weight: 600; color: var(--text-pri); }
+.extra-banner-pct.green  { color: var(--green); }
+.extra-banner-pct.yellow { color: var(--yellow); }
+.extra-banner-pct.red    { color: var(--red); }
+
 .extra-banner-label {
   display: flex;
   align-items: center;

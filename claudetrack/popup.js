@@ -88,6 +88,8 @@ const extraBanner   = $('extraBanner');
 const extraUsed     = $('extraUsed');
 const extraCap      = $('extraCap');
 const extraReset    = $('extraReset');
+const extraPct      = $('extraPct');
+const extraBar      = $('extraBar');
 const staleBanner   = $('staleBanner');
 const staleSubtitle = $('staleBannerSubtitle');
 const signInBtn     = $('signInBtn');
@@ -170,6 +172,19 @@ function formatTimeUntil(epochMs) {
   if (d > 0) return `Resets in ${d}d ${h}h`;
   if (h > 0) return `Resets in ${h}h ${m}m`;
   return `Resets in ${m}m`;
+}
+
+// Usage credits reset on the 1st of each calendar month (verified: the API
+// exposes no reset timestamp, and claude.ai resets on the 1st — not the billing
+// date). Derive it locally; the hour is approximate (local midnight).
+function firstOfNextMonth() {
+  const now = new Date();
+  return new Date(now.getFullYear(), now.getMonth() + 1, 1).getTime();
+}
+
+function formatShortDate(epochMs) {
+  const d = new Date(epochMs);
+  return `${d.getDate()} ${d.toLocaleDateString('en-US', { month: 'short' })}`;
 }
 
 function formatCredits(amount, currency) {
@@ -280,13 +295,17 @@ function render(data) {
     extraBanner.style.display = 'flex';
     extraUsed.textContent = formatCredits(extra.usedCredits, extra.currency);
     extraCap.textContent  = formatCredits(extra.monthlyLimit, extra.currency);
-    // Show the precise countdown when the API gives a reset timestamp; otherwise
-    // fall back to the monthly cadence implied by the monthly_limit field.
-    const xReset = formatTimeUntil(extra.resetTime);
-    const xDate  = xReset ? formatResetDate(extra.resetTime) : '';
-    extraReset.textContent = xReset
-      ? (xDate ? `${xReset} (${xDate})` : xReset)
-      : 'Resets monthly';
+
+    const xPct = Math.min(100, Math.max(0, (extra.usedCredits / extra.monthlyLimit) * 100));
+    extraPct.textContent = `${Math.round(xPct)}%`;
+    extraBar.style.width = `${xPct}%`;
+    applyColor(extraPct, extraBar, xPct);
+
+    // The usage API carries no reset timestamp for credits; they reset on the
+    // 1st of each month, so derive the countdown locally.
+    const reset  = firstOfNextMonth();
+    const xReset = formatTimeUntil(reset);
+    extraReset.textContent = xReset ? `${xReset} (${formatShortDate(reset)})` : 'Resets monthly';
   } else {
     extraBanner.style.display = 'none';
   }

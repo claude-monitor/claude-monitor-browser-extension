@@ -273,17 +273,15 @@ function mapExtraUsage(extra) {
   const usedCredits = Number(extra.used_credits) / 100;
   const monthlyLimit = Number(extra.monthly_limit) / 100;
   if (!Number.isFinite(usedCredits) || !Number.isFinite(monthlyLimit)) return null;
+  // Verified live (both enabled and disabled accounts): extra_usage carries no
+  // reset timestamp — fields are is_enabled / monthly_limit / used_credits /
+  // utilization / currency / disabled_reason. The popup derives the reset
+  // locally instead (credits reset on the 1st of each month).
   return {
     isEnabled: Boolean(extra.is_enabled),
     usedCredits,
     monthlyLimit,
     currency: typeof extra.currency === 'string' ? extra.currency : 'USD',
-    // Verified the live extra_usage shape (on a disabled account): the only
-    // fields are is_enabled / monthly_limit / used_credits / utilization /
-    // currency / disabled_reason — there is NO resets_at. We still parse it in
-    // case an *enabled* account exposes one; otherwise it's null and the popup
-    // shows a static "Resets monthly" hint (monthly_limit ⇒ monthly cycle).
-    resetTime: parseApiTime(extra.resets_at),
   };
 }
 
@@ -394,7 +392,6 @@ function sanitizeExtra(extra) {
     usedCredits,
     monthlyLimit,
     currency: typeof extra.currency === 'string' ? extra.currency : 'USD',
-    resetTime: extra.resetTime ?? null,
   };
 }
 
