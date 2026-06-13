@@ -181,6 +181,11 @@ matter more than the extension code itself:
 - Keeping the permission surface **minimal** (the most effective mitigation).
 - Shipping **unminified** code so the published build can be diffed against this
   repository.
+- **Signing git commits and tags** with an OpenPGP key, so the commit history
+  has a verifiable origin (GitHub shows "Verified").
+- **Publishing signed SHA-256 checksums** for each release package, so any copy
+  can be checked against a known-good, signed hash — and traced if a hash
+  surfaces in threat intelligence / IoCs.
 
 ---
 
@@ -228,3 +233,54 @@ repo:
 3. There is no build step — no transpilation, bundling, or minification — so the
    files should match byte-for-byte aside from the Firefox manifest swap
    documented in the store-listing notes.
+
+---
+
+## Verifying Release Signatures and Commits
+
+Release checksums and git commits/tags are signed with the maintainer's OpenPGP
+key:
+
+- **Identity:** `Martin Sadofschi <martin.sadofschi@gmail.com>`
+- **Fingerprint:** `FD4D 1902 4C6B 44CA 0252  25C3 165E 7A7F C8BB 817D`
+- **Public key:** [`signing-key.asc`](signing-key.asc) in this repository (also
+  added to the maintainer's GitHub account).
+
+Import the key once:
+
+```sh
+gpg --import signing-key.asc
+```
+
+### Verify a release package
+
+Each release publishes a `SHA256SUMS-v<version>.txt` checksums file and a
+detached signature `SHA256SUMS-v<version>.txt.asc`. To verify:
+
+```sh
+# 1. Confirm the checksums file was signed by the key above:
+gpg --verify SHA256SUMS-v1.6.7.txt.asc SHA256SUMS-v1.6.7.txt
+
+# 2. Confirm the ZIP matches the signed hash:
+sha256sum -c SHA256SUMS-v1.6.7.txt          # Linux / macOS
+```
+
+On Windows:
+
+```powershell
+Get-FileHash -Algorithm SHA256 claude-usage-monitor-chrome-v1.6.7.zip
+# compare the hash against the line in SHA256SUMS-v1.6.7.txt
+```
+
+A "Good signature" from the fingerprint above plus a matching hash means the
+package is the exact one the maintainer released. The same hash can be used to
+trace a sample back to its legitimate origin if it appears in IoC feeds.
+
+### Verify commits
+
+```sh
+git log --show-signature
+```
+
+GitHub marks commits and tags as **Verified** once this public key is registered
+on the maintainer's account.
