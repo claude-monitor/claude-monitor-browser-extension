@@ -61,6 +61,18 @@
   .progress-fill.yellow{background:var(--yellow)}.progress-fill.red{background:var(--red)}
   .reset-row{color:var(--text-sec);font-size:11.5px;font-variant-numeric:tabular-nums}
 
+  .extra-banner{margin:9px 14px 0;padding:8px 12px;background:rgba(217,119,87,.08);border:1px solid rgba(217,119,87,.22);border-radius:var(--radius-sm);display:flex;flex-direction:column;gap:4px;font-size:11.5px;color:var(--text-sec);font-variant-numeric:tabular-nums}
+  .extra-banner-row{display:flex;align-items:center;justify-content:space-between}
+  .extra-banner-label{display:flex;align-items:center;gap:6px}
+  .extra-banner-label svg{color:var(--accent-bright);flex-shrink:0;width:13px;height:13px}
+  .extra-banner-value{color:var(--text-pri);font-weight:600}
+  .extra-banner-track{height:5px;margin-bottom:0}
+  .extra-banner-pct{font-weight:600;color:var(--text-pri)}
+  .extra-banner-pct.green{color:var(--green)}.extra-banner-pct.yellow{color:var(--yellow)}.extra-banner-pct.red{color:var(--red)}
+  .extra-banner-foot{display:flex;align-items:baseline;gap:8px}
+  .extra-banner-balance{color:var(--text-sec);font-size:10.5px}
+  .extra-banner-reset{color:var(--text-dim);font-size:10.5px;margin-left:auto}
+
   .card.compact{padding:7px 13px}
   .card.compact .card-header{margin-bottom:5px;align-items:center}
   .card.compact .card-title{line-height:1.2}
@@ -122,9 +134,16 @@ const IC={
   sliders:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>',
   refresh:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>',
   ext:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>',
-  check:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>'
+  check:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>',
+  dollar:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>'
 };
 const cls=p=>p<50?'green':p<80?'yellow':'red';
+function extraBanner(state){
+  const E = state==='high'
+    ? {used:'€0.90',cap:'€1.00',pct:90,bal:'€5.00',reset:'Resets in 18d (1 Jul)'}
+    : {used:'€0.42',cap:'€1.00',pct:42,bal:'€5.00',reset:'Resets in 18d (1 Jul)'};
+  return `<div class="extra-banner"><div class="extra-banner-row"><span class="extra-banner-label">${IC.dollar}Extra credits</span><span><span class="extra-banner-value">${E.used}</span> / ${E.cap} &middot; <span class="extra-banner-pct ${cls(E.pct)}">${E.pct}%</span></span></div><div class="progress-track extra-banner-track"><div class="progress-fill ${cls(E.pct)}" style="width:${E.pct}%"></div></div><div class="extra-banner-foot"><span class="extra-banner-balance">Balance ${E.bal}</span><span class="extra-banner-reset">${E.reset}</span></div></div>`;
+}
 function full(icon,title,pct,reset,sub,note){return `<div class="card"><div class="card-header"><div class="card-title-row">${icon}<span class="card-title">${title}</span></div><span class="card-pct ${cls(pct)}">${pct}%</span></div>${sub?`<div class="card-subtitle">${sub}</div>`:''}${note?`<div class="card-note">${note}</div>`:''}<div class="progress-track"><div class="progress-fill ${cls(pct)}" style="width:${pct}%"></div></div><div class="reset-row">${reset}</div></div>`;}
 function comp(icon,title,pct,countTxt){const c=countTxt?cls(Math.round(pct)):cls(pct);return `<div class="card compact"><div class="card-header"><div class="card-title-row">${icon}<span class="card-title">${title}</span></div><span class="card-pct ${countTxt?'count ':''}${c}">${countTxt||pct+'%'}</span></div><div class="progress-track"><div class="progress-fill ${c}" style="width:${pct}%"></div></div></div>`;}
 function menu(){return `<div class="view-menu"><div class="vm-head"><span class="vm-title">METRICS</span><span class="vm-all">Select all</span></div>
@@ -134,13 +153,14 @@ function menu(){return `<div class="view-menu"><div class="vm-head"><span class=
   <div class="vm-item on"><span class="vm-check">${IC.check}</span><span class="vm-label">${IC.rt}Routine runs</span><span class="vm-pct">2 / 15</span></div>
   <div class="vm-divider"></div><div class="vm-title">THEME</div>
   <div class="swatches"><span class="sw active" style="background:#d97757"></span><span class="sw" style="background:#4a9eff"></span><span class="sw" style="background:#8250dc"></span><span class="sw" style="background:#15151b"></span><span class="sw" style="background:#faf9f7"></span><span class="sw" style="background:#4f46e5"></span></div></div>`;}
-function popup(theme,state,withMenu){
+function popup(theme,state,withMenu,withExtra){
   const S=state==='high'
     ?{s:92,w:76,o:58,so:22,d:9,r:[12,80],rt:'Resets in 1h 02m (12:00 PM)'}
     :{s:22,w:41,o:8,so:15,d:3,r:[2,13],rt:'Resets in 3h 41m (12:00 PM)'};
   return `<div class="popup t-${theme}">
-    <div class="header"><div class="header-left"><div class="logo">${IC.pulse}</div><div class="title-block"><span class="app-name">Claude Usage Monitor</span><span class="meta-row"><span class="app-version">v1.6.7</span><span class="plan-badge">Max 5x</span></span></div></div>
+    <div class="header"><div class="header-left"><div class="logo">${IC.pulse}</div><div class="title-block"><span class="app-name">Claude Usage Monitor</span><span class="meta-row"><span class="app-version">v1.7.0</span><span class="plan-badge">Max 5x</span></span></div></div>
       <div class="header-actions"><div class="pill">60m</div><div class="view-wrap"><div class="icon-btn">${IC.sliders}</div>${withMenu?menu():''}</div><div class="icon-btn">${IC.refresh}</div></div></div>
+    ${withExtra?extraBanner(state):''}
     <div class="cards">
       ${full(IC.clock,'Current Session',S.s,S.rt)}
       ${full(IC.cal,'Weekly · all models',S.w,'Resets in 6d 1h (Mon 15 June 12:00 PM)','Includes Fable, Opus, Sonnet &amp; Haiku','Fable draws down 2&times; faster than Opus')}
@@ -153,8 +173,8 @@ function popup(theme,state,withMenu){
   </div>`;
 }
 const SHOTS={
-  hero:{bg:'dark',layout:'split',build:()=>`<div class="glow"></div><div class="copy"><h1>Your Claude limits, at a glance</h1><p>Session, weekly, and per-model usage, right in your browser toolbar. No more opening the settings page.</p></div><div class="device">${popup('clay','healthy',false)}</div>`},
-  high:{bg:'dark',layout:'split',build:()=>`<div class="glow"></div><div class="copy"><h1>Know before you hit a limit</h1><p>Color-coded the moment you are getting close, with a live countdown to every reset.</p></div><div class="device">${popup('clay','high',false)}</div>`},
+  hero:{bg:'dark',layout:'split',build:()=>`<div class="glow"></div><div class="copy"><h1>Your Claude limits, at a glance</h1><p>Session, weekly, and per-model usage, right in your browser toolbar. No more opening the settings page.</p></div><div class="device">${popup('clay','healthy',false,true)}</div>`},
+  high:{bg:'dark',layout:'split',build:()=>`<div class="glow"></div><div class="copy"><h1>Know before you hit a limit</h1><p>Color-coded the moment you are getting close, with a live countdown to every reset.</p></div><div class="device">${popup('clay','high',false,true)}</div>`},
   menu:{bg:'dark',layout:'split',build:()=>`<div class="glow"></div><div class="copy"><h1>Make it yours</h1><p>Show or hide cards and switch between six color themes, right from the popup.</p></div><div class="device">${popup('clay','healthy',true)}</div>`},
   themes:{bg:'neutral',layout:'gallery',build:()=>`<div class="copy"><h1>Six built-in themes</h1><p>From warm dark to clean light. Pick the one that fits your setup.</p></div><div class="gallery-row">${popup('clay','healthy',false)}${popup('paper','healthy',false)}${popup('slate','healthy',false)}</div>`}
 };
