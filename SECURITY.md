@@ -284,3 +284,5 @@ git log --show-signature
 
 GitHub marks commits and tags as **Verified** once this public key is registered
 on the maintainer's account.
+
+Signing began with commit `9b9502c2` (2026-06-13).
