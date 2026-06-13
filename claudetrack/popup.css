@@ -538,12 +538,26 @@ body {
   border: 1px solid rgba(217, 119, 87, 0.22);
   border-radius: var(--radius-sm);
   display: flex;
-  align-items: center;
-  justify-content: space-between;
+  flex-direction: column;
+  gap: 4px;
   font-size: 11.5px;
   color: var(--text-sec);
   font-variant-numeric: tabular-nums;
 }
+
+.extra-banner-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.extra-banner-reset {
+  color: var(--text-dim);
+  font-size: 10.5px;
+  text-align: right;
+}
+
+.extra-banner-reset:empty { display: none; }
 
 .extra-banner-label {
   display: flex;

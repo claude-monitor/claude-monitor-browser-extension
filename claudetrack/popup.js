@@ -87,6 +87,7 @@ const designMenuPct  = $('designMenuPct');
 const extraBanner   = $('extraBanner');
 const extraUsed     = $('extraUsed');
 const extraCap      = $('extraCap');
+const extraReset    = $('extraReset');
 const staleBanner   = $('staleBanner');
 const staleSubtitle = $('staleBannerSubtitle');
 const signInBtn     = $('signInBtn');
@@ -173,9 +174,12 @@ function formatTimeUntil(epochMs) {
 
 function formatCredits(amount, currency) {
   const symbol = currency === 'USD' ? '$' : (currency || '');
-  // Whole dollars when amount is integer, two decimals otherwise.
-  const rounded = Number.isInteger(amount) ? amount : Number(amount.toFixed(2));
-  const formatted = rounded.toLocaleString('en-US');
+  // Always two decimals: this is a money value, so $5.50 must not render as
+  // "$5.5" and a $100 cap reads as "$100.00".
+  const formatted = amount.toLocaleString('en-US', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
   return `${symbol}${formatted}`;
 }
 
@@ -276,6 +280,13 @@ function render(data) {
     extraBanner.style.display = 'flex';
     extraUsed.textContent = formatCredits(extra.usedCredits, extra.currency);
     extraCap.textContent  = formatCredits(extra.monthlyLimit, extra.currency);
+    // Show the precise countdown when the API gives a reset timestamp; otherwise
+    // fall back to the monthly cadence implied by the monthly_limit field.
+    const xReset = formatTimeUntil(extra.resetTime);
+    const xDate  = xReset ? formatResetDate(extra.resetTime) : '';
+    extraReset.textContent = xReset
+      ? (xDate ? `${xReset} (${xDate})` : xReset)
+      : 'Resets monthly';
   } else {
     extraBanner.style.display = 'none';
   }

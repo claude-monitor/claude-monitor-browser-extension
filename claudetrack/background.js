@@ -267,14 +267,23 @@ function mapApiUsageToStoredShape(usage) {
 function mapExtraUsage(extra) {
   if (!extra || typeof extra !== 'object') return null;
   if (extra.used_credits == null || extra.monthly_limit == null) return null;
-  const usedCredits = Number(extra.used_credits);
-  const monthlyLimit = Number(extra.monthly_limit);
+  // The API reports money in cents (minor units): e.g. 10197 / 10000 means
+  // $101.97 / $100.00. Convert to dollars here, at the single API boundary, so
+  // the stored shape and the popup formatter both work in whole-currency units.
+  const usedCredits = Number(extra.used_credits) / 100;
+  const monthlyLimit = Number(extra.monthly_limit) / 100;
   if (!Number.isFinite(usedCredits) || !Number.isFinite(monthlyLimit)) return null;
   return {
     isEnabled: Boolean(extra.is_enabled),
     usedCredits,
     monthlyLimit,
     currency: typeof extra.currency === 'string' ? extra.currency : 'USD',
+    // Verified the live extra_usage shape (on a disabled account): the only
+    // fields are is_enabled / monthly_limit / used_credits / utilization /
+    // currency / disabled_reason — there is NO resets_at. We still parse it in
+    // case an *enabled* account exposes one; otherwise it's null and the popup
+    // shows a static "Resets monthly" hint (monthly_limit ⇒ monthly cycle).
+    resetTime: parseApiTime(extra.resets_at),
   };
 }
 
@@ -385,6 +394,7 @@ function sanitizeExtra(extra) {
     usedCredits,
     monthlyLimit,
     currency: typeof extra.currency === 'string' ? extra.currency : 'USD',
+    resetTime: extra.resetTime ?? null,
   };
 }
 

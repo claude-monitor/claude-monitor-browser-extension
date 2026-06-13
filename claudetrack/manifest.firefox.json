@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Claude Usage: Session, Weekly & Design",
   "short_name": "Claude Usage",
-  "version": "1.6.7",
+  "version": "1.6.8",
   "description": "Track your Claude.ai usage in real time. See session and weekly limits, reset times, and color-coded progress — in your toolbar.",
   "author": "Digital Advanced Solutions",
   "browser_specific_settings": {

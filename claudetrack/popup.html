@@ -127,15 +127,18 @@
 
     <!-- Extra-usage banner (hidden unless extra.isEnabled) -->
     <div class="extra-banner" id="extraBanner" style="display:none">
-      <span class="extra-banner-label">
-        <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none"
-             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <line x1="12" y1="1" x2="12" y2="23"/>
-          <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-        </svg>
-        Extra credits
-      </span>
-      <span><span class="extra-banner-value" id="extraUsed">$0</span> / <span id="extraCap">$0</span></span>
+      <div class="extra-banner-row">
+        <span class="extra-banner-label">
+          <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="1" x2="12" y2="23"/>
+            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+          </svg>
+          Extra credits
+        </span>
+        <span><span class="extra-banner-value" id="extraUsed">$0</span> / <span id="extraCap">$0</span></span>
+      </div>
+      <div class="extra-banner-reset" id="extraReset"></div>
     </div>
 
     <div class="cards" id="cards">
