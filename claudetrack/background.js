@@ -136,11 +136,15 @@ async function refreshUsageFromApi() {
     // Routine budget is a separate, optional fetch — never let it break the
     // refresh. Null when unavailable (other plan, auth, beta changed) → card hides.
     data.routine = await fetchRoutineBudget(activeOrgId);
-    // Prepaid credit balance — separate optional fetch; only meaningful when
-    // extra usage is enabled. Fail-soft to null so it never breaks the refresh.
-    if (data.extra) {
-      data.extra.balance = await fetchPrepaidCredits(activeOrgId);
-    }
+    // Credits spend/limit: prefer overage_spend_limit, the same source claude.ai
+    // /usage uses for the "Usage credits" card. It keeps used/limit/reset even
+    // when usage.extra_usage goes null on suspension, so it mirrors /usage
+    // exactly; fall back to the extra_usage mapping when it's not offered.
+    const overage = await fetchOverageSpendLimit(activeOrgId);
+    if (overage) data.extra = overage;
+    // Prepaid balance ("current balance"), shown next to the credits card.
+    // Always fetched; fail-soft to null so it never breaks the refresh.
+    data.prepaidBalance = await fetchPrepaidCredits(activeOrgId);
     const stored = await persistAndBadge(data);
     return {
       refreshed: stored,
@@ -269,24 +273,25 @@ function mapApiUsageToStoredShape(usage) {
   };
 }
 
+// Fallback credits source: usage.extra_usage. Money is in cents (10197/10000 =
+// $101.97/$100.00). Maps to the same unified shape as the primary
+// overage_spend_limit source. Returns null when suspended (used/limit null) —
+// the overage endpoint covers that case.
 function mapExtraUsage(extra) {
   if (!extra || typeof extra !== 'object') return null;
   if (extra.used_credits == null || extra.monthly_limit == null) return null;
-  // The API reports money in cents (minor units): e.g. 10197 / 10000 means
-  // $101.97 / $100.00. Convert to dollars here, at the single API boundary, so
-  // the stored shape and the popup formatter both work in whole-currency units.
   const usedCredits = Number(extra.used_credits) / 100;
   const monthlyLimit = Number(extra.monthly_limit) / 100;
-  if (!Number.isFinite(usedCredits) || !Number.isFinite(monthlyLimit)) return null;
-  // Verified live (both enabled and disabled accounts): extra_usage carries no
-  // reset timestamp — fields are is_enabled / monthly_limit / used_credits /
-  // utilization / currency / disabled_reason. The popup derives the reset
-  // locally instead (credits reset on the 1st of each month).
+  if (!Number.isFinite(usedCredits) || !Number.isFinite(monthlyLimit) || monthlyLimit <= 0) return null;
   return {
     isEnabled: Boolean(extra.is_enabled),
     usedCredits,
     monthlyLimit,
     currency: typeof extra.currency === 'string' ? extra.currency : 'USD',
+    utilization: (usedCredits / monthlyLimit) * 100,
+    resetTime: null,
+    outOfCredits: usedCredits >= monthlyLimit,
+    disabledReason: typeof extra.disabled_reason === 'string' ? extra.disabled_reason : null,
   };
 }
 
@@ -319,6 +324,39 @@ function mapRoutineBudget(data) {
   return { used, limit };
 }
 
+// Primary credits source — the same endpoint claude.ai /usage uses for the
+// "Usage credits" card. Plain cookie auth (no special headers). Returns the
+// spend/limit/reset even while suspended, unlike usage.extra_usage.
+async function fetchOverageSpendLimit(orgId) {
+  try {
+    const data = await fetchClaudeJson(`${API_BASE}/organizations/${orgId}/overage_spend_limit`);
+    return mapOverageSpendLimit(data);
+  } catch {
+    return null; // fail soft: 403/404 (not offered on this plan) → use fallback
+  }
+}
+
+// Response: { is_enabled, monthly_credit_limit, used_credits, currency,
+// out_of_credits, disabled_reason, disabled_until, ... }. Amounts in cents.
+// disabled_until is the real reset (1st of next month) once the limit is hit.
+function mapOverageSpendLimit(data) {
+  if (!data || typeof data !== 'object') return null;
+  if (data.monthly_credit_limit == null || data.used_credits == null) return null;
+  const monthlyLimit = Number(data.monthly_credit_limit) / 100;
+  const usedCredits  = Number(data.used_credits) / 100;
+  if (!Number.isFinite(monthlyLimit) || !Number.isFinite(usedCredits) || monthlyLimit <= 0) return null;
+  return {
+    isEnabled: Boolean(data.is_enabled),
+    usedCredits,
+    monthlyLimit,
+    currency: typeof data.currency === 'string' ? data.currency : 'USD',
+    utilization: (usedCredits / monthlyLimit) * 100,
+    resetTime: parseApiTime(data.disabled_until),
+    outOfCredits: Boolean(data.out_of_credits),
+    disabledReason: typeof data.disabled_reason === 'string' ? data.disabled_reason : null,
+  };
+}
+
 async function fetchPrepaidCredits(orgId) {
   try {
     const data = await fetchClaudeJson(`${API_BASE}/organizations/${orgId}/prepaid/credits`);
@@ -329,11 +367,16 @@ async function fetchPrepaidCredits(orgId) {
 }
 
 // Response shape: { amount: 500, currency: "EUR", ... }. amount is in cents.
+// Carries its own currency so the overdraft notice can render when `extra`
+// (and its currency) is null due to suspension.
 function mapPrepaidCredits(data) {
   if (!data || typeof data !== 'object') return null;
   const amount = Number(data.amount);
   if (!Number.isFinite(amount)) return null;
-  return amount / 100;
+  return {
+    amount: amount / 100,
+    currency: typeof data.currency === 'string' ? data.currency : 'USD',
+  };
 }
 
 function parseApiTime(value) {
@@ -385,6 +428,7 @@ function sanitizeUsageData(data) {
       label: data.design?.label ?? null,
     },
     extra: sanitizeExtra(data.extra),
+    prepaidBalance: sanitizePrepaid(data.prepaidBalance),
     routine: sanitizeRoutine(data.routine),
     meta: {
       ready: Boolean(data.meta?.ready),
@@ -405,16 +449,30 @@ function sanitizeRoutine(routine) {
 
 function sanitizeExtra(extra) {
   if (!extra || typeof extra !== 'object') return null;
-  if (extra.usedCredits == null || extra.monthlyLimit == null) return null;
   const usedCredits = Number(extra.usedCredits);
   const monthlyLimit = Number(extra.monthlyLimit);
-  if (!Number.isFinite(usedCredits) || !Number.isFinite(monthlyLimit)) return null;
+  if (!Number.isFinite(usedCredits) || !Number.isFinite(monthlyLimit) || monthlyLimit <= 0) return null;
+  const utilization = Number(extra.utilization);
+  const resetTime = Number(extra.resetTime);
   return {
     isEnabled: Boolean(extra.isEnabled),
     usedCredits,
     monthlyLimit,
     currency: typeof extra.currency === 'string' ? extra.currency : 'USD',
-    balance: extra.balance == null || !Number.isFinite(Number(extra.balance)) ? null : Number(extra.balance),
+    utilization: Number.isFinite(utilization) ? utilization : (usedCredits / monthlyLimit) * 100,
+    resetTime: Number.isFinite(resetTime) ? resetTime : null,
+    outOfCredits: Boolean(extra.outOfCredits),
+    disabledReason: typeof extra.disabledReason === 'string' ? extra.disabledReason : null,
+  };
+}
+
+function sanitizePrepaid(prepaid) {
+  if (!prepaid || typeof prepaid !== 'object') return null;
+  const amount = Number(prepaid.amount);
+  if (!Number.isFinite(amount)) return null;
+  return {
+    amount,
+    currency: typeof prepaid.currency === 'string' ? prepaid.currency : 'USD',
   };
 }
 

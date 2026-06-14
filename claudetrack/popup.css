@@ -588,6 +588,13 @@ body {
   font-weight: 600;
 }
 
+/* Over the spend limit (out_of_credits / ≥100%): escalate the credits banner
+   from clay-tint to alert-red, matching the full red bar /usage shows. */
+.extra-banner.over {
+  background: rgba(225, 90, 70, 0.10);
+  border-color: rgba(225, 90, 70, 0.32);
+}
+
 /* ── Stale / auth-failed banner ──────────────────────────────────────────── */
 
 .stale-banner {

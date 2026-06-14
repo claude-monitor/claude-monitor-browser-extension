@@ -228,7 +228,7 @@ function render(data) {
     return;
   }
 
-  const { session, weekly, sonnet, opus, design, extra, routine, lastUpdated: ts } = data;
+  const { session, weekly, sonnet, opus, design, extra, routine, prepaidBalance, lastUpdated: ts } = data;
   lastData = data;
   const hasSomething =
     session?.percentage !== null ||
@@ -296,24 +296,30 @@ function render(data) {
   // ── Daily routine runs (count-based; shown whenever the API returns it) ─
   renderRoutineCard(routine);
 
-  // ── Extra usage credits ──────────────────────────────────────────────
-  if (extra && extra.isEnabled && extra.monthlyLimit > 0) {
+  // ── Usage credits (mirrors claude.ai /usage) ─────────────────────────
+  if (extra && extra.monthlyLimit > 0) {
     extraBanner.style.display = 'flex';
     extraUsed.textContent = formatCredits(extra.usedCredits, extra.currency);
     extraCap.textContent  = formatCredits(extra.monthlyLimit, extra.currency);
 
-    const xPct = Math.min(100, Math.max(0, (extra.usedCredits / extra.monthlyLimit) * 100));
-    extraPct.textContent = `${Math.round(xPct)}%`;
-    extraBar.style.width = `${xPct}%`;
-    applyColor(extraPct, extraBar, xPct);
+    // Show the true utilisation in text (e.g. 1302%) like /usage; clamp only the
+    // bar fill. out_of_credits forces the full red "used up" treatment.
+    const rawPct = Number.isFinite(extra.utilization)
+      ? extra.utilization
+      : (extra.usedCredits / extra.monthlyLimit) * 100;
+    const barPct = Math.min(100, Math.max(0, rawPct));
+    extraPct.textContent = `${Math.round(rawPct)}%`;
+    extraBar.style.width = `${barPct}%`;
+    applyColor(extraPct, extraBar, extra.outOfCredits ? 100 : rawPct);
+    extraBanner.classList.toggle('over', Boolean(extra.outOfCredits) || rawPct >= 100);
+    extraBanner.title = extra.outOfCredits ? creditsReasonText(extra.disabledReason) : '';
 
-    extraBalance.textContent = extra.balance != null
-      ? `Balance ${formatCredits(extra.balance, extra.currency)}`
+    extraBalance.textContent = prepaidBalance
+      ? `Balance ${formatCredits(prepaidBalance.amount, prepaidBalance.currency)}`
       : '';
 
-    // The usage API carries no reset timestamp for credits; they reset on the
-    // 1st of each month, so derive the countdown locally.
-    const reset  = firstOfNextMonth();
+    // Prefer the API's real reset (disabled_until); else credits reset on the 1st.
+    const reset  = extra.resetTime || firstOfNextMonth();
     const xReset = formatTimeUntil(reset);
     extraReset.textContent = xReset ? `${xReset} (${formatShortDate(reset)})` : 'Resets monthly';
   } else {
@@ -326,6 +332,16 @@ function render(data) {
 
   // ── Optional-cards menu ───────────────────────────────────────────────
   renderViewMenu(data);
+}
+
+// ── Usage-credits helper ─────────────────────────────────────────────────────
+
+// Short reason for the "used up" state, shown as the credits-banner tooltip.
+// Mirrors the disabled_reason values seen on overage_spend_limit / extra_usage.
+function creditsReasonText(reason) {
+  if (reason === 'self_selected_spend_limit_reached') return 'Monthly spend limit reached';
+  if (reason === 'org_level_disabled_until')          return 'Spend limit reached (org level)';
+  return 'Spend limit reached';
 }
 
 // ── Sub-card rendering ──────────────────────────────────────────────────────

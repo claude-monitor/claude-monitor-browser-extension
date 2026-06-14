@@ -20,7 +20,7 @@ Report privately by email to **martin.sadofschi@gmail.com** with:
 
 - A description of the issue and its impact.
 - Steps to reproduce, or a proof of concept.
-- The extension version (shown in the popup header, e.g. `v1.7.0`) and your
+- The extension version (shown in the popup header, e.g. `v1.7.1`) and your
   browser + version.
 
 You can expect an initial acknowledgement within **5 business days**. Valid
@@ -62,6 +62,7 @@ Declared in [`claudetrack/manifest.json`](claudetrack/manifest.json):
 | host: `claude.ai/api/organizations`           | Read the org list to find the active org UUID + plan   | No other path on claude.ai                                  |
 | host: `claude.ai/api/organizations/*/usage`   | Read usage statistics                                  | Read-only; cannot write                                     |
 | host: `claude.ai/api/organizations/*/prepaid/credits` | Read your prepaid usage-credit **balance** (shown in the extra-credits banner) | Read-only; no payment methods, cards, or invoices |
+| host: `claude.ai/api/organizations/*/overage_spend_limit` | Read your monthly usage-credit **spend / limit** (shown in the extra-credits banner) | Read-only; no payment methods, cards, or invoices |
 | host: `claude.ai/v1/code/routines/run-budget` | Read the daily routine-run budget                      | Read-only; cannot write                                     |
 
 There is **no** `cookies`, `tabs`, `scripting`, `webRequest`, `<all_urls>`, or
@@ -138,24 +139,25 @@ job. A compromised release is bounded by what the manifest already grants:
 So minimal permissions are not a cosmetic detail — they are the cap on a
 supply-chain compromise.
 
-### A compromised service worker is still bounded to four paths
+### A compromised service worker is still bounded to five paths
 
 A fair question from any security reviewer: the background service worker runs
 inside the already-trusted extension, on a timer, with `credentials: 'include'`
 — so could a **compromised** build quietly walk other authenticated `claude.ai`
 endpoints and exfiltrate whatever they return? With this manifest, no. The
-reason is that `host_permissions` are scoped to four **exact paths**, not to
+reason is that `host_permissions` are scoped to five **exact paths**, not to
 `https://claude.ai/*`:
 
 - `https://claude.ai/api/organizations`
 - `https://claude.ai/api/organizations/*/usage`
 - `https://claude.ai/api/organizations/*/prepaid/credits`
+- `https://claude.ai/api/organizations/*/overage_spend_limit`
 - `https://claude.ai/v1/code/routines/run-budget`
 
 That path-level scoping ([`claudetrack/manifest.json`](claudetrack/manifest.json))
 bounds the worst case in two independent ways.
 
-**1. It can only read those four endpoints.** Attaching the session cookie is
+**1. It can only read those five endpoints.** Attaching the session cookie is
 not the same as being able to read the response. A credentialed `fetch` to any
 other URL — a different path on `claude.ai`, or any other domain — is an
 ordinary cross-origin request for which the extension holds no matching host
@@ -170,7 +172,7 @@ endpoint readable, a malicious build has to add it to the manifest — and that 
 the same non-silent escalation described above: the browser surfaces a
 new-permission prompt and **disables the extension until you re-approve it**, the
 change is visible in this repository's public diff, and it is subject to store
-review. There is no quiet path from "four read-only endpoints" to "the rest of
+review. There is no quiet path from "five read-only endpoints" to "the rest of
 your account."
 
 **What a compromised build can still do** — without any prompt — is *send* what
@@ -183,7 +185,7 @@ manifest does not grant. The polling interval changes how often that metadata
 could be sent, not what is in scope.
 
 All of this is checkable against
-[`claudetrack/manifest.json`](claudetrack/manifest.json) (the four host
+[`claudetrack/manifest.json`](claudetrack/manifest.json) (the five host
 permissions) and [`claudetrack/background.js`](claudetrack/background.js) (every
 request is a `GET` to one of those URLs).
 
@@ -285,7 +287,7 @@ The store package is the unmodified, unminified source in
 [`claudetrack/`](claudetrack/). To verify the version you installed matches this
 repo:
 
-1. Note the version in the popup header (e.g. `v1.7.0`) and check out the
+1. Note the version in the popup header (e.g. `v1.7.1`) and check out the
    matching commit/tag.
 2. Compare the installed extension files (Chrome:
    `chrome://extensions` → Inspect; or unpack the store CRX/XPI) against
@@ -322,17 +324,17 @@ folder):
 
 ```sh
 # 1. Confirm the checksums file was signed by the key above:
-gpg --verify signing/SHA256SUMS-v1.7.0.txt.asc signing/SHA256SUMS-v1.7.0.txt
+gpg --verify signing/SHA256SUMS-v1.7.1.txt.asc signing/SHA256SUMS-v1.7.1.txt
 
 # 2. Confirm the ZIP matches the signed hash:
-sha256sum -c signing/SHA256SUMS-v1.7.0.txt  # Linux / macOS
+sha256sum -c signing/SHA256SUMS-v1.7.1.txt  # Linux / macOS
 ```
 
 On Windows:
 
 ```powershell
-Get-FileHash -Algorithm SHA256 claude-usage-monitor-chrome-v1.7.0.zip
-# compare the hash against the line in signing/SHA256SUMS-v1.7.0.txt
+Get-FileHash -Algorithm SHA256 claude-usage-monitor-chrome-v1.7.1.zip
+# compare the hash against the line in signing/SHA256SUMS-v1.7.1.txt
 ```
 
 A "Good signature" from the fingerprint above plus a matching hash means the

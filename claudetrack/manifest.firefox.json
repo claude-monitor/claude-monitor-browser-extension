@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Claude Usage: Session, Weekly & Design",
   "short_name": "Claude Usage",
-  "version": "1.7.0",
+  "version": "1.7.1",
   "description": "Track your Claude.ai usage in real time. See session and weekly limits, reset times, and color-coded progress — in your toolbar.",
   "author": "Digital Advanced Solutions",
   "browser_specific_settings": {
@@ -19,6 +19,7 @@
     "https://claude.ai/api/organizations",
     "https://claude.ai/api/organizations/*/usage",
     "https://claude.ai/api/organizations/*/prepaid/credits",
+    "https://claude.ai/api/organizations/*/overage_spend_limit",
     "https://claude.ai/v1/code/routines/run-budget"
   ],
   "homepage_url": "https://claude-monitor.com/",
