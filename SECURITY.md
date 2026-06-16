@@ -20,7 +20,7 @@ Report privately by email to **martin.sadofschi@gmail.com** with:
 
 - A description of the issue and its impact.
 - Steps to reproduce, or a proof of concept.
-- The extension version (shown in the popup header, e.g. `v1.7.1`) and your
+- The extension version (shown in the popup header, e.g. `v1.7.2`) and your
   browser + version.
 
 You can expect an initial acknowledgement within **5 business days**. Valid
@@ -287,7 +287,7 @@ The store package is the unmodified, unminified source in
 [`claudetrack/`](claudetrack/). To verify the version you installed matches this
 repo:
 
-1. Note the version in the popup header (e.g. `v1.7.1`) and check out the
+1. Note the version in the popup header (e.g. `v1.7.2`) and check out the
    matching commit/tag.
 2. Compare the installed extension files (Chrome:
    `chrome://extensions` → Inspect; or unpack the store CRX/XPI) against
@@ -324,17 +324,17 @@ folder):
 
 ```sh
 # 1. Confirm the checksums file was signed by the key above:
-gpg --verify signing/SHA256SUMS-v1.7.1.txt.asc signing/SHA256SUMS-v1.7.1.txt
+gpg --verify signing/SHA256SUMS-v1.7.2.txt.asc signing/SHA256SUMS-v1.7.2.txt
 
 # 2. Confirm the ZIP matches the signed hash:
-sha256sum -c signing/SHA256SUMS-v1.7.1.txt  # Linux / macOS
+sha256sum -c signing/SHA256SUMS-v1.7.2.txt  # Linux / macOS
 ```
 
 On Windows:
 
 ```powershell
-Get-FileHash -Algorithm SHA256 claude-usage-monitor-chrome-v1.7.1.zip
-# compare the hash against the line in signing/SHA256SUMS-v1.7.1.txt
+Get-FileHash -Algorithm SHA256 claude-usage-monitor-chrome-v1.7.2.zip
+# compare the hash against the line in signing/SHA256SUMS-v1.7.2.txt
 ```
 
 A "Good signature" from the fingerprint above plus a matching hash means the

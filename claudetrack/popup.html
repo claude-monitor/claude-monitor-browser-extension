@@ -81,6 +81,14 @@
             </span>
             <span class="view-menu-pct" id="routineMenuCount">—</span>
           </button>
+          <button class="view-menu-item" data-card="extra" id="extraMenuItem">
+            <span class="view-check"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+            <span class="view-menu-label">
+              <svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+              Extra credits
+            </span>
+            <span class="view-menu-pct" id="extraMenuPct">—</span>
+          </button>
           </div><!-- /cardsSection -->
           <div class="view-menu-divider" id="themeDivider" style="display:none"></div>
           <div class="view-menu-section">
@@ -125,7 +133,7 @@
       <button class="stale-banner-cta" id="signInBtn">Sign in →</button>
     </div>
 
-    <!-- Extra-usage banner (hidden unless extra.isEnabled) -->
+    <!-- Extra-usage banner (credits); hidden when no data or toggled off in the View menu -->
     <div class="extra-banner" id="extraBanner" style="display:none">
       <div class="extra-banner-row">
         <span class="extra-banner-label">
