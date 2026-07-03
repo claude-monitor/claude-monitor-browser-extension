@@ -161,8 +161,9 @@ async function getClaudeOrgId() {
   const { claudeOrgId, claudeOrgIdAt, claudePlan } = await chrome.storage.local.get(['claudeOrgId', 'claudeOrgIdAt', 'claudePlan']);
   const fresh = claudeOrgIdAt && (Date.now() - claudeOrgIdAt) < ORG_ID_TTL_MS;
   // Only short-circuit when the plan is also cached, so an existing install
-  // (org id already cached) still fetches the org list once to populate the plan badge.
-  if (claudeOrgId && fresh && claudePlan && claudePlan.subcaps) return claudeOrgId;
+  // (org id already cached) still fetches the org list once to populate the plan
+  // badge. The 'fable' key check forces one refetch after the update that added it.
+  if (claudeOrgId && fresh && claudePlan && claudePlan.subcaps && 'fable' in claudePlan.subcaps) return claudeOrgId;
 
   const organizations = await fetchClaudeJson(`${API_BASE}/organizations`);
   const org = selectOrg(organizations);
@@ -200,7 +201,7 @@ function availableSubcaps(tier, caps) {
   const t = String(tier || '').toLowerCase();
   const paid = caps.includes('claude_max') || caps.includes('claude_pro') ||
                /max|pro|team|enterprise/.test(t);
-  return { opus: paid, sonnet: paid, design: paid };
+  return { fable: paid, opus: paid, sonnet: paid, design: paid };
 }
 
 function planLabel(tier, caps) {
@@ -238,26 +239,38 @@ async function fetchClaudeJson(url) {
 }
 
 function mapApiUsageToStoredShape(usage) {
+  const scoped = mapLimitsArray(usage?.limits);
+  const session = pickBucket(scoped.session, usage?.five_hour);
+  const weekly  = pickBucket(scoped.weekly,  usage?.seven_day);
+  const opus    = pickBucket(scoped.opus,    usage?.seven_day_opus);
+  const sonnet  = pickBucket(scoped.sonnet,  usage?.seven_day_sonnet);
   return {
     session: {
-      percentage: normalizePct(usage?.five_hour?.utilization),
-      resetTime: parseApiTime(usage?.five_hour?.resets_at),
-      label: usage?.five_hour?.resets_at ? null : 'Not yet used',
+      percentage: normalizePct(session?.utilization),
+      resetTime: parseApiTime(session?.resets_at),
+      label: session?.resets_at ? null : 'Not yet used',
     },
     weekly: {
-      percentage: normalizePct(usage?.seven_day?.utilization),
-      resetTime: parseApiTime(usage?.seven_day?.resets_at),
-      label: usage?.seven_day?.resets_at ? null : 'Weekly limit',
+      percentage: normalizePct(weekly?.utilization),
+      resetTime: parseApiTime(weekly?.resets_at),
+      label: weekly?.resets_at ? null : 'Weekly limit',
+    },
+    // Fable has no flat seven_day_* bucket — its weekly cap only exists as a
+    // weekly_scoped entry in the limits array.
+    fable: {
+      percentage: normalizePct(scoped.fable?.utilization),
+      resetTime: parseApiTime(scoped.fable?.resets_at),
+      label: scoped.fable?.resets_at ? null : 'Not yet used',
     },
     opus: {
-      percentage: normalizePct(usage?.seven_day_opus?.utilization),
-      resetTime: parseApiTime(usage?.seven_day_opus?.resets_at),
-      label: usage?.seven_day_opus?.resets_at ? null : 'Not yet used',
+      percentage: normalizePct(opus?.utilization),
+      resetTime: parseApiTime(opus?.resets_at),
+      label: opus?.resets_at ? null : 'Not yet used',
     },
     sonnet: {
-      percentage: normalizePct(usage?.seven_day_sonnet?.utilization),
-      resetTime: parseApiTime(usage?.seven_day_sonnet?.resets_at),
-      label: usage?.seven_day_sonnet?.resets_at ? null : 'Not yet used',
+      percentage: normalizePct(sonnet?.utilization),
+      resetTime: parseApiTime(sonnet?.resets_at),
+      label: sonnet?.resets_at ? null : 'Not yet used',
     },
     design: {
       percentage: normalizePct(usage?.seven_day_omelette?.utilization),
@@ -267,10 +280,43 @@ function mapApiUsageToStoredShape(usage) {
     extra: mapExtraUsage(usage?.extra_usage),
     meta: {
       ready:
-        normalizePct(usage?.five_hour?.utilization) !== null ||
-        normalizePct(usage?.seven_day?.utilization) !== null,
+        normalizePct(session?.utilization) !== null ||
+        normalizePct(weekly?.utilization) !== null,
     },
   };
+}
+
+// The `limits` array (added to /usage ~2026-07) is what claude.ai/settings/usage
+// renders: [{ kind, group, percent, severity, resets_at, scope, is_active }].
+// kind is "session" | "weekly_all" | "weekly_scoped"; weekly_scoped entries
+// carry scope.model.display_name (e.g. "Fable" — per-model caps live ONLY here,
+// there is no seven_day_fable flat bucket). Normalized to the flat-bucket shape
+// ({ utilization, resets_at }) so both sources feed the same mapping.
+function mapLimitsArray(limits) {
+  const out = {};
+  if (!Array.isArray(limits)) return out;
+  for (const limit of limits) {
+    if (!limit || typeof limit !== 'object') continue;
+    const entry = { utilization: limit.percent, resets_at: limit.resets_at ?? null };
+    if (limit.kind === 'session') {
+      out.session = entry;
+    } else if (limit.kind === 'weekly_all') {
+      out.weekly = entry;
+    } else if (limit.kind === 'weekly_scoped') {
+      const model = String(limit.scope?.model?.display_name || '').toLowerCase();
+      if (model.includes('fable'))       out.fable  = entry;
+      else if (model.includes('opus'))   out.opus   = entry;
+      else if (model.includes('sonnet')) out.sonnet = entry;
+    }
+  }
+  return out;
+}
+
+// Prefer the limits-array entry (it is what the official usage page shows) and
+// fall back to the legacy flat bucket for accounts still on the old shape.
+function pickBucket(scopedEntry, flatBucket) {
+  if (scopedEntry && normalizePct(scopedEntry.utilization) !== null) return scopedEntry;
+  return flatBucket ?? null;
 }
 
 // Fallback credits source: usage.extra_usage. Money is in cents (10197/10000 =
@@ -411,6 +457,11 @@ function sanitizeUsageData(data) {
       percentage: normalizePct(data.weekly?.percentage),
       resetTime: data.weekly?.resetTime ?? null,
       label: data.weekly?.label ?? null,
+    },
+    fable: {
+      percentage: normalizePct(data.fable?.percentage),
+      resetTime: data.fable?.resetTime ?? null,
+      label: data.fable?.label ?? null,
     },
     opus: {
       percentage: normalizePct(data.opus?.percentage),

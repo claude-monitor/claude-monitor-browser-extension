@@ -3,11 +3,11 @@
 const USAGE_URL   = 'https://claude.ai/settings/usage';
 const SIGN_IN_URL = 'https://claude.ai/login';
 
-const SUBCARDS = ['sonnet', 'opus', 'design'];
+const SUBCARDS = ['fable', 'sonnet', 'opus', 'design'];
 // Per-sub-cap visibility. Tri-state: true = always show, false = always hide,
 // undefined = auto (show only when the API returns data for it this week).
 let cardPrefs  = {};
-let planSubcaps = {};   // which sub-caps the plan offers: { opus, sonnet, design }
+let planSubcaps = {};   // which sub-caps the plan offers: { fable, opus, sonnet, design }
 let lastData   = null;
 
 // Optional cards selectable from the View menu (weekly sub-caps + daily routine).
@@ -38,6 +38,13 @@ const weeklyPct   = $('weeklyPct');
 const weeklyBar   = $('weeklyBar');
 const weeklyReset = $('weeklyReset');
 const weeklyLabel = $('weeklyLabel');
+
+// Fable
+const fableCard  = $('fableCard');
+const fablePct   = $('fablePct');
+const fableBar   = $('fableBar');
+const fableReset = $('fableReset');
+const fableLabel = $('fableLabel');
 
 // Sonnet
 const sonnetCard  = $('sonnetCard');
@@ -76,9 +83,11 @@ const viewAllBtn     = $('viewAllBtn');
 const cardsSection   = $('cardsSection');
 const themeDivider   = $('themeDivider');
 const themeSwatches  = $('themeSwatches');
+const fableMenuItem  = $('fableMenuItem');
 const sonnetMenuItem = $('sonnetMenuItem');
 const opusMenuItem   = $('opusMenuItem');
 const designMenuItem = $('designMenuItem');
+const fableMenuPct   = $('fableMenuPct');
 const sonnetMenuPct  = $('sonnetMenuPct');
 const opusMenuPct    = $('opusMenuPct');
 const designMenuPct  = $('designMenuPct');
@@ -281,11 +290,12 @@ function render(data) {
     return;
   }
 
-  const { session, weekly, sonnet, opus, design, extra, routine, prepaidBalance, lastUpdated: ts } = data;
+  const { session, weekly, fable, sonnet, opus, design, extra, routine, prepaidBalance, lastUpdated: ts } = data;
   lastData = data;
   const hasSomething =
     session?.percentage !== null ||
     weekly?.percentage  !== null ||
+    fable?.percentage   !== null ||
     sonnet?.percentage  !== null ||
     opus?.percentage    !== null ||
     design?.percentage  !== null;
@@ -340,13 +350,14 @@ function render(data) {
   weeklyLabel.textContent = '';
 
   // ── Weekly sub-caps (always selectable from the filter menu) ─────────
+  renderSubCard('fable',  fable,  fableCard,  fablePct,  fableBar,  fableReset, weekly?.resetTime);
   renderSubCard('sonnet', sonnet, sonnetCard, sonnetPct, sonnetBar, sonnetReset, weekly?.resetTime);
   renderSubCard('opus',   opus,   opusCard,   opusPct,   opusBar,   opusReset, weekly?.resetTime);
   renderSubCard('design', design, designCard, designPct, designBar, designReset, weekly?.resetTime);
 
   // Compact sub-caps hide their reset rows; one shared note covers them all.
   if (subcapNote) {
-    const anySubcap = [sonnetCard, opusCard, designCard].some(el => el.style.display !== 'none');
+    const anySubcap = [fableCard, sonnetCard, opusCard, designCard].some(el => el.style.display !== 'none');
     subcapNote.style.display = anySubcap ? 'block' : 'none';
   }
 
@@ -484,18 +495,20 @@ function renderRoutineCard(routine) {
 function renderViewMenu(data) {
   // Only sub-caps the plan offers (or that already have data) are listed.
   const offered = {
+    fable:  subcapOffered('fable',  (data?.fable?.percentage  ?? null) !== null),
     opus:   subcapOffered('opus',   (data?.opus?.percentage   ?? null) !== null),
     sonnet: subcapOffered('sonnet', (data?.sonnet?.percentage ?? null) !== null),
     design: subcapOffered('design', (data?.design?.percentage ?? null) !== null),
   };
   const routineOff = routineOffered(data?.routine);
   const extraOff   = extraOffered(data?.extra);
-  const anyOffered = offered.opus || offered.sonnet || offered.design || routineOff || extraOff;
+  const anyOffered = offered.fable || offered.opus || offered.sonnet || offered.design || routineOff || extraOff;
   // The options menu is always available (it hosts the theme picker); only the
   // card-toggle section follows the plan's sub-caps.
   if (cardsSection) cardsSection.style.display = anyOffered ? 'block' : 'none';
   if (themeDivider) themeDivider.style.display = anyOffered ? 'block' : 'none';
 
+  updateMenuItem('fable',  offered.fable,  data?.fable?.percentage,  fableMenuItem,  fableMenuPct);
   updateMenuItem('opus',   offered.opus,   data?.opus?.percentage,   opusMenuItem,   opusMenuPct);
   updateMenuItem('sonnet', offered.sonnet, data?.sonnet?.percentage, sonnetMenuItem, sonnetMenuPct);
   updateMenuItem('design', offered.design, data?.design?.percentage, designMenuItem, designMenuPct);

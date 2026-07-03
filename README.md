@@ -1,7 +1,7 @@
 # Claude Usage Monitor
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-1.7.2-blue.svg)](claudetrack/manifest.json)
+[![Version](https://img.shields.io/badge/version-1.9.0-blue.svg)](claudetrack/manifest.json)
 [![Chrome Web Store](https://img.shields.io/badge/Chrome-Web%20Store-brightgreen.svg)](https://chromewebstore.google.com/detail/claude-usage-monitor-sess/bfhdcfiigpaaopklllpobkheakpigbfo)
 [![Firefox Add-ons](https://img.shields.io/badge/Firefox-Add--ons-orange.svg)](https://addons.mozilla.org/firefox/addon/claude-usage-meter/)
 
@@ -11,7 +11,7 @@ It displays your usage buckets:
 
 - **Current Session**: the current 5-hour-window Claude usage percentage.
 - **Weekly limit**: the weekly usage percentage across all models.
-- **Per-model weekly sub-limits**: Opus, Sonnet and Claude Design weekly usage (on paid plans) — show or hide each from the **Metrics** section of the popup's options menu.
+- **Per-model weekly sub-limits**: Fable, Opus, Sonnet and Claude Design weekly usage (on paid plans) — show or hide each from the **Metrics** section of the popup's options menu.
 - **Daily routine runs**: included Claude Code routine runs as a `used / limit` count (on plans that include them).
 - **Your plan**: a badge in the popup header shows your Claude subscription (e.g. *Max 5x*).
 
@@ -28,7 +28,7 @@ The extension refreshes usage through Claude.ai's internal authenticated API.
 
 - Toolbar badge showing the current session percentage.
 - Popup with current session and weekly usage cards.
-- Per-model weekly sub-limit cards — Opus, Sonnet and Claude Design — offered on paid plans.
+- Per-model weekly sub-limit cards — Fable, Opus, Sonnet and Claude Design — offered on paid plans.
 - **Display options** menu in the popup: a **Metrics** section to show/hide optional cards (per-model weekly limits and daily routine runs, with Select all / Deselect all), plus a **Theme** section with 6 color palettes; your choices are remembered.
 - Daily routine-runs card (`used / limit`), shown only on plans that include routine runs.
 - Subscription badge in the header (Max, Pro, Team, etc.).

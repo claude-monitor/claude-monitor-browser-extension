@@ -888,7 +888,8 @@ body {
 :root[data-layout="bento"] .reset-row,
 :root[data-layout="bento"] .reset-label,
 :root[data-layout="bento"] .card-subtitle,
-:root[data-layout="bento"] .card-note,
-:root[data-layout="bento"] #subcapNote { display: none; }
+:root[data-layout="bento"] .card-note { display: none; }
+/* !important: popup.js toggles this via inline style, which would win otherwise */
+:root[data-layout="bento"] #subcapNote { display: none !important; }
 
 :root[data-layout="bento"] .card-title-row { justify-content: center; }
