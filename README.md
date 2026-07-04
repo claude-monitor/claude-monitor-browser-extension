@@ -7,6 +7,8 @@
 
 Claude Usage Monitor is a Manifest V3 browser extension for Claude.ai that shows your current usage directly from the toolbar popup. **Open source (MIT)** — all code in this repo is exactly what runs in your browser.
 
+![Claude Usage Monitor popup showing session, weekly and per-model usage with reset countdowns](docs/screenshots/overview.png)
+
 It displays your usage buckets:
 
 - **Current Session**: the current 5-hour-window Claude usage percentage.
@@ -36,6 +38,10 @@ The extension refreshes usage through Claude.ai's internal authenticated API.
 - Manual refresh button.
 - Quick link to `https://claude.ai/settings/usage`.
 - Local storage caching so the last known value remains visible between refreshes.
+
+| Four layouts — Classic, Mixed, Grid, List | Six color themes |
+|---|---|
+| ![The four popup layouts](docs/screenshots/layouts.png) | ![The six color themes](docs/screenshots/themes.png) |
 
 ## Browser support
 
