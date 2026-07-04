@@ -1,4 +1,4 @@
-// ─── ClaudeTrack — Background Service Worker ───────────────────────────────
+// ─── Claude Usage Monitor — Background Service Worker ──────────────────────
 // Polls Claude.ai's authenticated usage API every 5 minutes, persists the
 // result to chrome.storage.local, and updates the toolbar badge.
 

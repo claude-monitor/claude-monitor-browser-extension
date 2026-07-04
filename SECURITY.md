@@ -1,14 +1,14 @@
 # Security Policy
 
 This document describes the security model of **Claude Usage Monitor**
-(`claude-monitor/claude-monitor`), how to report a vulnerability, and an honest threat
+(`claude-monitor/claude-monitor-browser-extension`), how to report a vulnerability, and an honest threat
 model — including what a worst-case compromise could and could not do.
 
 The extension is open source and unminified. Every claim below is checkable
 against the source in this repository, primarily
-[`claudetrack/manifest.json`](claudetrack/manifest.json),
-[`claudetrack/background.js`](claudetrack/background.js), and
-[`claudetrack/popup.js`](claudetrack/popup.js).
+[`extension/manifest.json`](extension/manifest.json),
+[`extension/background.js`](extension/background.js), and
+[`extension/popup.js`](extension/popup.js).
 
 ---
 
@@ -53,7 +53,7 @@ by trust. The defense is the permission surface, not a promise.
 
 ### Permissions
 
-Declared in [`claudetrack/manifest.json`](claudetrack/manifest.json):
+Declared in [`extension/manifest.json`](extension/manifest.json):
 
 | Permission                                    | Why it exists                                          | What it does **not** grant                                  |
 | --------------------------------------------- | ------------------------------------------------------ | ----------------------------------------------------------- |
@@ -83,7 +83,7 @@ any broad host permission. There are **no content scripts**, no
 ### Credentials and your session
 
 Network requests use `credentials: 'include'`
-([`background.js`](claudetrack/background.js)), which tells the **browser** to
+([`background.js`](extension/background.js)), which tells the **browser** to
 attach the `claude.ai` cookie you already have — exactly as the official
 `claude.ai/settings/usage` page does. The extension:
 
@@ -98,9 +98,9 @@ attach the `claude.ai` cookie you already have — exactly as the official
 - All code ships inside the package. Nothing is downloaded or evaluated at
   runtime (no `eval`, no remote scripts), as required by Manifest V3.
 - API responses are rendered with `.textContent`, never `innerHTML`
-  ([`popup.js`](claudetrack/popup.js)), so a malformed or hostile API response
+  ([`popup.js`](extension/popup.js)), so a malformed or hostile API response
   cannot inject executable markup.
-- The message listener in [`background.js`](claudetrack/background.js) only
+- The message listener in [`background.js`](extension/background.js) only
   accepts messages from the extension's own popup (`REFRESH`, `SET_INTERVAL`).
   With no `externally_connectable`, **no web page can message the extension.**
 
@@ -154,7 +154,7 @@ reason is that `host_permissions` are scoped to five **exact paths**, not to
 - `https://claude.ai/api/organizations/*/overage_spend_limit`
 - `https://claude.ai/v1/code/routines/run-budget`
 
-That path-level scoping ([`claudetrack/manifest.json`](claudetrack/manifest.json))
+That path-level scoping ([`extension/manifest.json`](extension/manifest.json))
 bounds the worst case in two independent ways.
 
 **1. It can only read those five endpoints.** Attaching the session cookie is
@@ -185,15 +185,15 @@ manifest does not grant. The polling interval changes how often that metadata
 could be sent, not what is in scope.
 
 All of this is checkable against
-[`claudetrack/manifest.json`](claudetrack/manifest.json) (the five host
-permissions) and [`claudetrack/background.js`](claudetrack/background.js) (every
+[`extension/manifest.json`](extension/manifest.json) (the five host
+permissions) and [`extension/background.js`](extension/background.js) (every
 request is a `GET` to one of those URLs).
 
 ### No dependency supply chain
 
 The extension has **zero third-party runtime dependencies**: no `package.json`,
 no `node_modules`, no bundler, and no build step. The JavaScript in
-[`claudetrack/`](claudetrack/) is exactly what ships to the store. There is no
+[`extension/`](extension/) is exactly what ships to the store. There is no
 npm/lockfile layer for a malicious, compromised, or typosquatted package to ride
 in through — the only code that runs is the code in this repository. This is why
 pinned dependency versions do not apply here: there are no dependencies to pin,
@@ -284,14 +284,14 @@ and never paste keys into tracked files.
 ## Verifying the Published Build
 
 The store package is the unmodified, unminified source in
-[`claudetrack/`](claudetrack/). To verify the version you installed matches this
+[`extension/`](extension/). To verify the version you installed matches this
 repo:
 
 1. Note the version in the popup header (e.g. `v1.7.2`) and check out the
    matching commit/tag.
 2. Compare the installed extension files (Chrome:
    `chrome://extensions` → Inspect; or unpack the store CRX/XPI) against
-   `claudetrack/`.
+   `extension/`.
 3. There is no build step — no transpilation, bundling, or minification — so the
    files should match byte-for-byte aside from the Firefox manifest swap
    (`manifest.firefox.json` shipped as `manifest.json`).

@@ -1,7 +1,7 @@
 # Claude Usage Monitor
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-1.9.0-blue.svg)](claudetrack/manifest.json)
+[![Version](https://img.shields.io/badge/version-1.9.0-blue.svg)](extension/manifest.json)
 [![Chrome Web Store](https://img.shields.io/badge/Chrome-Web%20Store-brightgreen.svg)](https://chromewebstore.google.com/detail/claude-usage-monitor-sess/bfhdcfiigpaaopklllpobkheakpigbfo)
 [![Firefox Add-ons](https://img.shields.io/badge/Firefox-Add--ons-orange.svg)](https://addons.mozilla.org/firefox/addon/claude-usage-meter/)
 
@@ -52,27 +52,27 @@ The codebase uses the standard `chrome.*` extension APIs, which Firefox supports
 
 ## Run locally
 
-Load the unpacked extension from the inner `claudetrack/` directory in this repository.
+Load the unpacked extension from the inner `extension/` directory in this repository.
 
 The extension files are here:
 
-- `claudetrack/manifest.json`
-- `claudetrack/background.js`
-- `claudetrack/popup.html`
+- `extension/manifest.json`
+- `extension/background.js`
+- `extension/popup.html`
 
 ### Chrome
 
 1. Open `chrome://extensions`.
 2. Enable **Developer mode**.
 3. Click **Load unpacked**.
-4. Select the `claudetrack/` folder inside this repo.
+4. Select the `extension/` folder inside this repo.
 5. Pin the extension if you want fast access from the toolbar.
 
 ### Firefox
 
 Firefox uses a separate manifest (`manifest.firefox.json`). To load it temporarily:
 
-1. In a copy of the `claudetrack/` folder, replace `manifest.json` with the contents of `manifest.firefox.json` (Firefox reads `manifest.json`).
+1. In a copy of the `extension/` folder, replace `manifest.json` with the contents of `manifest.firefox.json` (Firefox reads `manifest.json`).
 2. Open `about:debugging#/runtime/this-firefox`.
 3. Click **Load Temporary Add-on...**.
 4. Select the `manifest.json` inside that copied folder.
@@ -89,11 +89,11 @@ For a permanent install, use the published add-on at <https://addons.mozilla.org
 
 ## Project structure
 
-- `claudetrack/manifest.json`: extension manifest and permissions.
-- `claudetrack/background.js`: automatic refresh logic, Claude API fetching, storage, and badge updates.
-- `claudetrack/popup.html`: popup markup.
-- `claudetrack/popup.css`: popup styling.
-- `claudetrack/popup.js`: popup rendering, manual refresh flow, and storage listeners.
+- `extension/manifest.json`: extension manifest and permissions.
+- `extension/background.js`: automatic refresh logic, Claude API fetching, storage, and badge updates.
+- `extension/popup.html`: popup markup.
+- `extension/popup.css`: popup styling.
+- `extension/popup.js`: popup rendering, manual refresh flow, and storage listeners.
 
 ## Privacy
 
@@ -105,7 +105,7 @@ For a permanent install, use the published add-on at <https://addons.mozilla.org
 
 ## Contributing
 
-Bug reports and feature requests are welcome via [GitHub Issues](https://github.com/claude-monitor/claude-monitor/issues).
+Bug reports and feature requests are welcome via [GitHub Issues](https://github.com/claude-monitor/claude-monitor-browser-extension/issues).
 
 Pull requests are welcome. For non-trivial changes, please open an issue first to discuss the scope.
 
