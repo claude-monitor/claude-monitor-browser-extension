@@ -105,7 +105,7 @@ For a permanent install, use the published add-on at <https://addons.mozilla.org
 
 ## Contributing
 
-Bug reports and feature requests are welcome via [GitHub Issues](https://github.com/msadofschi/claudetrack/issues).
+Bug reports and feature requests are welcome via [GitHub Issues](https://github.com/claude-monitor/claude-monitor/issues).
 
 Pull requests are welcome. For non-trivial changes, please open an issue first to discuss the scope.
 

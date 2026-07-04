@@ -1,7 +1,7 @@
 # Security Policy
 
 This document describes the security model of **Claude Usage Monitor**
-(`msadofschi/claudetrack`), how to report a vulnerability, and an honest threat
+(`claude-monitor/claude-monitor`), how to report a vulnerability, and an honest threat
 model — including what a worst-case compromise could and could not do.
 
 The extension is open source and unminified. Every claim below is checkable
