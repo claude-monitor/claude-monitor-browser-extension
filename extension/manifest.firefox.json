@@ -1,9 +1,9 @@
 {
   "manifest_version": 3,
-  "name": "Claude Usage: Session, Weekly & Design",
+  "name": "Claude Usage: Fable, Session & Weekly Limits",
   "short_name": "Claude Usage",
-  "version": "1.9.1",
-  "description": "Track your Claude.ai usage in real time. See session and weekly limits, reset times, and color-coded progress — in your toolbar.",
+  "version": "1.10.0",
+  "description": "The first tracker for Claude's Fable weekly cap. Session & weekly limits, reset times, and 80%/95% alerts — in your toolbar.",
   "author": "Digital Advanced Solutions",
   "browser_specific_settings": {
     "gecko": {
@@ -14,7 +14,7 @@
       }
     }
   },
-  "permissions": ["storage", "alarms"],
+  "permissions": ["storage", "alarms", "notifications"],
   "host_permissions": [
     "https://claude.ai/api/organizations",
     "https://claude.ai/api/organizations/*/usage",
@@ -23,6 +23,10 @@
     "https://claude.ai/v1/code/routines/run-budget"
   ],
   "homepage_url": "https://claude-monitor.com/",
+  "options_ui": {
+    "page": "options.html",
+    "open_in_tab": false
+  },
   "background": {
     "scripts": ["background.js"]
   },

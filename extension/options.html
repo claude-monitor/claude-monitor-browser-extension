@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Claude Usage Monitor — Settings</title>
+  <style>
+    /* Standalone styles: this page renders embedded in the browser's own
+       extension UI (white or dark chrome), so it follows the system scheme
+       instead of the popup's selected theme. */
+    :root {
+      --bg: #ffffff; --card: #faf7f3; --border: #e7e2db;
+      --text: #1c1813; --text-sec: #6b6258; --accent: #b85a36;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #201a16; --card: #2a221d; --border: #45392f;
+        --text: #f4eee7; --text-sec: #b9ada1; --accent: #d97757;
+      }
+    }
+    body {
+      margin: 0;
+      padding: 16px;
+      min-width: 320px;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-size: 13px;
+    }
+    h1 { font-size: 14px; margin: 0 0 12px; }
+    .section {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 4px 14px;
+    }
+    .row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 9px 0;
+    }
+    .row + .row { border-top: 1px solid var(--border); }
+    input[type="checkbox"] { accent-color: var(--accent); width: 15px; height: 15px; }
+    input[type="number"] {
+      width: 56px;
+      padding: 3px 6px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 13px;
+    }
+    input[type="number"]:focus { outline: none; border-color: var(--accent); }
+    .hint { color: var(--text-sec); font-size: 11.5px; margin: 8px 2px 14px; }
+    .actions { display: flex; align-items: center; gap: 10px; }
+    button {
+      padding: 6px 12px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 12px;
+      cursor: pointer;
+    }
+    button:hover { border-color: var(--accent); }
+    #status { color: var(--accent); font-size: 12px; }
+  </style>
+</head>
+<body>
+
+  <h1>Notifications</h1>
+  <div class="section">
+    <div class="row">
+      <label for="notifEnabled">Alert me when usage crosses a threshold</label>
+      <input type="checkbox" id="notifEnabled" />
+    </div>
+    <div class="row">
+      <label for="warnAt">Warning threshold</label>
+      <span><input type="number" id="warnAt" min="1" max="100" step="1" /> %</span>
+    </div>
+    <div class="row">
+      <label for="critAt">Critical threshold</label>
+      <span><input type="number" id="critAt" min="1" max="100" step="1" /> %</span>
+    </div>
+  </div>
+  <p class="hint">Applies to the session, weekly and per-model caps. Each alert fires once per reset window.</p>
+
+  <div class="actions">
+    <button id="testBtn">Send test notification</button>
+    <span id="status" role="status"></span>
+  </div>
+
+  <script src="options.js"></script>
+</body>
+</html>

@@ -224,6 +224,22 @@ body {
 .refresh-btn:active { transform: scale(0.92); }
 .refresh-btn.spinning svg { animation: spin 0.7s linear infinite; }
 
+.settings-btn {
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--border-lt);
+  border-radius: var(--radius-sm);
+  background: var(--bg-2);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-sec);
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.settings-btn:hover { background: var(--bg-3); color: var(--text-pri); border-color: var(--accent); }
+
 @keyframes spin { to { transform: rotate(360deg); } }
 
 /* ── View menu (show / hide optional cards) ──────────────────────────────── */
@@ -653,6 +669,45 @@ body {
 
 /* Dim cards when data is stale due to auth failure */
 .cards.dimmed .card { opacity: 0.5; }
+
+/* ── Review nudge ────────────────────────────────────────────────────────── */
+
+.review-nudge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 14px;
+  border-top: 1px solid var(--border);
+  background: var(--bg-1);
+  font-size: 11px;
+  color: var(--text-sec);
+}
+
+.review-nudge-text { flex: 1; }
+
+.review-nudge-cta {
+  background: none;
+  border: none;
+  padding: 2px;
+  cursor: pointer;
+  color: var(--accent-bright);
+  font-size: 11px;
+  font-family: inherit;
+}
+
+.review-nudge-cta:hover { text-decoration: underline; }
+
+.review-nudge-dismiss {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-dim);
+  font-size: 11px;
+  padding: 2px 4px;
+  line-height: 1;
+}
+
+.review-nudge-dismiss:hover { color: var(--text-pri); }
 
 /* ── Footer ──────────────────────────────────────────────────────────────── */
 

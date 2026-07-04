@@ -21,7 +21,14 @@ const ANTHROPIC_VERSION  = '2023-06-01';
 chrome.runtime.onInstalled.addListener(() => {
   setupAlarm();
   refreshUsage();   // fetch immediately on install/update
+  markInstalledAt();
 });
+
+// First-seen timestamp drives the popup's review nudge (~1 week after install).
+async function markInstalledAt() {
+  const { installedAt } = await chrome.storage.local.get('installedAt');
+  if (!installedAt) await chrome.storage.local.set({ installedAt: Date.now() });
+}
 
 chrome.runtime.onStartup.addListener(() => {
   setupAlarm();
@@ -431,6 +438,110 @@ function parseApiTime(value) {
   return Number.isFinite(epoch) ? epoch : null;
 }
 
+// ── Threshold notifications ───────────────────────────────────────────────
+
+const NOTIF_DEFAULTS = { enabled: true, warnAt: 80, critAt: 95 };
+
+// Buckets that fire alerts, with the display name used in the notification copy.
+const NOTIF_BUCKETS = [
+  ['session', 'Claude session'],
+  ['weekly',  'Claude weekly limit'],
+  ['fable',   'Fable weekly cap'],
+  ['opus',    'Opus weekly cap'],
+  ['sonnet',  'Sonnet weekly cap'],
+  ['design',  'Claude Design weekly cap'],
+];
+
+// Settings are written by options.html; re-read on every poll so changes apply
+// on the next refresh without messaging. Clamped here too, in case storage was
+// edited outside the options page.
+async function getNotifSettings() {
+  const { notifSettings } = await chrome.storage.local.get('notifSettings');
+  const merged = { ...NOTIF_DEFAULTS, ...(notifSettings || {}) };
+  const warnAt = clampThreshold(merged.warnAt, NOTIF_DEFAULTS.warnAt);
+  const critAt = Math.max(warnAt, clampThreshold(merged.critAt, NOTIF_DEFAULTS.critAt));
+  return { enabled: Boolean(merged.enabled), warnAt, critAt };
+}
+
+function clampThreshold(value, fallback) {
+  const num = Math.round(Number(value));
+  if (!Number.isFinite(num)) return fallback;
+  return Math.min(100, Math.max(1, num));
+}
+
+// Notify on the first crossing of each threshold per reset window. The window
+// is identified by its resets_at timestamp: when it changes (new window) the
+// flags clear, so each window alerts at most once per threshold — no repeat
+// notifications on every poll while usage stays above the threshold.
+async function checkThresholdNotifications(data) {
+  const settings = await getNotifSettings();
+  if (!settings.enabled) return;
+
+  const { notifState } = await chrome.storage.local.get('notifState');
+  const state = (notifState && typeof notifState === 'object') ? notifState : {};
+  let dirty = false;
+
+  for (const [key, label] of NOTIF_BUCKETS) {
+    const pct = data?.[key]?.percentage;
+    if (pct === null || pct === undefined) continue;
+    const windowId = data[key].resetTime ?? 'no-reset';
+    let flags = state[key];
+    if (!flags || flags.windowId !== windowId) {
+      flags = { windowId, warned: false, critical: false };
+      state[key] = flags;
+      dirty = true;
+    }
+    if (pct >= settings.critAt && !flags.critical) {
+      flags.critical = true;
+      flags.warned = true; // don't follow a critical alert with a late warning
+      dirty = true;
+      showThresholdNotification(key, label, pct, data[key].resetTime, true);
+    } else if (pct >= settings.warnAt && !flags.warned) {
+      flags.warned = true;
+      dirty = true;
+      showThresholdNotification(key, label, pct, data[key].resetTime, false);
+    }
+  }
+
+  if (dirty) await chrome.storage.local.set({ notifState: state });
+}
+
+function showThresholdNotification(key, label, pct, resetTime, critical) {
+  const resetsIn = formatTimeUntil(resetTime);
+  const message = critical
+    ? (resetsIn ? `Almost at the limit — resets in ${resetsIn}` : 'Almost at the limit')
+    : (resetsIn ? `Resets in ${resetsIn}` : 'Approaching the limit');
+  // Firefox supports only the basic subset of notification options — no
+  // priority/buttons — so stick to the common fields.
+  chrome.notifications.create(`usage-${key}-${critical ? 'crit' : 'warn'}`, {
+    type: 'basic',
+    iconUrl: 'icons/icon128.png',
+    title: `${label} at ${Math.round(pct)}%`,
+    message,
+  });
+}
+
+// d/h/m countdown for the notification copy (the popup has its own long form).
+function formatTimeUntil(epochMs) {
+  if (!epochMs) return null;
+  const diff = epochMs - Date.now();
+  if (diff <= 0) return null;
+  const totalSec = Math.floor(diff / 1000);
+  const d = Math.floor(totalSec / 86400);
+  const h = Math.floor((totalSec % 86400) / 3600);
+  const m = Math.floor((totalSec % 3600) / 60);
+  if (d > 0) return `${d}d ${h}h`;
+  if (h > 0) return `${h}h ${m}m`;
+  return `${m}m`;
+}
+
+// A click on any usage alert opens the official usage page.
+chrome.notifications.onClicked.addListener((id) => {
+  if (!id.startsWith('usage-')) return;
+  chrome.notifications.clear(id);
+  chrome.tabs.create({ url: 'https://claude.ai/settings/usage', active: true });
+});
+
 // ── Badge helpers ─────────────────────────────────────────────────────────
 
 async function persistAndBadge(data) {
@@ -441,6 +552,8 @@ async function persistAndBadge(data) {
   next.lastUpdated = Date.now();
   await chrome.storage.local.set({ claudeUsage: next });
   updateBadge(next);
+  // Alerts ride on the fresh data but must never break the refresh itself.
+  try { await checkThresholdNotifications(next); } catch { /* data is already persisted */ }
   return true;
 }
 
