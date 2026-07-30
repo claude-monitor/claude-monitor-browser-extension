@@ -18,11 +18,22 @@ const ANTHROPIC_VERSION  = '2023-06-01';
 
 // ── Lifecycle ─────────────────────────────────────────────────────────────
 
-chrome.runtime.onInstalled.addListener(() => {
+chrome.runtime.onInstalled.addListener((details) => {
   setupAlarm();
   refreshUsage();   // fetch immediately on install/update
   markInstalledAt();
+  if (details?.reason === 'update') markWindowsPromoOnUpdate();
 });
+
+// One-shot flag for the Windows companion promo in the popup. An update reaches
+// the whole installed base at once instead of waiting for each user to age into
+// the time-based nudge. The version is recorded so the click can be attributed
+// to the release that surfaced it; a previous dismissal is never overridden.
+async function markWindowsPromoOnUpdate() {
+  const { winPromoDismissed } = await chrome.storage.local.get('winPromoDismissed');
+  if (winPromoDismissed) return;
+  await chrome.storage.local.set({ winPromoUpdate: chrome.runtime.getManifest().version });
+}
 
 // First-seen timestamp drives the popup's review nudge (~1 week after install).
 async function markInstalledAt() {

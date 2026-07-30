@@ -34,6 +34,11 @@ const intervalSelect  = $('intervalSelect');
 const settingsBtn     = $('settingsBtn');
 const subcapNote    = $('subcapNote');
 
+// Windows companion promo
+const winPromo         = $('winPromo');
+const winPromoCta      = $('winPromoCta');
+const winPromoDismiss  = $('winPromoDismiss');
+
 // Review nudge
 const reviewNudge      = $('reviewNudge');
 const reviewRateBtn    = $('reviewRateBtn');
@@ -829,8 +834,8 @@ function loadData() {
   }
 
   chrome.storage.local.get(
-    ['claudeUsage', 'refreshInterval', 'authBackoff', 'cardPrefs', 'claudePlan', 'theme', 'layout', 'installedAt', 'reviewNudgeDismissed', 'usageHistory', 'showSparkline'],
-    ({ claudeUsage, refreshInterval, authBackoff, cardPrefs: storedPrefs, claudePlan, theme, layout, installedAt, reviewNudgeDismissed, usageHistory, showSparkline: sparkPref }) => {
+    ['claudeUsage', 'refreshInterval', 'authBackoff', 'cardPrefs', 'claudePlan', 'theme', 'layout', 'installedAt', 'reviewNudgeDismissed', 'usageHistory', 'showSparkline', 'winPromoDismissed', 'winPromoUpdate'],
+    ({ claudeUsage, refreshInterval, authBackoff, cardPrefs: storedPrefs, claudePlan, theme, layout, installedAt, reviewNudgeDismissed, usageHistory, showSparkline: sparkPref, winPromoDismissed, winPromoUpdate }) => {
       historySeries = Array.isArray(usageHistory) ? usageHistory : [];
       showSparkline = sparkPref !== false;   // absent means on
       renderSparkToggle();
@@ -846,6 +851,8 @@ function loadData() {
       render(claudeUsage || null);
       renderAuthState(authBackoff, claudeUsage?.lastUpdated);
       renderReviewNudge(installedAt, reviewNudgeDismissed, Boolean(claudeUsage));
+      // After the review nudge: it decides whether there is room for this one.
+      renderWinPromo(installedAt, winPromoDismissed, winPromoUpdate, Boolean(claudeUsage));
     }
   );
 }
@@ -861,6 +868,47 @@ function renderReviewNudge(installedAt, dismissed, hasData) {
 function dismissReviewNudge() {
   chrome.storage.local.set({ reviewNudgeDismissed: true });
   if (reviewNudge) reviewNudge.style.display = 'none';
+}
+
+// ── Windows companion promo ───────────────────────────────────────────────
+// What the extension structurally cannot do: show usage with the browser shut,
+// and reopen Claude Code when a limit resets. That gap is the whole pitch.
+
+const WIN_PROMO_AFTER_MS = 14 * 24 * 60 * 60 * 1000;  // clear of the 7-day review ask
+const WIN_PROMO_PRODUCT_ID = '9NNZK4V8CZM0';
+const IS_WINDOWS = navigator.userAgent.includes('Windows NT');
+
+let winPromoCid = 'ext-popup';
+
+// cid is the only thing Partner Center's acquisitions report splits campaigns
+// by, so every surface carries its own and none of them ship without one.
+function winPromoUrl(cid) {
+  return `https://apps.microsoft.com/detail/${WIN_PROMO_PRODUCT_ID}?cid=${cid}`;
+}
+
+// Priority is explicit and the review ask wins: it feeds the extension's own
+// distribution, it resolves in a single interaction, and two asks stacked in a
+// 320px popup read as spam. This waits for the review nudge to be settled.
+function renderWinPromo(installedAt, dismissed, updateVersion, hasData) {
+  if (!winPromo) return;
+  const reviewShowing = reviewNudge && reviewNudge.style.display !== 'none';
+  const due = updateVersion || (installedAt && (Date.now() - installedAt) >= WIN_PROMO_AFTER_MS);
+  winPromoCid = updateVersion ? `ext-update-${majorMinor(updateVersion)}` : 'ext-popup';
+  const show = IS_WINDOWS && !dismissed && !reviewShowing && Boolean(due) && hasData;
+  winPromo.style.display = show ? 'block' : 'none';
+}
+
+// 1.12.0 -> 1.12. Patch releases of the same minor are the same campaign, so the
+// report stays readable instead of fragmenting into one row per build.
+function majorMinor(version) {
+  const parts = String(version).split('.');
+  return parts.length >= 2 ? `${parts[0]}.${parts[1]}` : String(version);
+}
+
+function dismissWinPromo() {
+  chrome.storage.local.set({ winPromoDismissed: true });
+  chrome.storage.local.remove('winPromoUpdate');
+  if (winPromo) winPromo.style.display = 'none';
 }
 
 // ── Refresh flow ──────────────────────────────────────────────────────────
@@ -1002,6 +1050,16 @@ reviewRateBtn?.addEventListener('click', () => {
 });
 
 reviewDismissBtn?.addEventListener('click', dismissReviewNudge);
+
+// Only ever opens a tab from a real click, never on its own: an unprompted tab
+// is exactly what stores flag as unexpected behaviour.
+winPromoCta?.addEventListener('click', () => {
+  const url = winPromoUrl(winPromoCid);
+  dismissWinPromo();
+  chrome.tabs.create({ url, active: true });
+});
+
+winPromoDismiss?.addEventListener('click', dismissWinPromo);
 
 // Listen for storage changes while popup is open
 chrome.storage.onChanged.addListener((changes) => {
