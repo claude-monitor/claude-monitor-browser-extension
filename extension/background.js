@@ -61,6 +61,12 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
       .catch((error) => sendResponse({ ok: false, reason: String(error?.message || error) }));
     return true;
   }
+  if (msg.type === 'PRUNE_HISTORY') {
+    pruneStoredHistory()
+      .then((count) => sendResponse({ ok: true, count }))
+      .catch((error) => sendResponse({ ok: false, reason: String(error?.message || error) }));
+    return true;
+  }
   if (msg.type === 'SET_INTERVAL') {
     const minutes = msg.minutes;
     chrome.storage.local.set({ refreshInterval: minutes }).then(() => {
@@ -345,6 +351,7 @@ function mapExtraUsage(extra) {
     resetTime: null,
     outOfCredits: usedCredits >= monthlyLimit,
     disabledReason: typeof extra.disabled_reason === 'string' ? extra.disabled_reason : null,
+    source: 'extra_usage',
   };
 }
 
@@ -407,6 +414,7 @@ function mapOverageSpendLimit(data) {
     resetTime: parseApiTime(data.disabled_until),
     outOfCredits: Boolean(data.out_of_credits),
     disabledReason: typeof data.disabled_reason === 'string' ? data.disabled_reason : null,
+    source: 'overage_spend_limit',
   };
 }
 
@@ -545,6 +553,97 @@ chrome.notifications?.onClicked.addListener((id) => {
   chrome.tabs.create({ url: 'https://claude.ai/settings/usage', active: true });
 });
 
+// ── Usage history ─────────────────────────────────────────────────────────
+// Local time series behind the popup sparkline and the JSON/CSV export. It
+// never leaves the device and holds no chat, project, cookie or token data.
+
+const HISTORY_KEY          = 'usageHistory';
+const HISTORY_MIN_GAP_MS   = 10 * 60 * 1000;  // floor between stored samples
+const HISTORY_MAX_SAMPLES  = 5000;            // ~30d at one sample / 10 min
+const HISTORY_DEFAULT_DAYS = 30;
+const HISTORY_MAX_DAYS     = 30;              // free-tier retention cap
+
+const HISTORY_BUCKETS = ['session', 'weekly', 'fable', 'opus', 'sonnet', 'design'];
+
+// Written by options.html; re-read on every append so a change applies at once.
+async function getHistorySettings() {
+  const { historySettings } = await chrome.storage.local.get('historySettings');
+  const days = Math.round(Number(historySettings?.retentionDays));
+  return {
+    retentionDays: Number.isFinite(days)
+      ? Math.min(HISTORY_MAX_DAYS, Math.max(1, days))
+      : HISTORY_DEFAULT_DAYS,
+  };
+}
+
+// One sample per successful capture. A failed refresh writes nothing: a gap in
+// the series means "we could not read", never "usage was zero". Sampling is
+// throttled so a 1-minute poll interval doesn't blow up storage, except when a
+// reset window rolls over — that point marks the cycle boundary and must survive.
+async function appendHistorySample(data) {
+  const settings = await getHistorySettings();
+  const stored = await chrome.storage.local.get(HISTORY_KEY);
+  const history = Array.isArray(stored[HISTORY_KEY]) ? stored[HISTORY_KEY] : [];
+  const sample = await buildHistorySample(data);
+  const last = history[history.length - 1] || null;
+  if (last && (sample.t - last.t) < HISTORY_MIN_GAP_MS && !resetWindowChanged(last, sample)) return;
+  history.push(sample);
+  await chrome.storage.local.set({ [HISTORY_KEY]: pruneHistory(history, settings.retentionDays) });
+}
+
+// Money stays in major units, exactly as the snapshot already normalized it from
+// the API's cents. The export declares currency and units so it can't be misread.
+async function buildHistorySample(data) {
+  const { claudePlan } = await chrome.storage.local.get('claudePlan');
+  const buckets = {};
+  for (const key of HISTORY_BUCKETS) {
+    buckets[key] = {
+      pct: data?.[key]?.percentage ?? null,
+      reset: data?.[key]?.resetTime ?? null,
+    };
+  }
+  return {
+    t: Date.now(),
+    v: chrome.runtime.getManifest().version,
+    plan: claudePlan?.label ?? null,
+    stale: false,  // only live reads are appended; failures show up as gaps
+    buckets,
+    spend: data?.extra ? {
+      used: data.extra.usedCredits,
+      limit: data.extra.monthlyLimit,
+      currency: data.extra.currency,
+      source: data.extra.source ?? null,
+    } : null,
+    prepaid: data?.prepaidBalance ? {
+      amount: data.prepaidBalance.amount,
+      currency: data.prepaidBalance.currency,
+    } : null,
+  };
+}
+
+function resetWindowChanged(prev, next) {
+  return HISTORY_BUCKETS.some(
+    key => (prev?.buckets?.[key]?.reset ?? null) !== (next.buckets[key].reset ?? null),
+  );
+}
+
+function pruneHistory(history, retentionDays) {
+  const cutoff = Date.now() - retentionDays * 24 * 60 * 60 * 1000;
+  const kept = history.filter(s => s && Number.isFinite(s.t) && s.t >= cutoff);
+  return kept.length > HISTORY_MAX_SAMPLES ? kept.slice(kept.length - HISTORY_MAX_SAMPLES) : kept;
+}
+
+// Lowering the retention setting has to take effect immediately, not on the
+// next poll, so the options page asks for a prune right after saving.
+async function pruneStoredHistory() {
+  const settings = await getHistorySettings();
+  const stored = await chrome.storage.local.get(HISTORY_KEY);
+  const history = Array.isArray(stored[HISTORY_KEY]) ? stored[HISTORY_KEY] : [];
+  const kept = pruneHistory(history, settings.retentionDays);
+  await chrome.storage.local.set({ [HISTORY_KEY]: kept });
+  return kept.length;
+}
+
 // ── Badge helpers ─────────────────────────────────────────────────────────
 
 async function persistAndBadge(data) {
@@ -557,6 +656,8 @@ async function persistAndBadge(data) {
   updateBadge(next);
   // Alerts ride on the fresh data but must never break the refresh itself.
   try { await checkThresholdNotifications(next); } catch { /* data is already persisted */ }
+  // Same posture for the history append: best-effort, never blocks a refresh.
+  try { await appendHistorySample(next); } catch { /* data is already persisted */ }
   return true;
 }
 
@@ -630,6 +731,9 @@ function sanitizeExtra(extra) {
     resetTime: Number.isFinite(resetTime) ? resetTime : null,
     outOfCredits: Boolean(extra.outOfCredits),
     disabledReason: typeof extra.disabledReason === 'string' ? extra.disabledReason : null,
+    // Which endpoint produced this reading. The two are not interchangeable
+    // (extra_usage goes null on suspension), so the history records the origin.
+    source: typeof extra.source === 'string' ? extra.source : null,
   };
 }
 
