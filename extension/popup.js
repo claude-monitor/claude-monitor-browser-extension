@@ -399,7 +399,11 @@ function render(data) {
       : '';
 
     // Prefer the API's real reset (disabled_until); else credits reset on the 1st.
-    const reset  = extra.resetTime || firstOfNextMonth();
+    // Only if it is still ahead: disabled_until keeps the timestamp of a past
+    // cycle once the account is re-enabled, and rendering it would show an
+    // expired date as if the reset were imminent.
+    const apiReset = Number(extra.resetTime);
+    const reset  = (Number.isFinite(apiReset) && apiReset > Date.now()) ? apiReset : firstOfNextMonth();
     const xReset = formatTimeUntil(reset);
     extraReset.textContent = xReset ? `${xReset} (${formatShortDate(reset)})` : 'Resets monthly';
   } else {
