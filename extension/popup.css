@@ -352,6 +352,10 @@ body {
 }
 
 .view-check svg { width: 10px; height: 10px; color: var(--accent-ink); display: none; }
+/* Display option rather than a metric: sits under the layouts, so it needs the
+   breathing room the metric list gets from its container. */
+.view-menu-opt { margin-top: 3px; }
+
 .view-menu-item.on .view-check { background: var(--accent); border-color: var(--accent); }
 .view-menu-item.on .view-check svg { display: block; }
 

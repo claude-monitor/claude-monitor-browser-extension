@@ -55,6 +55,7 @@ const weeklyLabel = $('weeklyLabel');
 const sessionSpark = $('sessionSpark');
 const weeklySpark  = $('weeklySpark');
 const extraSpark   = $('extraSpark');
+const sparkToggle  = $('sparkToggle');
 
 // Fable
 const fableCard  = $('fableCard');
@@ -449,8 +450,16 @@ function gapFor(spanMs) {
 }
 
 let historySeries = [];
+// On by default: the curve is the reason the history is collected at all.
+let showSparkline = true;
 
 function renderSparklines(data) {
+  if (!showSparkline) {
+    for (const el of [sessionSpark, weeklySpark, extraSpark]) {
+      if (el) el.style.display = 'none';
+    }
+    return;
+  }
   renderSpark(
     sessionSpark,
     seriesFor(windowStart(data?.session?.resetTime, SPARK_SESSION_SPAN), s => s.buckets?.session?.pct),
@@ -553,6 +562,19 @@ function splitOnGaps(points, gapMs) {
   }
   segments.push(current);
   return segments;
+}
+
+function renderSparkToggle() {
+  sparkToggle?.classList.toggle('on', showSparkline);
+}
+
+function toggleSparkline() {
+  showSparkline = !showSparkline;
+  chrome.storage.local.set({ showSparkline });
+  renderSparkToggle();
+  // Not guarded on lastData: hiding the curves needs no usage data, and the
+  // series itself is enough to draw them back.
+  renderSparklines(lastData);
 }
 
 function pctText(value) { return `${Math.round(value)}%`; }
@@ -807,9 +829,11 @@ function loadData() {
   }
 
   chrome.storage.local.get(
-    ['claudeUsage', 'refreshInterval', 'authBackoff', 'cardPrefs', 'claudePlan', 'theme', 'layout', 'installedAt', 'reviewNudgeDismissed', 'usageHistory'],
-    ({ claudeUsage, refreshInterval, authBackoff, cardPrefs: storedPrefs, claudePlan, theme, layout, installedAt, reviewNudgeDismissed, usageHistory }) => {
+    ['claudeUsage', 'refreshInterval', 'authBackoff', 'cardPrefs', 'claudePlan', 'theme', 'layout', 'installedAt', 'reviewNudgeDismissed', 'usageHistory', 'showSparkline'],
+    ({ claudeUsage, refreshInterval, authBackoff, cardPrefs: storedPrefs, claudePlan, theme, layout, installedAt, reviewNudgeDismissed, usageHistory, showSparkline: sparkPref }) => {
       historySeries = Array.isArray(usageHistory) ? usageHistory : [];
+      showSparkline = sparkPref !== false;   // absent means on
+      renderSparkToggle();
       applyTheme(theme);
       if (theme) mirrorTheme(theme);
       applyLayout(layout);
@@ -907,6 +931,14 @@ viewBtn?.addEventListener('click', (e) => {
 });
 
 viewMenu?.addEventListener('click', (e) => {
+  // Display options carry data-opt and are not cards: "Deselect all" must not
+  // sweep them, and they have no percentage to show.
+  const opt = e.target.closest('[data-opt]');
+  if (opt) {
+    e.stopPropagation();
+    if (opt.dataset.opt === 'spark') toggleSparkline();
+    return;
+  }
   const item = e.target.closest('.view-menu-item');
   if (!item) return;
   e.stopPropagation();
@@ -998,6 +1030,11 @@ chrome.storage.onChanged.addListener((changes) => {
   if (changes.layout) {
     applyLayout(changes.layout.newValue);
     if (changes.layout.newValue) mirrorLayout(changes.layout.newValue);
+  }
+  if (changes.showSparkline) {
+    showSparkline = changes.showSparkline.newValue !== false;
+    renderSparkToggle();
+    renderSparklines(lastData);
   }
 });
 
