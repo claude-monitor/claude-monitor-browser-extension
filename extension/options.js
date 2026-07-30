@@ -240,3 +240,17 @@ exportCsvBtn.addEventListener('click', async () => {
   downloadFile(`claude-usage-history-${exportStamp()}.csv`, 'text/csv', buildCsvExport(history));
   flashStatus('Exported');
 });
+
+// ─── Windows companion promo ─────────────────────────────────────────────────
+// Shown only on Windows, where the app can actually be installed. The cid is
+// what Partner Center splits campaigns by, so this surface carries its own.
+
+const WIN_PROMO_URL = 'https://apps.microsoft.com/detail/9NNZK4V8CZM0?cid=ext-options';
+
+const winPromoRow  = document.getElementById('winPromoRow');
+const winPromoLink = document.getElementById('winPromoLink');
+
+if (navigator.userAgent.includes('Windows NT') && winPromoRow && winPromoLink) {
+  winPromoLink.href = WIN_PROMO_URL;
+  winPromoRow.style.display = 'block';
+}

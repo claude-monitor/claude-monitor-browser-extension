@@ -77,6 +77,16 @@
     }
     button:hover { border-color: var(--accent); }
     #status { color: var(--accent); font-size: 12px; }
+    .promo {
+      margin-top: 22px;
+      padding-top: 14px;
+      border-top: 1px solid var(--border);
+      color: var(--text-sec);
+      font-size: 11.5px;
+      line-height: 1.5;
+    }
+    .promo b { color: var(--text); }
+    .promo a { display: inline-block; margin-top: 5px; color: var(--accent); }
   </style>
 </head>
 <body>
@@ -128,6 +138,15 @@
     <button id="exportJsonBtn">Export JSON</button>
     <button id="exportCsvBtn">Export CSV</button>
     <button id="clearHistoryBtn">Clear history</button>
+  </div>
+
+  <!-- Windows only; the href is set in options.js so the campaign id lives in
+       one place next to the other surfaces. -->
+  <div class="promo" id="winPromoRow" style="display:none">
+    <span><b>Also on Windows.</b> UsagePeek shows your usage next to the clock with the
+    browser closed, and reopens your Claude Code projects the moment a limit resets.</span>
+    <br />
+    <a id="winPromoLink" href="#" target="_blank" rel="noopener">Try it free for 7 days →</a>
   </div>
 
   <script src="options.js"></script>

@@ -744,6 +744,63 @@ body {
 
 .review-nudge-dismiss:hover { color: var(--text-pri); }
 
+/* ── Windows companion promo ─────────────────────────────────────────────── */
+/* Taller than the review nudge because it has to make an argument, not ask a
+   favour. Same footer-adjacent placement so it never displaces usage data. */
+
+.promo-nudge {
+  position: relative;
+  padding: 10px 14px 11px;
+  border-top: 1px solid var(--border);
+  background: var(--bg-1);
+}
+
+.promo-nudge-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--text-pri);
+}
+
+.promo-nudge-head svg { color: var(--accent-bright); flex-shrink: 0; }
+
+.promo-nudge-body {
+  margin: 3px 0 7px;
+  padding-right: 16px;   /* clear of the dismiss button */
+  font-size: 11px;
+  line-height: 1.45;
+  color: var(--text-sec);
+}
+
+.promo-nudge-cta {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: var(--accent-bright);
+  font-size: 11px;
+  font-family: inherit;
+}
+
+.promo-nudge-cta:hover { text-decoration: underline; }
+
+.promo-nudge-dismiss {
+  position: absolute;
+  top: 7px;
+  right: 9px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-dim);
+  font-size: 11px;
+  padding: 2px 4px;
+  line-height: 1;
+}
+
+.promo-nudge-dismiss:hover { color: var(--text-pri); }
+
 /* ── Footer ──────────────────────────────────────────────────────────────── */
 
 .footer {

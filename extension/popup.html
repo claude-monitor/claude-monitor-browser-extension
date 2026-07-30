@@ -388,6 +388,23 @@
       <button class="review-nudge-dismiss" id="reviewDismissBtn" title="Don't show again" aria-label="Dismiss">✕</button>
     </div>
 
+    <!-- Windows companion promo. Windows only, never shown alongside the review
+         ask, dismissible forever. Opens a tab only on an explicit click. -->
+    <div class="promo-nudge" id="winPromo" style="display:none">
+      <button class="promo-nudge-dismiss" id="winPromoDismiss" title="Don't show again" aria-label="Dismiss">✕</button>
+      <div class="promo-nudge-head">
+        <svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="3" width="20" height="14" rx="2"/>
+          <line x1="8" y1="21" x2="16" y2="21"/>
+          <line x1="12" y1="17" x2="12" y2="21"/>
+        </svg>
+        Also on Windows
+      </div>
+      <div class="promo-nudge-body">UsagePeek shows your usage next to the clock with the browser closed, and reopens your Claude Code projects the moment a limit resets.</div>
+      <button class="promo-nudge-cta" id="winPromoCta">Try it free for 7 days →</button>
+    </div>
+
     <!-- ── Footer ────────────────────────────────────────────────────── -->
     <div class="footer">
       <span class="last-updated" id="lastUpdated" aria-live="polite">Never updated</span>
