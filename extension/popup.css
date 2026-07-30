@@ -352,6 +352,10 @@ body {
 }
 
 .view-check svg { width: 10px; height: 10px; color: var(--accent-ink); display: none; }
+/* Display option rather than a metric: sits under the layouts, so it needs the
+   breathing room the metric list gets from its container. */
+.view-menu-opt { margin-top: 3px; }
+
 .view-menu-item.on .view-check { background: var(--accent); border-color: var(--accent); }
 .view-menu-item.on .view-check svg { display: block; }
 
@@ -526,6 +530,35 @@ body {
 
 .progress-fill.yellow { background: var(--yellow); }
 .progress-fill.red    { background: var(--red); }
+
+/* ── Sparkline ───────────────────────────────────────────────────────────── */
+/* Stretched to the card width via preserveAspectRatio="none", so strokes use
+   non-scaling-stroke to keep an even weight regardless of the popup width. */
+
+.spark {
+  display: block;
+  width: 100%;
+  height: 22px;
+  margin: -4px 0 7px;
+}
+
+.spark-line {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.spark-area { fill: var(--accent); opacity: 0.12; stroke: none; }
+
+.spark-extra { height: 18px; margin: 5px 0 0; }
+
+/* The ring layouts hide the bar and centre the cards; a full-width curve does
+   not belong there. */
+:root[data-layout="hybrid"] .spark,
+:root[data-layout="bento"]  .spark { display: none !important; }
 
 /* ── Reset row ───────────────────────────────────────────────────────────── */
 

@@ -123,6 +123,13 @@
                 <span class="layout-check"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
               </button>
             </div>
+            <button class="view-menu-item view-menu-opt" data-opt="spark" id="sparkToggle">
+              <span class="view-check"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+              <span class="view-menu-label">
+                <svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+                Trend line
+              </span>
+            </button>
           </div>
           <div class="view-menu-divider"></div>
           <div class="view-menu-section">
@@ -138,11 +145,11 @@
           </div>
         </div>
       </div>
-      <button class="settings-btn" id="settingsBtn" title="Notification settings">
+      <button class="settings-btn" id="settingsBtn" title="Settings and history">
         <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none"
              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
-          <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+          <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/>
+          <circle cx="12" cy="12" r="3"/>
         </svg>
       </button>
       <button class="refresh-btn" id="refreshBtn" title="Refresh usage data">
@@ -190,6 +197,8 @@
       <div class="progress-track extra-banner-track">
         <div class="progress-fill" id="extraBar" style="width:0%"></div>
       </div>
+      <svg class="spark spark-extra" id="extraSpark" viewBox="0 0 100 24" preserveAspectRatio="none"
+           role="img" style="display:none"></svg>
       <div class="extra-banner-foot">
         <span class="extra-banner-balance" id="extraBalance"></span>
         <span class="extra-banner-reset" id="extraReset"></span>
@@ -215,6 +224,8 @@
         <div class="progress-track">
           <div class="progress-fill" id="sessionBar" style="width:0%"></div>
         </div>
+        <svg class="spark" id="sessionSpark" viewBox="0 0 100 24" preserveAspectRatio="none"
+             role="img" style="display:none"></svg>
         <div class="reset-row">
           <span id="sessionReset">—</span>
         </div>
@@ -241,6 +252,8 @@
         <div class="progress-track">
           <div class="progress-fill" id="weeklyBar" style="width:0%"></div>
         </div>
+        <svg class="spark" id="weeklySpark" viewBox="0 0 100 24" preserveAspectRatio="none"
+             role="img" style="display:none"></svg>
         <div class="reset-row">
           <span id="weeklyReset">—</span>
         </div>
@@ -370,8 +383,8 @@
 
     <!-- Discreet review ask; shown ~1 week after install, dismissible forever -->
     <div class="review-nudge" id="reviewNudge" style="display:none">
-      <span class="review-nudge-text">Finding this useful?</span>
-      <button class="review-nudge-cta" id="reviewRateBtn">★ Rate it</button>
+      <span class="review-nudge-text">Like what you see?</span>
+      <button class="review-nudge-cta" id="reviewRateBtn">★ Leave a review</button>
       <button class="review-nudge-dismiss" id="reviewDismissBtn" title="Don't show again" aria-label="Dismiss">✕</button>
     </div>
 

@@ -51,6 +51,12 @@ const weeklyBar   = $('weeklyBar');
 const weeklyReset = $('weeklyReset');
 const weeklyLabel = $('weeklyLabel');
 
+// Sparklines
+const sessionSpark = $('sessionSpark');
+const weeklySpark  = $('weeklySpark');
+const extraSpark   = $('extraSpark');
+const sparkToggle  = $('sparkToggle');
+
 // Fable
 const fableCard  = $('fableCard');
 const fablePct   = $('fablePct');
@@ -399,12 +405,19 @@ function render(data) {
       : '';
 
     // Prefer the API's real reset (disabled_until); else credits reset on the 1st.
-    const reset  = extra.resetTime || firstOfNextMonth();
+    // Only if it is still ahead: disabled_until keeps the timestamp of a past
+    // cycle once the account is re-enabled, and rendering it would show an
+    // expired date as if the reset were imminent.
+    const apiReset = Number(extra.resetTime);
+    const reset  = (Number.isFinite(apiReset) && apiReset > Date.now()) ? apiReset : firstOfNextMonth();
     const xReset = formatTimeUntil(reset);
     extraReset.textContent = xReset ? `${xReset} (${formatShortDate(reset)})` : 'Resets monthly';
   } else {
     extraBanner.style.display = 'none';
   }
+
+  // ── Sparklines ───────────────────────────────────────────────────────
+  renderSparklines(data);
 
   // ── Timestamp ────────────────────────────────────────────────────────
   clearRefreshError();
@@ -412,6 +425,163 @@ function render(data) {
 
   // ── Optional-cards menu ───────────────────────────────────────────────
   renderViewMenu(data);
+}
+
+// ── Sparklines ───────────────────────────────────────────────────────────────
+// Drawn from the local history series the background worker writes. The number
+// says where you are; the curve says how you got there.
+
+const SVG_NS = 'http://www.w3.org/2000/svg';
+const SPARK_W = 100;
+const SPARK_H = 24;
+const SPARK_PAD = 1.5;                          // keeps the stroke off the edges
+const SPARK_MIN_POINTS = 2;
+const SPARK_SESSION_SPAN = 5 * 60 * 60 * 1000;
+const SPARK_WEEKLY_SPAN  = 7 * 24 * 60 * 60 * 1000;
+
+// A hole cuts the line, but "how long is a hole" depends on the span drawn. A
+// fixed threshold would shred the weekly curve every night the browser is shut,
+// so it scales with the window and only bottoms out near the sampling interval.
+const SPARK_GAP_MIN_MS = 45 * 60 * 1000;
+const SPARK_GAP_RATIO  = 0.08;
+
+function gapFor(spanMs) {
+  return Math.max(SPARK_GAP_MIN_MS, spanMs * SPARK_GAP_RATIO);
+}
+
+let historySeries = [];
+// On by default: the curve is the reason the history is collected at all.
+let showSparkline = true;
+
+function renderSparklines(data) {
+  if (!showSparkline) {
+    for (const el of [sessionSpark, weeklySpark, extraSpark]) {
+      if (el) el.style.display = 'none';
+    }
+    return;
+  }
+  renderSpark(
+    sessionSpark,
+    seriesFor(windowStart(data?.session?.resetTime, SPARK_SESSION_SPAN), s => s.buckets?.session?.pct),
+    { max: 100, floor: 10, gapMs: gapFor(SPARK_SESSION_SPAN), label: 'Session', fmt: pctText },
+  );
+  renderSpark(
+    weeklySpark,
+    seriesFor(windowStart(data?.weekly?.resetTime, SPARK_WEEKLY_SPAN), s => s.buckets?.weekly?.pct),
+    { max: 100, floor: 10, gapMs: gapFor(SPARK_WEEKLY_SPAN), label: 'Weekly', fmt: pctText },
+  );
+  const currency = data?.extra?.currency || 'USD';
+  const monthStart = startOfMonth();
+  renderSpark(
+    extraSpark,
+    seriesFor(monthStart, s => s.spend?.used),
+    // Nothing spent yet draws a flat line on the floor: honest, but only noise.
+    { floor: 1, hideWhenFlatZero: true, gapMs: gapFor(Date.now() - monthStart),
+      label: 'Spent this month', fmt: (v) => formatCredits(v, currency) },
+  );
+}
+
+// Start of the live reset window, so the curve never crosses a reset: that would
+// draw a cliff back to zero and read as usage dropping.
+function windowStart(resetTime, spanMs) {
+  const now = Date.now();
+  const reset = Number(resetTime);
+  return (Number.isFinite(reset) && reset > now) ? reset - spanMs : now - spanMs;
+}
+
+function seriesFor(fromTs, valueOf) {
+  const out = [];
+  for (const sample of historySeries) {
+    if (!sample || !Number.isFinite(sample.t) || sample.t < fromTs) continue;
+    const raw = valueOf(sample);
+    // A missing reading is a hole in the curve, never a zero.
+    if (raw === null || raw === undefined || !Number.isFinite(Number(raw))) continue;
+    out.push({ t: sample.t, v: Number(raw) });
+  }
+  return out;
+}
+
+// The card already shows the exact figure, so the curve is scaled to its own
+// range (with a floor) to stay readable at low usage: 15% on a fixed 0-100 axis
+// is a 3px sliver that shows nothing. The tooltip states the real range.
+function renderSpark(el, points, opts) {
+  if (!el) return;
+  while (el.firstChild) el.removeChild(el.firstChild);
+
+  if (points.length < SPARK_MIN_POINTS) { el.style.display = 'none'; return; }
+  const values = points.map(p => p.v);
+  const maxV = Math.max(...values);
+  const minV = Math.min(...values);
+  if (opts.hideWhenFlatZero && maxV <= 0) { el.style.display = 'none'; return; }
+
+  const top = Math.min(opts.max ?? Infinity, Math.max(opts.floor, maxV * 1.3));
+  const t0 = points[0].t;
+  const span = Math.max(points[points.length - 1].t - t0, 1);
+  const x = (t) => (((t - t0) / span) * SPARK_W).toFixed(2);
+  const y = (v) => (SPARK_PAD + (1 - Math.min(v / top, 1)) * (SPARK_H - SPARK_PAD * 2)).toFixed(2);
+
+  const title = document.createElementNS(SVG_NS, 'title');
+  title.textContent = `${opts.label}: ${opts.fmt(minV)} to ${opts.fmt(maxV)}`;
+  el.appendChild(title);
+
+  for (const segment of splitOnGaps(points, opts.gapMs)) {
+    const line = segment.map((p, i) => `${i ? 'L' : 'M'}${x(p.t)},${y(p.v)}`).join(' ');
+    if (segment.length > 1) {
+      const last = segment[segment.length - 1];
+      el.appendChild(sparkPath('spark-area',
+        `M${x(segment[0].t)},${SPARK_H} ${line.replace(/^M/, 'L')} L${x(last.t)},${SPARK_H} Z`));
+      el.appendChild(sparkPath('spark-line', line));
+    } else {
+      // A lone point between two gaps still deserves a mark; round caps draw it.
+      el.appendChild(sparkPath('spark-line', `${line} L${x(segment[0].t)},${y(segment[0].v)}`));
+    }
+  }
+
+  el.setAttribute('aria-label', title.textContent);
+  el.style.display = 'block';
+}
+
+function sparkPath(className, d) {
+  const node = document.createElementNS(SVG_NS, 'path');
+  node.setAttribute('class', className);
+  node.setAttribute('d', d);
+  return node;
+}
+
+// A hole this long means refreshes failed; the line is cut there rather than
+// interpolated across data we never read.
+function splitOnGaps(points, gapMs) {
+  const segments = [];
+  let current = [points[0]];
+  for (let i = 1; i < points.length; i++) {
+    if (points[i].t - points[i - 1].t > gapMs) {
+      segments.push(current);
+      current = [];
+    }
+    current.push(points[i]);
+  }
+  segments.push(current);
+  return segments;
+}
+
+function renderSparkToggle() {
+  sparkToggle?.classList.toggle('on', showSparkline);
+}
+
+function toggleSparkline() {
+  showSparkline = !showSparkline;
+  chrome.storage.local.set({ showSparkline });
+  renderSparkToggle();
+  // Not guarded on lastData: hiding the curves needs no usage data, and the
+  // series itself is enough to draw them back.
+  renderSparklines(lastData);
+}
+
+function pctText(value) { return `${Math.round(value)}%`; }
+
+function startOfMonth() {
+  const now = new Date();
+  return new Date(now.getFullYear(), now.getMonth(), 1).getTime();
 }
 
 // ── Usage-credits helper ─────────────────────────────────────────────────────
@@ -659,8 +829,11 @@ function loadData() {
   }
 
   chrome.storage.local.get(
-    ['claudeUsage', 'refreshInterval', 'authBackoff', 'cardPrefs', 'claudePlan', 'theme', 'layout', 'installedAt', 'reviewNudgeDismissed'],
-    ({ claudeUsage, refreshInterval, authBackoff, cardPrefs: storedPrefs, claudePlan, theme, layout, installedAt, reviewNudgeDismissed }) => {
+    ['claudeUsage', 'refreshInterval', 'authBackoff', 'cardPrefs', 'claudePlan', 'theme', 'layout', 'installedAt', 'reviewNudgeDismissed', 'usageHistory', 'showSparkline'],
+    ({ claudeUsage, refreshInterval, authBackoff, cardPrefs: storedPrefs, claudePlan, theme, layout, installedAt, reviewNudgeDismissed, usageHistory, showSparkline: sparkPref }) => {
+      historySeries = Array.isArray(usageHistory) ? usageHistory : [];
+      showSparkline = sparkPref !== false;   // absent means on
+      renderSparkToggle();
       applyTheme(theme);
       if (theme) mirrorTheme(theme);
       applyLayout(layout);
@@ -758,6 +931,14 @@ viewBtn?.addEventListener('click', (e) => {
 });
 
 viewMenu?.addEventListener('click', (e) => {
+  // Display options carry data-opt and are not cards: "Deselect all" must not
+  // sweep them, and they have no percentage to show.
+  const opt = e.target.closest('[data-opt]');
+  if (opt) {
+    e.stopPropagation();
+    if (opt.dataset.opt === 'spark') toggleSparkline();
+    return;
+  }
   const item = e.target.closest('.view-menu-item');
   if (!item) return;
   e.stopPropagation();
@@ -824,6 +1005,12 @@ reviewDismissBtn?.addEventListener('click', dismissReviewNudge);
 
 // Listen for storage changes while popup is open
 chrome.storage.onChanged.addListener((changes) => {
+  // The worker persists the snapshot first and appends the history sample after,
+  // so the series arrives in its own event and the curves are redrawn then.
+  if (changes.usageHistory) {
+    historySeries = Array.isArray(changes.usageHistory.newValue) ? changes.usageHistory.newValue : [];
+    if (lastData) renderSparklines(lastData);
+  }
   if (changes.claudeUsage) {
     render(changes.claudeUsage.newValue || null);
   }
@@ -843,6 +1030,11 @@ chrome.storage.onChanged.addListener((changes) => {
   if (changes.layout) {
     applyLayout(changes.layout.newValue);
     if (changes.layout.newValue) mirrorLayout(changes.layout.newValue);
+  }
+  if (changes.showSparkline) {
+    showSparkline = changes.showSparkline.newValue !== false;
+    renderSparkToggle();
+    renderSparklines(lastData);
   }
 });
 
