@@ -745,12 +745,13 @@ body {
 .review-nudge-dismiss:hover { color: var(--text-pri); }
 
 /* ── Windows companion promo ─────────────────────────────────────────────── */
-/* Taller than the review nudge because it has to make an argument, not ask a
-   favour. Same footer-adjacent placement so it never displaces usage data. */
+/* Two lines, hard limit: Chrome caps the popup at 600px and the promo is what
+   pushed it past that on Windows. The full argument lives on the store page.
+   Footer-adjacent placement so it never displaces usage data. */
 
 .promo-nudge {
   position: relative;
-  padding: 10px 14px 11px;
+  padding: 9px 14px 10px;
   border-top: 1px solid var(--border);
   background: var(--bg-1);
 }
@@ -766,9 +767,9 @@ body {
 
 .promo-nudge-head svg { color: var(--accent-bright); flex-shrink: 0; }
 
+/* The dismiss button sits on the head row, so this line can use the full width. */
 .promo-nudge-body {
-  margin: 3px 0 7px;
-  padding-right: 16px;   /* clear of the dismiss button */
+  margin-top: 2px;
   font-size: 11px;
   line-height: 1.45;
   color: var(--text-sec);
@@ -778,6 +779,7 @@ body {
   background: none;
   border: none;
   padding: 0;
+  margin-left: 5px;
   cursor: pointer;
   color: var(--accent-bright);
   font-size: 11px;
