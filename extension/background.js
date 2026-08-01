@@ -632,10 +632,20 @@ async function buildHistorySample(data) {
   };
 }
 
+// A rollover is the previous window having ended, not the reset timestamp
+// moving. The API nudges resets_at forward on every read while a window is
+// still live, so comparing the two values for inequality was true on every
+// poll and defeated the 10-minute floor entirely: measured one sample every
+// 5 minutes on all three live buckets, two of them 8 seconds apart.
 function resetWindowChanged(prev, next) {
-  return HISTORY_BUCKETS.some(
-    key => (prev?.buckets?.[key]?.reset ?? null) !== (next.buckets[key].reset ?? null),
-  );
+  return HISTORY_BUCKETS.some((key) => {
+    // ?? NaN, not a bare Number(): Number(null) is 0, which would read as a
+    // window that ended in 1970 and make every appearing bucket a rollover.
+    const before = Number(prev?.buckets?.[key]?.reset ?? NaN);
+    const after  = Number(next.buckets[key].reset ?? NaN);
+    if (!Number.isFinite(before) || !Number.isFinite(after)) return false;
+    return after > before && before <= next.t;
+  });
 }
 
 function pruneHistory(history, retentionDays) {
