@@ -633,10 +633,11 @@ async function buildHistorySample(data) {
 }
 
 // A rollover is the previous window having ended, not the reset timestamp
-// moving. The API nudges resets_at forward on every read while a window is
-// still live, so comparing the two values for inequality was true on every
-// poll and defeated the 10-minute floor entirely: measured one sample every
-// 5 minutes on all three live buckets, two of them 8 seconds apart.
+// changing. The API returns resets_at with sub-second jitter in both
+// directions on every read (measured across consecutive polls: +0.05s, -0.27s,
+// +0.91s, -1.09s), so comparing the two values for inequality was true on every
+// poll and defeated the 10-minute floor entirely: one sample every 5 minutes on
+// all three live buckets, two of them 8 seconds apart.
 function resetWindowChanged(prev, next) {
   return HISTORY_BUCKETS.some((key) => {
     // ?? NaN, not a bare Number(): Number(null) is 0, which would read as a
