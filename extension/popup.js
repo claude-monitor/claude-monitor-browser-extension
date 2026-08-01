@@ -60,6 +60,7 @@ const weeklyLabel = $('weeklyLabel');
 const sessionSpark = $('sessionSpark');
 const weeklySpark  = $('weeklySpark');
 const extraSpark   = $('extraSpark');
+const sparkTip     = $('sparkTip');
 const sparkToggle  = $('sparkToggle');
 
 // Fable
@@ -458,10 +459,12 @@ let historySeries = [];
 // On by default: the curve is the reason the history is collected at all.
 let showSparkline = true;
 
+for (const el of [sessionSpark, weeklySpark, extraSpark]) bindSparkHover(el);
+
 function renderSparklines(data) {
   if (!showSparkline) {
     for (const el of [sessionSpark, weeklySpark, extraSpark]) {
-      if (el) el.style.display = 'none';
+      if (el) { el.style.display = 'none'; sparkMeta.delete(el); }
     }
     return;
   }
@@ -523,6 +526,7 @@ function seriesFor(fromTs, valueOf) {
 function renderSpark(el, points, opts) {
   if (!el) return;
   while (el.firstChild) el.removeChild(el.firstChild);
+  sparkMeta.delete(el);
 
   if (points.length < SPARK_MIN_POINTS) { el.style.display = 'none'; return; }
   const values = points.map(p => p.v);
@@ -538,9 +542,7 @@ function renderSpark(el, points, opts) {
   const x = (t) => (Math.min(Math.max((t - t0) / span, 0), 1) * SPARK_W).toFixed(2);
   const y = (v) => (SPARK_PAD + (1 - Math.min(v / top, 1)) * (SPARK_H - SPARK_PAD * 2)).toFixed(2);
 
-  const title = document.createElementNS(SVG_NS, 'title');
-  title.textContent = `${opts.label}: ${opts.fmt(minV)} to ${opts.fmt(maxV)}`;
-  el.appendChild(title);
+  sparkMeta.set(el, { points, t0, span, fmt: opts.fmt });
 
   for (const segment of splitOnGaps(points, opts.gapMs)) {
     const line = segment.map((p, i) => `${i ? 'L' : 'M'}${x(p.t)},${y(p.v)}`).join(' ');
@@ -555,8 +557,78 @@ function renderSpark(el, points, opts) {
     }
   }
 
-  el.setAttribute('aria-label', title.textContent);
+  el.setAttribute('aria-label', `${opts.label}: ${opts.fmt(minV)} to ${opts.fmt(maxV)}`);
   el.style.display = 'block';
+}
+
+// ── Sparkline hover readout ──────────────────────────────────────────────────
+// The curve answers "how did I get here"; hovering answers "what was it at 3:20
+// exactly". It snaps to the nearest stored sample and never interpolates: every
+// point on the line is a real reading, and a readout between two of them would
+// be a number the extension never measured.
+
+const sparkMeta = new WeakMap();
+
+function bindSparkHover(el) {
+  if (!el) return;
+  el.addEventListener('mousemove', event => showSparkTip(el, event));
+  el.addEventListener('mouseleave', () => hideSparkTip(el));
+}
+
+function nearestSample(points, t) {
+  let best = points[0];
+  for (const p of points) {
+    if (Math.abs(p.t - t) < Math.abs(best.t - t)) best = p;
+  }
+  return best;
+}
+
+// A weekly curve spans days, so the hour alone would be ambiguous there.
+function sparkTipTime(t, spanMs) {
+  const d = new Date(t);
+  const time = d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+  return spanMs > 24 * 60 * 60 * 1000
+    ? `${d.toLocaleDateString([], { weekday: 'short' })} ${time}`
+    : time;
+}
+
+function showSparkTip(el, event) {
+  const meta = sparkMeta.get(el);
+  const rect = el.getBoundingClientRect();
+  if (!meta || !sparkTip || !rect.width) return;
+
+  const frac = Math.min(Math.max((event.clientX - rect.left) / rect.width, 0), 1);
+  const point = nearestSample(meta.points, meta.t0 + frac * meta.span);
+
+  sparkTip.textContent = `${sparkTipTime(point.t, meta.span)} · ${meta.fmt(point.v)}`;
+  sparkTip.hidden = false;
+
+  // Anchored on the sample, not on the cursor, so the number and the mark on the
+  // curve always point at the same reading.
+  const px = rect.left + ((point.t - meta.t0) / meta.span) * rect.width;
+  const maxLeft = document.documentElement.clientWidth - sparkTip.offsetWidth - 4;
+  sparkTip.style.left = `${Math.round(Math.min(Math.max(px - sparkTip.offsetWidth / 2, 4), maxLeft))}px`;
+  sparkTip.style.top  = `${Math.round(rect.top - sparkTip.offsetHeight - 4)}px`;
+  drawSparkCursor(el, meta, point);
+}
+
+function drawSparkCursor(el, meta, point) {
+  let cursor = el.querySelector('.spark-cursor');
+  if (!cursor) {
+    cursor = document.createElementNS(SVG_NS, 'line');
+    cursor.setAttribute('class', 'spark-cursor');
+    cursor.setAttribute('y1', '0');
+    cursor.setAttribute('y2', String(SPARK_H));
+    el.appendChild(cursor);
+  }
+  const cx = (((point.t - meta.t0) / meta.span) * SPARK_W).toFixed(2);
+  cursor.setAttribute('x1', cx);
+  cursor.setAttribute('x2', cx);
+}
+
+function hideSparkTip(el) {
+  if (sparkTip) sparkTip.hidden = true;
+  el.querySelector('.spark-cursor')?.remove();
 }
 
 function sparkPath(className, d) {
