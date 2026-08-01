@@ -465,15 +465,20 @@ function renderSparklines(data) {
     }
     return;
   }
+  const now = Date.now();
+  const sessionFrom = windowStart(data?.session?.resetTime, SPARK_SESSION_SPAN);
   renderSpark(
     sessionSpark,
-    seriesFor(windowStart(data?.session?.resetTime, SPARK_SESSION_SPAN), s => s.buckets?.session?.pct),
-    { max: 100, floor: 10, gapMs: gapFor(SPARK_SESSION_SPAN), label: 'Session', fmt: pctText },
+    seriesFor(sessionFrom, s => s.buckets?.session?.pct),
+    { max: 100, floor: 10, gapMs: gapFor(SPARK_SESSION_SPAN), label: 'Session', fmt: pctText,
+      from: sessionFrom, to: now },
   );
+  const weeklyFrom = windowStart(data?.weekly?.resetTime, SPARK_WEEKLY_SPAN);
   renderSpark(
     weeklySpark,
-    seriesFor(windowStart(data?.weekly?.resetTime, SPARK_WEEKLY_SPAN), s => s.buckets?.weekly?.pct),
-    { max: 100, floor: 10, gapMs: gapFor(SPARK_WEEKLY_SPAN), label: 'Weekly', fmt: pctText },
+    seriesFor(weeklyFrom, s => s.buckets?.weekly?.pct),
+    { max: 100, floor: 10, gapMs: gapFor(SPARK_WEEKLY_SPAN), label: 'Weekly', fmt: pctText,
+      from: weeklyFrom, to: now },
   );
   const currency = data?.extra?.currency || 'USD';
   const monthStart = startOfMonth();
@@ -481,8 +486,9 @@ function renderSparklines(data) {
     extraSpark,
     seriesFor(monthStart, s => s.spend?.used),
     // Nothing spent yet draws a flat line on the floor: honest, but only noise.
-    { floor: 1, hideWhenFlatZero: true, gapMs: gapFor(Date.now() - monthStart),
-      label: 'Spent this month', fmt: (v) => formatCredits(v, currency) },
+    { floor: 1, hideWhenFlatZero: true, gapMs: gapFor(now - monthStart),
+      label: 'Spent this month', fmt: (v) => formatCredits(v, currency),
+      from: monthStart, to: now },
   );
 }
 
@@ -506,9 +512,12 @@ function seriesFor(fromTs, valueOf) {
   return out;
 }
 
-// The card already shows the exact figure, so the curve is scaled to its own
-// range (with a floor) to stay readable at low usage: 15% on a fixed 0-100 axis
-// is a 3px sliver that shows nothing. The tooltip states the real range.
+// X is anchored to the drawn window (opts.from/opts.to), not to the samples: a
+// weekly curve with only a few hours of history has to stay a stub on the right,
+// or it gets stretched to full width and reads exactly like the 5h session one.
+// Y is the opposite call: the card already shows the exact figure, so the curve
+// is scaled to its own range (with a floor) to stay readable at low usage, since
+// 15% on a fixed 0-100 axis is a 3px sliver. The tooltip states the real range.
 function renderSpark(el, points, opts) {
   if (!el) return;
   while (el.firstChild) el.removeChild(el.firstChild);
@@ -520,9 +529,11 @@ function renderSpark(el, points, opts) {
   if (opts.hideWhenFlatZero && maxV <= 0) { el.style.display = 'none'; return; }
 
   const top = Math.min(opts.max ?? Infinity, Math.max(opts.floor, maxV * 1.3));
-  const t0 = points[0].t;
-  const span = Math.max(points[points.length - 1].t - t0, 1);
-  const x = (t) => (((t - t0) / span) * SPARK_W).toFixed(2);
+  const t0 = Number.isFinite(opts.from) ? opts.from : points[0].t;
+  const t1 = Number.isFinite(opts.to) ? opts.to : points[points.length - 1].t;
+  const span = Math.max(t1 - t0, 1);
+  // Clamped so a sample from a skewed clock can't draw outside the viewBox.
+  const x = (t) => (Math.min(Math.max((t - t0) / span, 0), 1) * SPARK_W).toFixed(2);
   const y = (v) => (SPARK_PAD + (1 - Math.min(v / top, 1)) * (SPARK_H - SPARK_PAD * 2)).toFixed(2);
 
   const title = document.createElementNS(SVG_NS, 'title');
