@@ -470,15 +470,17 @@ function renderSparklines(data) {
   renderSpark(
     sessionSpark,
     seriesFor(sessionFrom, s => s.buckets?.session?.pct),
-    { max: 100, floor: 10, gapMs: gapFor(SPARK_SESSION_SPAN), label: 'Session', fmt: pctText,
-      from: sessionFrom, to: now },
+    // The API reports whole percentages, so light use reads 0 for a long while.
+    // A flat line on the floor is honest and still looks like a broken chart.
+    { max: 100, floor: 10, hideWhenFlatZero: true, gapMs: gapFor(SPARK_SESSION_SPAN),
+      label: 'Session', fmt: pctText, from: sessionFrom, to: now },
   );
   const weeklyFrom = windowStart(data?.weekly?.resetTime, SPARK_WEEKLY_SPAN);
   renderSpark(
     weeklySpark,
     seriesFor(weeklyFrom, s => s.buckets?.weekly?.pct),
-    { max: 100, floor: 10, gapMs: gapFor(SPARK_WEEKLY_SPAN), label: 'Weekly', fmt: pctText,
-      from: weeklyFrom, to: now },
+    { max: 100, floor: 10, hideWhenFlatZero: true, gapMs: gapFor(SPARK_WEEKLY_SPAN),
+      label: 'Weekly', fmt: pctText, from: weeklyFrom, to: now },
   );
   const currency = data?.extra?.currency || 'USD';
   const monthStart = startOfMonth();
