@@ -398,11 +398,13 @@
 
     </div><!-- /cards -->
 
-    <!-- Discreet review ask; shown ~1 week after install, dismissible forever -->
-    <div class="review-nudge" id="reviewNudge" style="display:none">
-      <span class="review-nudge-text">Like what you see?</span>
-      <button class="review-nudge-cta" id="reviewRateBtn">★ Leave a review</button>
-      <button class="review-nudge-dismiss" id="reviewDismissBtn" title="Don't show again" aria-label="Dismiss">✕</button>
+    <!-- Review ask: right after the extension proved useful (an alert in time,
+         a first Free-plan reading) or after 3 days of use. Every star goes to
+         the store; nobody is routed elsewhere based on how happy they are. -->
+    <div class="review-nudge rate" id="reviewNudge" style="display:none">
+      <span class="review-nudge-text" id="reviewNudgeText">Finding it useful? Rate us</span>
+      <button class="review-nudge-cta review-stars" id="reviewRateBtn" title="Rate it in the store" aria-label="Rate it in the store">★★★★★</button>
+      <button class="review-nudge-dismiss" id="reviewDismissBtn" title="Not now" aria-label="Not now">✕</button>
     </div>
 
     <!-- Pro waitlist ask; lowest priority of the three nudges, dismissible forever -->

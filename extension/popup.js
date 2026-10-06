@@ -53,6 +53,7 @@ const winPromoDismiss  = $('winPromoDismiss');
 const reviewNudge      = $('reviewNudge');
 const reviewRateBtn    = $('reviewRateBtn');
 const reviewDismissBtn = $('reviewDismissBtn');
+const reviewNudgeText  = $('reviewNudgeText');
 
 // Pro waitlist nudge
 const waitlistNudge      = $('waitlistNudge');
@@ -990,8 +991,8 @@ function loadData() {
   }
 
   chrome.storage.local.get(
-    ['claudeUsage', 'refreshInterval', 'authBackoff', 'fetchFailures', 'cardPrefs', 'claudePlan', 'theme', 'layout', 'installedAt', 'reviewNudgeDismissed', 'reviewOpenDays', 'usageHistory', 'showSparkline', 'winPromoDismissed', 'winPromoUpdate', 'waitlistNudgeDismissed'],
-    ({ claudeUsage, refreshInterval, authBackoff, fetchFailures, cardPrefs: storedPrefs, claudePlan, theme, layout, installedAt, reviewNudgeDismissed, reviewOpenDays, usageHistory, showSparkline: sparkPref, winPromoDismissed, winPromoUpdate, waitlistNudgeDismissed }) => {
+    ['claudeUsage', 'refreshInterval', 'authBackoff', 'fetchFailures', 'cardPrefs', 'claudePlan', 'theme', 'layout', 'installedAt', 'reviewNudgeDismissed', 'reviewNudgeSnoozedUntil', 'reviewMoment', 'reviewOpenDays', 'usageHistory', 'showSparkline', 'winPromoDismissed', 'winPromoUpdate', 'waitlistNudgeDismissed'],
+    ({ claudeUsage, refreshInterval, authBackoff, fetchFailures, cardPrefs: storedPrefs, claudePlan, theme, layout, installedAt, reviewNudgeDismissed, reviewNudgeSnoozedUntil, reviewMoment, reviewOpenDays, usageHistory, showSparkline: sparkPref, winPromoDismissed, winPromoUpdate, waitlistNudgeDismissed }) => {
       historySeries = Array.isArray(usageHistory) ? usageHistory : [];
       showSparkline = sparkPref !== false;   // absent means on
       renderSparkToggle();
@@ -1008,7 +1009,7 @@ function loadData() {
       render(claudeUsage || null);
       renderAuthState(authBackoff, fetchFailures, claudeUsage?.lastUpdated);
       const openDays = trackReviewOpenDay(reviewOpenDays, Boolean(claudeUsage));
-      renderReviewNudge(openDays, reviewNudgeDismissed, Boolean(claudeUsage));
+      renderReviewNudge(openDays, reviewNudgeDismissed, Boolean(claudeUsage), reviewMoment, reviewNudgeSnoozedUntil);
       // After the review nudge: it decides whether there is room for this one.
       renderWinPromo(installedAt, winPromoDismissed, winPromoUpdate, Boolean(claudeUsage));
       // Last: it only takes the slot when neither of the other two wants it.
@@ -1031,15 +1032,40 @@ function trackReviewOpenDay(stored, hasData) {
   return next.count;
 }
 
-function renderReviewNudge(openDays, dismissed, hasData) {
+// The ask lands best right after the extension earned it: an alert that came
+// in time, or a Free account seeing its limits for the first time. Those open
+// it straight away (for a few days); otherwise the 3-day rule still applies.
+// The 1.14 nudge only waited for days of use and got ~4 reviews in two months.
+const REVIEW_MOMENT_WINDOW_MS = 3 * 24 * 60 * 60 * 1000;
+const REVIEW_SNOOZE_MS        = 14 * 24 * 60 * 60 * 1000;
+
+const REVIEW_COPY = {
+  alert: 'Warned in time? Rate us',
+  free:  'Seeing your Free limits? Rate us',
+  days:  'Finding it useful? Rate us',
+};
+
+function renderReviewNudge(openDays, dismissed, hasData, moment, snoozedUntil) {
   if (!reviewNudge) return;
-  const due = openDays >= REVIEW_NUDGE_MIN_DAYS;
-  reviewNudge.style.display = (!dismissed && due && hasData) ? 'flex' : 'none';
+  const now = Date.now();
+  const fresh = moment && Number.isFinite(moment.at) && now - moment.at < REVIEW_MOMENT_WINDOW_MS;
+  const due = fresh || openDays >= REVIEW_NUDGE_MIN_DAYS;
+  const snoozed = Number.isFinite(snoozedUntil) && now < snoozedUntil;
+  const show = !dismissed && !snoozed && due && hasData;
+  if (show && reviewNudgeText) reviewNudgeText.textContent = REVIEW_COPY[fresh ? moment.type : 'days'] || REVIEW_COPY.days;
+  reviewNudge.style.display = show ? 'flex' : 'none';
 }
 
-function dismissReviewNudge() {
-  chrome.storage.local.set({ reviewNudgeDismissed: true });
+// Rating ends the ask for good. The first "not now" only snoozes it: closing a
+// line in a hurry is not the same as never wanting to be asked, and the second
+// close is taken as the answer.
+function dismissReviewNudge({ rated = false } = {}) {
   if (reviewNudge) reviewNudge.style.display = 'none';
+  if (rated) { chrome.storage.local.set({ reviewNudgeDismissed: true }); return; }
+  chrome.storage.local.get('reviewNudgeSnoozedUntil', ({ reviewNudgeSnoozedUntil }) => {
+    if (reviewNudgeSnoozedUntil) chrome.storage.local.set({ reviewNudgeDismissed: true });
+    else chrome.storage.local.set({ reviewNudgeSnoozedUntil: Date.now() + REVIEW_SNOOZE_MS });
+  });
 }
 
 // ── Windows companion promo ───────────────────────────────────────────────
@@ -1237,12 +1263,12 @@ settingsBtn?.addEventListener('click', () => {
 });
 
 reviewRateBtn?.addEventListener('click', () => {
-  dismissReviewNudge();
+  dismissReviewNudge({ rated: true });
   chrome.tabs.create({ url: REVIEW_URL, active: true });
   window.close();
 });
 
-reviewDismissBtn?.addEventListener('click', dismissReviewNudge);
+reviewDismissBtn?.addEventListener('click', () => dismissReviewNudge());
 
 // Only ever opens a tab from a real click, never on its own: an unprompted tab
 // is exactly what stores flag as unexpected behaviour.

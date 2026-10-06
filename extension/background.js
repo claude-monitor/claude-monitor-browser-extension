@@ -117,7 +117,14 @@ async function applyStreamLimits(limits) {
     meta: { ready: true },
     source: 'stream',
   });
-  if (stored) await chrome.storage.local.remove('fetchFailures');
+  if (stored) {
+    await chrome.storage.local.remove('fetchFailures');
+    // First Free-plan reading ever: the limits Claude hides from its own usage
+    // page just showed up. Same moment-of-value signal as a timely alert.
+    if (claudeUsage?.source !== 'stream') {
+      await chrome.storage.local.set({ reviewMoment: { type: 'free', at: Date.now() } });
+    }
+  }
 }
 
 // Validates one window from the page (the page world is not trusted with
@@ -720,6 +727,9 @@ async function checkThresholdNotifications(data) {
 }
 
 function showThresholdNotification(key, label, pct, resetTime, critical) {
+  // A warning that arrived in time is the moment the extension proved itself,
+  // so the popup's review ask keys off it (see renderReviewNudge).
+  chrome.storage.local.set({ reviewMoment: { type: 'alert', at: Date.now() } });
   const resetsIn = formatTimeUntil(resetTime);
   const message = critical
     ? (resetsIn ? `Almost at the limit — resets in ${resetsIn}` : 'Almost at the limit')

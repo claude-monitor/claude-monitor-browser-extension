@@ -758,6 +758,28 @@ body {
 
 .review-nudge-cta:hover { text-decoration: underline; }
 
+/* The review ask stands out from the other footer nudges: an accent tint and
+   real stars, so it reads as a quick tap rather than another link. */
+.review-nudge.rate {
+  background: color-mix(in srgb, var(--accent) 10%, var(--bg-1));
+  color: var(--text-pri);
+}
+
+.review-stars {
+  font-size: 14px;
+  letter-spacing: 1px;
+  line-height: 1;
+  padding: 2px 4px;
+  border-radius: 4px;
+  transition: transform 0.12s, background 0.15s;
+}
+
+.review-stars:hover {
+  text-decoration: none;
+  background: color-mix(in srgb, var(--accent) 16%, transparent);
+  transform: scale(1.06);
+}
+
 .review-nudge-dismiss {
   background: none;
   border: none;
