@@ -77,6 +77,43 @@ testBtn.addEventListener('click', async () => {
   });
 });
 
+// ─── On-page bar ─────────────────────────────────────────────────────────────
+// Both permissions are optional and requested here, from the click. Turning the
+// bar off gives the access back instead of just hiding it.
+
+const PAGE_BAR_PERMS = { origins: ['https://claude.ai/*'], permissions: ['scripting'] };
+const pageBarEl = document.getElementById('pageBarEnabled');
+
+function renderPageBar() {
+  chrome.storage.local.get('pageBar', ({ pageBar }) => {
+    chrome.permissions.contains(PAGE_BAR_PERMS, (granted) => {
+      pageBarEl.checked = Boolean(pageBar?.enabled && granted);
+    });
+  });
+}
+
+pageBarEl.addEventListener('change', () => {
+  if (pageBarEl.checked) {
+    chrome.permissions.request(PAGE_BAR_PERMS, (granted) => {
+      if (!granted) {
+        pageBarEl.checked = false;
+        flashStatus('Permission denied');
+        return;
+      }
+      chrome.storage.local.set({ pageBar: { enabled: true } }, () => flashStatus('Saved'));
+    });
+  } else {
+    chrome.storage.local.set({ pageBar: { enabled: false } }, () => {
+      chrome.permissions.remove(PAGE_BAR_PERMS, () => {
+        void chrome.runtime.lastError;
+        flashStatus('Saved');
+      });
+    });
+  }
+});
+
+renderPageBar();
+
 // ─── History ─────────────────────────────────────────────────────────────────
 // The series is written by the background worker under `usageHistory`. Here we
 // only expose retention, the sample count, the export and the clear action.
