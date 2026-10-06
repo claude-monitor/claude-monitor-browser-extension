@@ -305,7 +305,9 @@ async function refreshUsageFromApi() {
       usage = await fetchClaudeJson(`${API_BASE}/organizations/${orgId}/usage`);
     } catch (error) {
       if (String(error?.message || '').startsWith('http-404')) {
-        await chrome.storage.local.remove(['claudeOrgId', 'claudeOrgIdAt']);
+        // Expire the cache but keep the old id, so getClaudeOrgId can tell an
+        // account switch (a different org comes back) from a stale cache.
+        await chrome.storage.local.remove('claudeOrgIdAt');
         const retriedOrgId = await getClaudeOrgId();
         if (!retriedOrgId) throw error;
         activeOrgId = retriedOrgId;
@@ -357,6 +359,13 @@ async function getClaudeOrgId() {
   const orgId = (org && (org.uuid || org.organization_uuid || org.id)) || null;
   if (orgId) {
     await chrome.storage.local.set({ claudeOrgId: orgId, claudeOrgIdAt: Date.now() });
+  }
+  // A different org means a different account signed in to claude.ai. The
+  // stored reading belongs to the previous one and must not be shown as this
+  // account's usage, so it goes, along with the alert state tied to it.
+  if (claudeOrgId && orgId && orgId !== claudeOrgId) {
+    await chrome.storage.local.remove(['claudeUsage', 'fetchFailures', 'notifState']);
+    chrome.action.setBadgeText({ text: '' });
   }
   await chrome.storage.local.set({ claudePlan: derivePlan(org) });
   return orgId;

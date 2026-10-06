@@ -1109,6 +1109,10 @@ let footerTextBeforeError = '';
 function refreshErrorMessage(reason) {
   if (reason === 'auth-failed')   return 'Refresh failed: sign in to claude.ai';
   if (reason === 'org-not-found') return 'Refresh failed: no organization found';
+  // Not a failure: the Free plan has no usage page, so its figures only move
+  // when a reply on claude.ai carries them.
+  if (reason === 'free-plan')     return 'Free plan: updates after each message';
+  if (reason === 'api-data-rejected') return 'Refresh failed: unexpected reply from claude.ai';
   return 'Refresh failed: claude.ai unreachable';
 }
 
