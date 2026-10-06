@@ -1,0 +1,14 @@
+{
+  "extName": {
+    "message": "Monitor utilizzo Claude: limiti di sessione e settimanali, crediti, avvisi",
+    "description": "Extension name on the Chrome Web Store and Edge Add-ons (max 75 characters)."
+  },
+  "extNameFirefox": {
+    "message": "Monitor utilizzo Claude: limiti e avvisi",
+    "description": "Extension name on Firefox Add-ons (max 50 characters)."
+  },
+  "extDescription": {
+    "message": "Limiti di utilizzo di Claude live: % di sessione e settimanale, countdown al reset, avvisi all'80/95%. Free, Pro, Max, Claude Code.",
+    "description": "Short description shown in the stores and the browser (max 132 characters)."
+  }
+}
