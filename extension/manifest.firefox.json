@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Claude Usage Tracker: Session & Weekly Limits",
   "short_name": "Claude Usage",
-  "version": "1.14.3",
+  "version": "1.15.0",
   "description": "Live Claude usage in your toolbar: session and weekly limits, per-model caps, credits, reset times, and alerts at 80% and 95%.",
   "author": "Digital Advanced Solutions",
   "browser_specific_settings": {

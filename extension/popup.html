@@ -181,6 +181,23 @@
       <button class="stale-banner-cta" id="signInBtn">Sign in →</button>
     </div>
 
+    <!-- Refresh-failing banner: signed in, but the last reads did not land -->
+    <div class="stale-banner" id="fetchFailBanner" style="display:none" role="status">
+      <span class="stale-banner-icon">
+        <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+          <line x1="12" y1="9" x2="12" y2="13"/>
+          <line x1="12" y1="17" x2="12.01" y2="17"/>
+        </svg>
+      </span>
+      <span class="stale-banner-text">
+        <b>Couldn't refresh: data is stale</b>
+        <span id="fetchFailSubtitle">Last update unknown</span>
+      </span>
+      <button class="stale-banner-cta" id="retryBtn">Retry</button>
+    </div>
+
     <!-- Extra-usage banner (credits); hidden when no data or toggled off in the View menu -->
     <div class="extra-banner" id="extraBanner" style="display:none">
       <div class="extra-banner-row">
@@ -388,6 +405,13 @@
       <button class="review-nudge-dismiss" id="reviewDismissBtn" title="Don't show again" aria-label="Dismiss">✕</button>
     </div>
 
+    <!-- Pro waitlist ask; lowest priority of the three nudges, dismissible forever -->
+    <div class="review-nudge" id="waitlistNudge" style="display:none">
+      <span class="review-nudge-text">Pro: your limits on your phone</span>
+      <button class="review-nudge-cta" id="waitlistJoinBtn">Join the waitlist →</button>
+      <button class="review-nudge-dismiss" id="waitlistDismissBtn" title="Don't show again" aria-label="Dismiss">✕</button>
+    </div>
+
     <!-- Windows companion promo. Windows only, never shown alongside the review
          ask, dismissible forever. Opens a tab only on an explicit click. -->
     <div class="promo-nudge" id="winPromo" style="display:none">
@@ -422,7 +446,20 @@
 
   <!-- ── No-data placeholder ─────────────────────────────────────────── -->
   <div id="noData">
-    <div class="no-data">
+    <!-- Free plan: claude.ai publishes no usage limits there, so there is nothing to read -->
+    <div class="no-data" id="freePlanNotice" style="display:none">
+      <svg aria-hidden="true" width="38" height="38" viewBox="0 0 24 24" fill="none"
+           stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="12" y1="16" x2="12" y2="12"/>
+        <line x1="12" y1="8" x2="12.01" y2="8"/>
+      </svg>
+      <p class="no-data-title">No usage limits on the Free plan</p>
+      <p>Claude only publishes usage limits on Pro, Max, Team and Enterprise. This extension reads those same numbers, so a Free account has nothing to show.</p>
+      <button class="open-usage-btn secondary" id="freePlanRetryBtn">Check again</button>
+    </div>
+
+    <div class="no-data" id="noDataGeneric">
       <svg aria-hidden="true" width="38" height="38" viewBox="0 0 24 24" fill="none"
            stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
         <polyline points="2,12 5,12 7.5,6 10,18 12.5,9 15,12 18,12"/>

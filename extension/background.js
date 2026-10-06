@@ -8,6 +8,7 @@ const POLL_MIN   = 5;   // minutes between automatic refreshes
 
 const ORG_ID_TTL_MS    = 24 * 60 * 60 * 1000; // re-validate cached orgId once a day
 const AUTH_BACKOFF_MAX = 6;                    // cap consecutive auth-failure skips
+const FETCH_FAIL_STALE = 2;                    // consecutive non-auth failures before the data counts as stale
 
 // Daily routine-run budget lives behind the Claude Code gateway (/v1/code/...),
 // NOT in /usage. The route 404s without the ccr-triggers beta + anthropic-version
@@ -116,13 +117,28 @@ async function refreshUsage({ force = false } = {}) {
   const apiResult = await refreshUsageFromApi();
   if (apiResult.refreshed) {
     await clearAuthBackoff();
+    await chrome.storage.local.remove('fetchFailures');
     return { ...apiResult, source: 'api' };
   }
   if (apiResult.reason === 'auth-failed') {
     await bumpAuthBackoff();
     markBadgeStale();
+  } else {
+    await bumpFetchFailures();
   }
   return { refreshed: false, reason: apiResult.reason || 'api-fetch-failed' };
+}
+
+// Non-auth failures (claude.ai unreachable, unexpected payload) used to leave
+// the last reading on screen as if it were live: users saw "12%" for hours with
+// no hint that nothing had been read since. One miss can be a blip, so the data
+// only counts as stale after FETCH_FAIL_STALE in a row; the popup reads the same
+// record to show its banner.
+async function bumpFetchFailures() {
+  const { fetchFailures } = await chrome.storage.local.get('fetchFailures');
+  const count = (fetchFailures?.count ?? 0) + 1;
+  await chrome.storage.local.set({ fetchFailures: { count, since: fetchFailures?.since ?? Date.now() } });
+  if (count >= FETCH_FAIL_STALE) markBadgeStale();
 }
 
 async function shouldSkipForAuthBackoff() {
@@ -847,7 +863,8 @@ function markBadgeStale() {
 
 // ── Restore badge on startup from cached data ────────────────────────────
 
-chrome.storage.local.get(['claudeUsage', 'authBackoff'], ({ claudeUsage, authBackoff }) => {
+chrome.storage.local.get(['claudeUsage', 'authBackoff', 'fetchFailures'], ({ claudeUsage, authBackoff, fetchFailures }) => {
   if (claudeUsage) updateBadge(claudeUsage);
   if (authBackoff && authBackoff.fails > 0) markBadgeStale();
+  if ((fetchFailures?.count ?? 0) >= FETCH_FAIL_STALE) markBadgeStale();
 });

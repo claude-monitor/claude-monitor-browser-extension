@@ -902,6 +902,24 @@ body {
 .open-usage-btn:hover  { background: var(--accent-bright); }
 .open-usage-btn:active { transform: scale(0.97); }
 
+/* Free-plan notice: an explanation, not a call to action, so the title carries
+   the weight and the button stays quiet. */
+.no-data .no-data-title {
+  color: var(--text-pri);
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.no-data .no-data-title + p { margin-top: 6px; }
+
+.open-usage-btn.secondary {
+  background: var(--bg-2);
+  color: var(--text-pri);
+  border: 1px solid var(--border);
+}
+
+.open-usage-btn.secondary:hover { background: var(--bg-3); }
+
 /* ── Reduced motion ──────────────────────────────────────────────────────── */
 
 @media (prefers-reduced-motion: reduce) {
