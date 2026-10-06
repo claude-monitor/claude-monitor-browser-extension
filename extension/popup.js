@@ -23,6 +23,44 @@ const WAITLIST_URL = 'https://claude-monitor.com/?src=ext-popup#waitlist';
 // Must match FETCH_FAIL_STALE in background.js.
 const FETCH_FAIL_STALE = 2;
 
+// ── i18n ──────────────────────────────────────────────────────────────────
+// Strings live in _locales/<lang>/messages.json; the browser picks the locale.
+// English keeps the en-US formats it always had; other languages get their own
+// date order and currency format.
+const UI_LANG = chrome.i18n.getUILanguage();
+const LOCALE  = UI_LANG.toLowerCase().startsWith('en') ? 'en-US' : UI_LANG;
+
+function msg(key, ...subs) {
+  return chrome.i18n.getMessage(key, subs.map(String)) || key;
+}
+
+// 2d 3h / 3h 20m / 20m, in the UI language.
+function formatDuration(totalSec) {
+  const d = Math.floor(totalSec / 86400);
+  const h = Math.floor((totalSec % 86400) / 3600);
+  const m = Math.floor((totalSec % 3600) / 60);
+  if (d > 0) return msg('durDH', d, h);
+  if (h > 0) return msg('durHM', h, m);
+  return msg('durM', m);
+}
+
+function applyI18n() {
+  document.documentElement.lang = UI_LANG;
+  document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = msg(el.dataset.i18n); });
+  document.querySelectorAll('[data-i18n-title]').forEach(el => { el.title = msg(el.dataset.i18nTitle); });
+  document.querySelectorAll('[data-i18n-aria]').forEach(el => { el.setAttribute('aria-label', msg(el.dataset.i18nAria)); });
+  document.querySelectorAll('.theme-swatch').forEach(sw => sw.setAttribute('aria-label', msg('themeAria', sw.title)));
+  document.querySelectorAll('#intervalSelect option').forEach(opt => { opt.textContent = msg('intervalOpt', opt.value); });
+}
+
+// The background stores these two fallback labels in English; translate them
+// at display time so readings saved by older versions still render.
+function labelText(label) {
+  if (label === 'Not yet used') return msg('notYetUsed');
+  if (label === 'Weekly limit') return msg('weeklyLimitLbl');
+  return label;
+}
+
 const SUBCARDS = ['fable', 'sonnet', 'opus', 'design'];
 // Per-sub-cap visibility. Tri-state: true = always show, false = always hide,
 // undefined = auto (show only when the API returns data for it this week).
@@ -266,6 +304,9 @@ function readLayoutMirror() {
 function formatResetDate(epochMs) {
   if (!epochMs) return '';
   const d       = new Date(epochMs);
+  if (LOCALE !== 'en-US') {
+    return d.toLocaleString(LOCALE, { weekday: 'short', day: 'numeric', month: 'long', hour: 'numeric', minute: '2-digit' });
+  }
   const weekday = d.toLocaleDateString('en-US', { weekday: 'short' });
   const month   = d.toLocaleDateString('en-US', { month: 'long' });
   const time    = d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
@@ -280,16 +321,8 @@ function formatResetTime(epochMs) {
 function formatTimeUntil(epochMs) {
   if (!epochMs) return null;
   const diff = epochMs - Date.now();
-  if (diff <= 0) return 'Resetting soon';
-
-  const totalSec = Math.floor(diff / 1000);
-  const d = Math.floor(totalSec / 86400);
-  const h = Math.floor((totalSec % 86400) / 3600);
-  const m = Math.floor((totalSec % 3600) / 60);
-
-  if (d > 0) return `Resets in ${d}d ${h}h`;
-  if (h > 0) return `Resets in ${h}h ${m}m`;
-  return `Resets in ${m}m`;
+  if (diff <= 0) return msg('resettingSoon');
+  return msg('resetsIn', formatDuration(Math.floor(diff / 1000)));
 }
 
 // Usage credits reset on the 1st of each calendar month (verified: the API
@@ -302,6 +335,7 @@ function firstOfNextMonth() {
 
 function formatShortDate(epochMs) {
   const d = new Date(epochMs);
+  if (LOCALE !== 'en-US') return d.toLocaleDateString(LOCALE, { day: 'numeric', month: 'short' });
   return `${d.getDate()} ${d.toLocaleDateString('en-US', { month: 'short' })}`;
 }
 
@@ -311,7 +345,7 @@ function formatCredits(amount, currency) {
   // prefix if the API ever sends an unknown currency code.
   const cur = (typeof currency === 'string' && currency) ? currency : 'USD';
   try {
-    return new Intl.NumberFormat('en-US', {
+    return new Intl.NumberFormat(LOCALE, {
       style: 'currency',
       currency: cur,
       currencyDisplay: 'narrowSymbol',
@@ -321,19 +355,23 @@ function formatCredits(amount, currency) {
   }
 }
 
-function formatTimestamp(epochMs) {
-  if (!epochMs) return 'Never updated';
-  const now  = new Date();
-  const d    = new Date(epochMs);
-  const diffMin = Math.round((now - d) / 60000);
-
-  if (diffMin < 1)   return 'Just updated';
-  if (diffMin < 60)  return `Updated ${diffMin}m ago`;
-
+// How long ago a reading was taken: { ago } for under a day, { at } beyond that,
+// null for under a minute. The footer and the stale banners phrase it differently.
+function readingAge(epochMs) {
+  const d = new Date(epochMs);
+  const diffMin = Math.round((Date.now() - d) / 60000);
+  if (diffMin < 1)  return null;
+  if (diffMin < 60) return { ago: msg('durM', diffMin) };
   const diffH = Math.floor(diffMin / 60);
-  if (diffH < 24) return `Updated ${diffH}h ago`;
+  if (diffH < 24)   return { ago: msg('durH', diffH) };
+  return { at: `${d.toLocaleDateString()} ${d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` };
+}
 
-  return `Updated ${d.toLocaleDateString()} ${d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+function formatTimestamp(epochMs) {
+  if (!epochMs) return msg('neverUpdated');
+  const age = readingAge(epochMs);
+  if (!age) return msg('justUpdated');
+  return age.ago ? msg('updatedAgo', age.ago) : msg('updatedAt', age.at);
 }
 
 // ── Render ────────────────────────────────────────────────────────────────
@@ -354,10 +392,8 @@ function showNoData() {
 // Once it is on, all that is missing is a message to read them from.
 function renderFreePlanNotice() {
   if (!freePlanText || !freePlanActionBtn) return;
-  freePlanText.textContent = pageBarOn
-    ? 'The bar on claude.ai is on. Send a message there and your limits show up here.'
-    : "Claude's usage page is closed on the Free plan, but every reply still carries your limits. Turn on the bar on claude.ai and they show up here after your next message.";
-  freePlanActionBtn.textContent = pageBarOn ? 'Open claude.ai' : 'Turn on';
+  freePlanText.textContent = pageBarOn ? msg('freeTextOn') : msg('freeTextOff');
+  freePlanActionBtn.textContent = pageBarOn ? msg('openClaude') : msg('turnOn');
 }
 
 function refreshPageBarState() {
@@ -413,15 +449,15 @@ function render(data) {
     applyColor(sessionPct, sessionBar, sPct);
     setRing(sessionRing, sessionRingTxt, sPct, `${p}%`);
   } else {
-    sessionPct.textContent = '—';
-    setRing(sessionRing, sessionRingTxt, 0, '—');
+    sessionPct.textContent = '–';
+    setRing(sessionRing, sessionRingTxt, 0, '–');
   }
 
   const sReset   = formatTimeUntil(session?.resetTime);
   const sStarted = sReset ? formatResetTime(session?.resetTime) : '';
   sessionReset.textContent = sReset
     ? (sStarted ? `${sReset} (${sStarted})` : sReset)
-    : (session?.label || 'Reset time unknown');
+    : (labelText(session?.label) || msg('resetTimeUnknown'));
   sessionLabel.textContent = '';
 
   // ── Weekly ───────────────────────────────────────────────────────────
@@ -433,15 +469,15 @@ function render(data) {
     applyColor(weeklyPct, weeklyBar, wPct);
     setRing(weeklyRing, weeklyRingTxt, wPct, `${p}%`);
   } else {
-    weeklyPct.textContent = '—';
-    setRing(weeklyRing, weeklyRingTxt, 0, '—');
+    weeklyPct.textContent = '–';
+    setRing(weeklyRing, weeklyRingTxt, 0, '–');
   }
 
   const wReset = formatTimeUntil(weekly?.resetTime);
   const wDate  = wReset ? formatResetDate(weekly?.resetTime) : '';
   weeklyReset.textContent = wReset
     ? (wDate ? `${wReset} (${wDate})` : wReset)
-    : (weekly?.label || 'Reset day unknown');
+    : (labelText(weekly?.label) || msg('resetDayUnknown'));
   weeklyLabel.textContent = '';
 
   // ── Weekly sub-caps (always selectable from the filter menu) ─────────
@@ -478,7 +514,7 @@ function render(data) {
     extraBanner.title = extra.outOfCredits ? creditsReasonText(extra.disabledReason) : '';
 
     extraBalance.textContent = prepaidBalance
-      ? `Balance ${formatCredits(prepaidBalance.amount, prepaidBalance.currency)}`
+      ? msg('balance', formatCredits(prepaidBalance.amount, prepaidBalance.currency))
       : '';
 
     // Prefer the API's real reset (disabled_until); else credits reset on the 1st.
@@ -488,7 +524,7 @@ function render(data) {
     const apiReset = Number(extra.resetTime);
     const reset  = (Number.isFinite(apiReset) && apiReset > Date.now()) ? apiReset : firstOfNextMonth();
     const xReset = formatTimeUntil(reset);
-    extraReset.textContent = xReset ? `${xReset} (${formatShortDate(reset)})` : 'Resets monthly';
+    extraReset.textContent = xReset ? `${xReset} (${formatShortDate(reset)})` : msg('resetsMonthly');
   } else {
     extraBanner.style.display = 'none';
   }
@@ -547,14 +583,14 @@ function renderSparklines(data) {
     // The API reports whole percentages, so light use reads 0 for a long while.
     // A flat line on the floor is honest and still looks like a broken chart.
     { max: 100, floor: 10, hideWhenFlatZero: true, gapMs: gapFor(SPARK_SESSION_SPAN),
-      label: 'Session', fmt: pctText, from: sessionFrom, to: now },
+      label: msg('sparkSession'), fmt: pctText, from: sessionFrom, to: now },
   );
   const weeklyFrom = windowStart(data?.weekly?.resetTime, SPARK_WEEKLY_SPAN);
   renderSpark(
     weeklySpark,
     seriesFor(weeklyFrom, s => s.buckets?.weekly?.pct),
     { max: 100, floor: 10, hideWhenFlatZero: true, gapMs: gapFor(SPARK_WEEKLY_SPAN),
-      label: 'Weekly', fmt: pctText, from: weeklyFrom, to: now },
+      label: msg('sparkWeekly'), fmt: pctText, from: weeklyFrom, to: now },
   );
   const currency = data?.extra?.currency || 'USD';
   const monthStart = startOfMonth();
@@ -563,7 +599,7 @@ function renderSparklines(data) {
     seriesFor(monthStart, s => s.spend?.used),
     // Nothing spent yet draws a flat line on the floor: honest, but only noise.
     { floor: 1, hideWhenFlatZero: true, gapMs: gapFor(now - monthStart),
-      label: 'Spent this month', fmt: (v) => formatCredits(v, currency),
+      label: msg('sparkSpent'), fmt: (v) => formatCredits(v, currency),
       from: monthStart, to: now },
   );
 }
@@ -628,7 +664,7 @@ function renderSpark(el, points, opts) {
     }
   }
 
-  el.setAttribute('aria-label', `${opts.label}: ${opts.fmt(minV)} to ${opts.fmt(maxV)}`);
+  el.setAttribute('aria-label', msg('sparkRange', opts.label, opts.fmt(minV), opts.fmt(maxV)));
   el.style.display = 'block';
 }
 
@@ -750,9 +786,9 @@ function startOfMonth() {
 // Short reason for the "used up" state, shown as the credits-banner tooltip.
 // Mirrors the disabled_reason values seen on overage_spend_limit / extra_usage.
 function creditsReasonText(reason) {
-  if (reason === 'self_selected_spend_limit_reached') return 'Monthly spend limit reached';
-  if (reason === 'org_level_disabled_until')          return 'Spend limit reached (org level)';
-  return 'Spend limit reached';
+  if (reason === 'self_selected_spend_limit_reached') return msg('spendLimitMonthly');
+  if (reason === 'org_level_disabled_until')          return msg('spendLimitOrg');
+  return msg('spendLimit');
 }
 
 // ── Sub-card rendering ──────────────────────────────────────────────────────
@@ -794,7 +830,7 @@ function renderSubCard(key, bucket, cardEl, pctEl, barEl, resetEl, weeklyResetTi
   const date  = reset ? formatResetDate(resetTime) : '';
   resetEl.textContent = reset
     ? (date ? `${reset} (${date})` : reset)
-    : (bucket?.label || 'Reset day unknown');
+    : (labelText(bucket?.label) || msg('resetDayUnknown'));
   // Compact sub-caps hide the reset row; expose it on hover instead.
   cardEl.title = resetEl.textContent;
 }
@@ -832,8 +868,8 @@ function renderRoutineCard(routine) {
   routineBar.style.width = `${pct}%`;
   applyColor(routinePct, routineBar, pct);
   setRing(routineRing, routineRingTxt, pct, `${used}`);
-  routineReset.textContent = 'Resets daily';
-  routineCard.title = 'Resets daily';
+  routineReset.textContent = msg('resetsDaily');
+  routineCard.title = msg('resetsDaily');
 }
 
 // ── Optional-cards menu ─────────────────────────────────────────────────────
@@ -873,7 +909,7 @@ function renderViewMenu(data) {
       cardVisible(k, k === 'routine' ? true
         : k === 'extra' ? extraOff
         : (data?.[k]?.percentage ?? null) !== null));
-    viewAllBtn.textContent = allShown ? 'Deselect all' : 'Select all';
+    viewAllBtn.textContent = allShown ? msg('deselectAll') : msg('selectAll');
   }
 }
 
@@ -886,7 +922,7 @@ function updateMenuItem(key, offered, pct, itemEl, pctEl) {
   // Dim when nothing was used this week (no data, or a 0% reading) so an idle
   // sub-cap doesn't read as bold next to active ones.
   itemEl.classList.toggle('no-usage', !hasData || Math.round(pct) === 0);
-  if (pctEl) pctEl.textContent = hasData ? `${Math.round(pct)}%` : '—';
+  if (pctEl) pctEl.textContent = hasData ? `${Math.round(pct)}%` : '–';
 }
 
 // Routine has no percentage, just a used / limit count. Like the sub-caps it
@@ -954,9 +990,11 @@ function renderAuthState(authBackoff, fetchFailures, lastUpdatedTs) {
   const authFailing  = Boolean(authBackoff && authBackoff.fails > 0);
   // Signed out explains the stale data on its own, so it wins over this one.
   const fetchFailing = !authFailing && (fetchFailures?.count ?? 0) >= FETCH_FAIL_STALE;
-  const subtitle = lastUpdatedTs
-    ? `Last update ${formatTimestamp(lastUpdatedTs).replace(/^Updated\s+/, '')}`
-    : 'No data captured yet';
+  const age = lastUpdatedTs ? readingAge(lastUpdatedTs) : null;
+  const subtitle = !lastUpdatedTs ? msg('noDataCaptured')
+    : !age ? msg('lastUpdateNow')
+    : age.ago ? msg('lastUpdateAgo', age.ago)
+    : msg('lastUpdateAt', age.at);
 
   staleBanner.style.display = authFailing ? 'flex' : 'none';
   if (fetchFailBanner) fetchFailBanner.style.display = fetchFailing ? 'flex' : 'none';
@@ -1043,9 +1081,9 @@ const REVIEW_MOMENT_WINDOW_MS = 3 * 24 * 60 * 60 * 1000;
 const REVIEW_SNOOZE_MS        = 14 * 24 * 60 * 60 * 1000;
 
 const REVIEW_COPY = {
-  alert: 'Warned in time? Rate us',
-  free:  'Seeing your Free limits? Rate us',
-  days:  'Finding it useful? Rate us',
+  alert: 'reviewAlert',
+  free:  'reviewFree',
+  days:  'reviewDays',
 };
 
 function renderReviewNudge(openDays, dismissed, hasData, moment, snoozedUntil) {
@@ -1055,7 +1093,7 @@ function renderReviewNudge(openDays, dismissed, hasData, moment, snoozedUntil) {
   const due = fresh || openDays >= REVIEW_NUDGE_MIN_DAYS;
   const snoozed = Number.isFinite(snoozedUntil) && now < snoozedUntil;
   const show = !dismissed && !snoozed && due && hasData;
-  if (show && reviewNudgeText) reviewNudgeText.textContent = REVIEW_COPY[fresh ? moment.type : 'days'] || REVIEW_COPY.days;
+  if (show && reviewNudgeText) reviewNudgeText.textContent = msg(REVIEW_COPY[fresh ? moment.type : 'days'] || REVIEW_COPY.days);
   reviewNudge.style.display = show ? 'flex' : 'none';
 }
 
@@ -1136,13 +1174,13 @@ let refreshErrorTimer = null;
 let footerTextBeforeError = '';
 
 function refreshErrorMessage(reason) {
-  if (reason === 'auth-failed')   return 'Refresh failed: sign in to claude.ai';
-  if (reason === 'org-not-found') return 'Refresh failed: no organization found';
+  if (reason === 'auth-failed')   return msg('errAuth');
+  if (reason === 'org-not-found') return msg('errOrg');
   // Not a failure: the Free plan has no usage page, so its figures only move
   // when a reply on claude.ai carries them.
-  if (reason === 'free-plan')     return 'Free plan: updates after each message';
-  if (reason === 'api-data-rejected') return 'Refresh failed: unexpected reply from claude.ai';
-  return 'Refresh failed: claude.ai unreachable';
+  if (reason === 'free-plan')     return msg('errFree');
+  if (reason === 'api-data-rejected') return msg('errRejected');
+  return msg('errUnreachable');
 }
 
 function clearRefreshError() {
@@ -1353,6 +1391,7 @@ chrome.storage.onChanged.addListener((changes) => {
 
 // ── Init ──────────────────────────────────────────────────────────────────
 
-applyTheme(readThemeMirror());     // sync, pre-storage — avoids the theme flash
+applyI18n();
+applyTheme(readThemeMirror());     // sync, pre-storage: avoids the theme flash
 applyLayout(readLayoutMirror());   // same, for the layout
 loadData();

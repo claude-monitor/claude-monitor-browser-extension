@@ -660,15 +660,20 @@ function parseApiTime(value) {
 
 const NOTIF_DEFAULTS = { enabled: true, warnAt: 80, critAt: 95 };
 
-// Buckets that fire alerts, with the display name used in the notification copy.
+// Buckets that fire alerts, with the message key of the name used in the
+// notification copy (translated in _locales).
 const NOTIF_BUCKETS = [
-  ['session', 'Claude session'],
-  ['weekly',  'Claude weekly limit'],
-  ['fable',   'Fable 5 weekly cap'],
-  ['opus',    'Opus weekly cap'],
-  ['sonnet',  'Sonnet weekly cap'],
-  ['design',  'Claude Design weekly cap'],
+  ['session', 'nbSession'],
+  ['weekly',  'nbWeekly'],
+  ['fable',   'nbFable'],
+  ['opus',    'nbOpus'],
+  ['sonnet',  'nbSonnet'],
+  ['design',  'nbDesign'],
 ];
+
+function msg(key, ...subs) {
+  return chrome.i18n.getMessage(key, subs.map(String)) || key;
+}
 
 // Settings are written by options.html; re-read on every poll so changes apply
 // on the next refresh without messaging. Clamped here too, in case storage was
@@ -733,14 +738,14 @@ function showThresholdNotification(key, label, pct, resetTime, critical) {
   chrome.storage.local.set({ reviewMoment: { type: 'alert', at: Date.now() } });
   const resetsIn = formatTimeUntil(resetTime);
   const message = critical
-    ? (resetsIn ? `Almost at the limit — resets in ${resetsIn}` : 'Almost at the limit')
-    : (resetsIn ? `Resets in ${resetsIn}` : 'Approaching the limit');
+    ? (resetsIn ? msg('almostResets', resetsIn) : msg('almostLimit'))
+    : (resetsIn ? msg('resetsIn', resetsIn) : msg('approaching'));
   // Firefox supports only the basic subset of notification options — no
   // priority/buttons — so stick to the common fields.
   chrome.notifications.create(`usage-${key}-${critical ? 'crit' : 'warn'}`, {
     type: 'basic',
     iconUrl: 'icons/icon128.png',
-    title: `${label} at ${Math.round(pct)}%`,
+    title: msg('notifTitle', msg(label), Math.round(pct)),
     message,
   });
 }
@@ -754,9 +759,9 @@ function formatTimeUntil(epochMs) {
   const d = Math.floor(totalSec / 86400);
   const h = Math.floor((totalSec % 86400) / 3600);
   const m = Math.floor((totalSec % 3600) / 60);
-  if (d > 0) return `${d}d ${h}h`;
-  if (h > 0) return `${h}h ${m}m`;
-  return `${m}m`;
+  if (d > 0) return msg('durDH', d, h);
+  if (h > 0) return msg('durHM', h, m);
+  return msg('durM', m);
 }
 
 // A click on any usage alert opens the official usage page.

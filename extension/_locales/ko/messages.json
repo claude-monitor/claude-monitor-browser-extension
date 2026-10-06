@@ -10,5 +10,533 @@
   "extDescription": {
     "message": "Claude 사용 한도를 실시간으로 확인하세요: 세션 및 주간 사용률, 초기화 카운트다운, 80/95% 알림. Free, Pro, Max, Claude Code 지원.",
     "description": "Short description shown in the stores and the browser (max 132 characters)."
+  },
+  "intervalTitle": {
+    "message": "자동 새로고침 간격"
+  },
+  "displayOptions": {
+    "message": "표시 옵션"
+  },
+  "metrics": {
+    "message": "지표"
+  },
+  "selectAll": {
+    "message": "모두 선택"
+  },
+  "deselectAll": {
+    "message": "모두 해제"
+  },
+  "fableWeekly": {
+    "message": "Fable 5 주간"
+  },
+  "opusWeekly": {
+    "message": "Opus 주간"
+  },
+  "sonnetWeekly": {
+    "message": "Sonnet 주간"
+  },
+  "routineRuns": {
+    "message": "루틴 실행"
+  },
+  "extraCredits": {
+    "message": "추가 크레딧"
+  },
+  "menuDesign": {
+    "message": "디자인"
+  },
+  "layoutClassic": {
+    "message": "클래식"
+  },
+  "layoutClassicDesc": {
+    "message": "기본 디자인"
+  },
+  "layoutMixed": {
+    "message": "혼합"
+  },
+  "layoutMixedDesc": {
+    "message": "링 + 목록"
+  },
+  "layoutGrid": {
+    "message": "그리드"
+  },
+  "layoutGridDesc": {
+    "message": "링이 있는 카드"
+  },
+  "layoutList": {
+    "message": "목록"
+  },
+  "layoutListDesc": {
+    "message": "간결한 행"
+  },
+  "trendLine": {
+    "message": "추세선"
+  },
+  "menuTheme": {
+    "message": "테마"
+  },
+  "themeAria": {
+    "message": "$P1$ 테마",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "settingsHistory": {
+    "message": "설정 및 기록"
+  },
+  "refreshTitle": {
+    "message": "사용량 데이터 새로고침"
+  },
+  "signedOutStale": {
+    "message": "로그아웃됨: 데이터가 오래되었습니다"
+  },
+  "lastUpdateUnknown": {
+    "message": "마지막 업데이트 알 수 없음"
+  },
+  "signIn": {
+    "message": "로그인 →"
+  },
+  "couldntRefresh": {
+    "message": "새로고침 실패: 데이터가 오래되었습니다"
+  },
+  "retry": {
+    "message": "다시 시도"
+  },
+  "currentSession": {
+    "message": "현재 세션"
+  },
+  "weeklyAll": {
+    "message": "주간 · 모든 모델"
+  },
+  "weeklyIncludes": {
+    "message": "Fable 5, Opus, Sonnet, Haiku 포함"
+  },
+  "subcapNote": {
+    "message": "모델별 한도는 주간 한도와 함께 초기화됩니다"
+  },
+  "dailyRoutineRuns": {
+    "message": "일일 루틴 실행"
+  },
+  "rateInStore": {
+    "message": "스토어에서 평가하기"
+  },
+  "notNow": {
+    "message": "나중에"
+  },
+  "waitlistText": {
+    "message": "Pro: 휴대폰에서 한도 확인"
+  },
+  "joinWaitlist": {
+    "message": "대기자 명단 등록 →"
+  },
+  "dontShowAgain": {
+    "message": "다시 표시 안 함"
+  },
+  "dismiss": {
+    "message": "닫기"
+  },
+  "alsoOnWindows": {
+    "message": "Windows에서도"
+  },
+  "winPromoBody": {
+    "message": "브라우저를 닫아도 시계 옆에 사용량 표시."
+  },
+  "tryFree": {
+    "message": "무료로 사용해 보기 →"
+  },
+  "neverUpdated": {
+    "message": "업데이트 기록 없음"
+  },
+  "opensClaudeTab": {
+    "message": "새 탭에서 claude.ai 열기"
+  },
+  "openUsagePage": {
+    "message": "사용량 페이지 열기"
+  },
+  "freeTitle": {
+    "message": "Free 플랜 한도 보기"
+  },
+  "freeTextOff": {
+    "message": "Free 플랜에서는 Claude 사용량 페이지를 볼 수 없지만, 모든 답변에는 여전히 한도 정보가 포함됩니다. claude.ai에서 바를 켜면 다음 메시지 후에 여기에 표시됩니다."
+  },
+  "freeTextOn": {
+    "message": "claude.ai의 바가 켜져 있습니다. 그곳에서 메시지를 보내면 여기에 한도가 표시됩니다."
+  },
+  "turnOn": {
+    "message": "켜기"
+  },
+  "openClaude": {
+    "message": "claude.ai 열기"
+  },
+  "noDataLine1": {
+    "message": "아직 사용량 데이터가 없습니다."
+  },
+  "noDataLine2": {
+    "message": "아래를 클릭해 데이터를 불러오세요."
+  },
+  "openUsagePageBtn": {
+    "message": "Claude 사용량 페이지 열기"
+  },
+  "resettingSoon": {
+    "message": "곧 초기화"
+  },
+  "resetsIn": {
+    "message": "$P1$ 후 초기화",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "durDH": {
+    "message": "$P1$일 $P2$시간",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      },
+      "p2": {
+        "content": "$2"
+      }
+    }
+  },
+  "durHM": {
+    "message": "$P1$시간 $P2$분",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      },
+      "p2": {
+        "content": "$2"
+      }
+    }
+  },
+  "durH": {
+    "message": "$P1$시간",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "durM": {
+    "message": "$P1$분",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "intervalOpt": {
+    "message": "$P1$분",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "justUpdated": {
+    "message": "방금 업데이트됨"
+  },
+  "updatedAgo": {
+    "message": "$P1$ 전에 업데이트됨",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "updatedAt": {
+    "message": "$P1$에 업데이트됨",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "lastUpdateAgo": {
+    "message": "마지막 업데이트: $P1$ 전",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "lastUpdateAt": {
+    "message": "마지막 업데이트: $P1$",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "lastUpdateNow": {
+    "message": "마지막 업데이트: 방금"
+  },
+  "noDataCaptured": {
+    "message": "아직 수집된 데이터가 없습니다"
+  },
+  "notYetUsed": {
+    "message": "아직 사용 안 함"
+  },
+  "weeklyLimitLbl": {
+    "message": "주간 한도"
+  },
+  "resetTimeUnknown": {
+    "message": "초기화 시간 알 수 없음"
+  },
+  "resetDayUnknown": {
+    "message": "초기화 날짜 알 수 없음"
+  },
+  "balance": {
+    "message": "잔액 $P1$",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "resetsMonthly": {
+    "message": "매월 초기화"
+  },
+  "sparkSession": {
+    "message": "세션"
+  },
+  "sparkWeekly": {
+    "message": "주간"
+  },
+  "sparkSpent": {
+    "message": "이번 달 지출"
+  },
+  "sparkRange": {
+    "message": "$P1$: $P2$~$P3$",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      },
+      "p2": {
+        "content": "$2"
+      },
+      "p3": {
+        "content": "$3"
+      }
+    }
+  },
+  "spendLimitMonthly": {
+    "message": "월간 지출 한도 도달"
+  },
+  "spendLimitOrg": {
+    "message": "지출 한도 도달(조직)"
+  },
+  "spendLimit": {
+    "message": "지출 한도 도달"
+  },
+  "resetsDaily": {
+    "message": "매일 초기화"
+  },
+  "reviewAlert": {
+    "message": "제때 알림을 받으셨나요? 평가해 주세요"
+  },
+  "reviewFree": {
+    "message": "Free 한도가 보이시나요? 평가해 주세요"
+  },
+  "reviewDays": {
+    "message": "유용하신가요? 평가해 주세요"
+  },
+  "errAuth": {
+    "message": "새로고침 실패: claude.ai에 로그인하세요"
+  },
+  "errOrg": {
+    "message": "새로고침 실패: 조직을 찾을 수 없습니다"
+  },
+  "errFree": {
+    "message": "Free 플랜: 메시지마다 업데이트됩니다"
+  },
+  "errRejected": {
+    "message": "새로고침 실패: claude.ai의 예상치 못한 응답"
+  },
+  "errUnreachable": {
+    "message": "새로고침 실패: claude.ai에 연결할 수 없습니다"
+  },
+  "optTitle": {
+    "message": "Claude Monitor: 설정"
+  },
+  "optNotifications": {
+    "message": "알림"
+  },
+  "optAlertMe": {
+    "message": "사용량이 기준을 넘으면 알림"
+  },
+  "optWarn": {
+    "message": "경고 기준"
+  },
+  "optCrit": {
+    "message": "위험 기준"
+  },
+  "optNotifHint": {
+    "message": "세션, 주간, 모델별 한도에 적용됩니다. 각 알림은 초기화 기간마다 한 번만 표시됩니다."
+  },
+  "optSendTest": {
+    "message": "테스트 알림 보내기"
+  },
+  "optOnClaude": {
+    "message": "claude.ai에서"
+  },
+  "optShowBar": {
+    "message": "채팅 입력창 위에 사용량 바 표시"
+  },
+  "optBarHint": {
+    "message": "기본값은 꺼짐이며, 켜면 claude.ai 페이지 접근 권한을 요청합니다. 바는 Claude가 각 답변에 첨부하는 사용량 수치만 읽고 메시지는 절대 읽지 않습니다. Free 플랜에서는 한도가 표시되는 유일한 곳입니다."
+  },
+  "optHistory": {
+    "message": "기록"
+  },
+  "optKeepFor": {
+    "message": "기록 보관 기간"
+  },
+  "optDays": {
+    "message": "$P1$일",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "optSnapshots": {
+    "message": "저장된 기록"
+  },
+  "optHistoryHint": {
+    "message": "사용량, 유료 지출, 선불 잔액은 새로고침에 성공할 때마다(약 10분마다) 로컬에 기록됩니다. 데이터는 기기 밖으로 나가지 않습니다. 내보내기에서 빠진 값은 비어 있으며, 이는 0이 아니라 데이터를 받을 수 없었다는 뜻입니다."
+  },
+  "optExportJson": {
+    "message": "JSON 내보내기"
+  },
+  "optExportCsv": {
+    "message": "CSV 내보내기"
+  },
+  "optClearHistory": {
+    "message": "기록 지우기"
+  },
+  "optReviewTitle": {
+    "message": "유용하신가요?"
+  },
+  "optReviewText": {
+    "message": "짧은 리뷰는 다른 Claude 사용자가 이 확장 프로그램을 찾는 가장 큰 방법입니다. 1분이면 됩니다."
+  },
+  "optLeaveReview": {
+    "message": "리뷰 남기기 ★★★★★"
+  },
+  "optProTitle": {
+    "message": "Pro가 곧 나옵니다."
+  },
+  "optProText": {
+    "message": "휴대폰에서 Claude 한도를 확인하고, 한도에 도달하기 전에 Slack이나 Discord로 알림을 받으세요. 선택형 유료 기능이며 이 확장 프로그램은 계속 무료입니다."
+  },
+  "optWinTitle": {
+    "message": "Windows에서도 사용할 수 있습니다."
+  },
+  "optWinText": {
+    "message": "UsagePeek는 브라우저를 닫아도 시계 옆에 사용량을 표시하고, 한도가 초기화되는 즉시 Claude Code 프로젝트를 다시 엽니다."
+  },
+  "optTryFree7": {
+    "message": "7일 무료 체험 →"
+  },
+  "stPermDenied": {
+    "message": "권한이 거부되었습니다"
+  },
+  "stSaved": {
+    "message": "저장됨"
+  },
+  "stHistoryCleared": {
+    "message": "기록을 지웠습니다"
+  },
+  "stNoHistory": {
+    "message": "아직 기록이 없습니다"
+  },
+  "stExported": {
+    "message": "내보냈습니다"
+  },
+  "testSuffix": {
+    "message": "(테스트)"
+  },
+  "nbSession": {
+    "message": "Claude 세션"
+  },
+  "nbWeekly": {
+    "message": "Claude 주간 한도"
+  },
+  "nbFable": {
+    "message": "Fable 5 주간 한도"
+  },
+  "nbOpus": {
+    "message": "Opus 주간 한도"
+  },
+  "nbSonnet": {
+    "message": "Sonnet 주간 한도"
+  },
+  "nbDesign": {
+    "message": "Claude Design 주간 한도"
+  },
+  "notifTitle": {
+    "message": "$P1$ $P2$% 도달",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      },
+      "p2": {
+        "content": "$2"
+      }
+    }
+  },
+  "almostResets": {
+    "message": "한도에 거의 도달했습니다. $P1$ 후 초기화",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "almostLimit": {
+    "message": "한도에 거의 도달했습니다"
+  },
+  "approaching": {
+    "message": "한도에 가까워지고 있습니다"
+  },
+  "barTitle": {
+    "message": "$P1$: $P2$% 사용",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      },
+      "p2": {
+        "content": "$2"
+      }
+    }
+  },
+  "barTitleReset": {
+    "message": "$P1$: $P2$% 사용, $P3$ 후 초기화",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      },
+      "p2": {
+        "content": "$2"
+      },
+      "p3": {
+        "content": "$3"
+      }
+    }
+  },
+  "barStale": {
+    "message": "오래된 데이터"
+  },
+  "barFreeWaiting": {
+    "message": "Free 플랜 한도는 다음 메시지 후에 표시됩니다"
+  },
+  "barNotLoaded": {
+    "message": "사용량을 아직 불러오지 않았습니다"
+  },
+  "barAria": {
+    "message": "Claude 사용량"
   }
 }
