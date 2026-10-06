@@ -1,13 +1,28 @@
-# Claude Usage Monitor
+# Claude Monitor
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-1.13.0-blue.svg)](extension/manifest.json)
-[![Chrome Web Store](https://img.shields.io/badge/Chrome-Web%20Store-brightgreen.svg)](https://chromewebstore.google.com/detail/claude-usage-monitor/bfhdcfiigpaaopklllpobkheakpigbfo)
-[![Firefox Add-ons](https://img.shields.io/badge/Firefox-Add--ons-orange.svg)](https://addons.mozilla.org/firefox/addon/claude-usage-meter/)
+[![Release](https://img.shields.io/github/v/release/claude-monitor/claude-monitor-browser-extension?label=release)](https://github.com/claude-monitor/claude-monitor-browser-extension/releases/latest)
+[![Chrome Web Store users](https://img.shields.io/chrome-web-store/users/bfhdcfiigpaaopklllpobkheakpigbfo?label=Chrome%20users)](https://chromewebstore.google.com/detail/bfhdcfiigpaaopklllpobkheakpigbfo)
+[![Chrome Web Store rating](https://img.shields.io/chrome-web-store/rating/bfhdcfiigpaaopklllpobkheakpigbfo?label=rating)](https://chromewebstore.google.com/detail/bfhdcfiigpaaopklllpobkheakpigbfo/reviews)
+[![Firefox Add-ons](https://img.shields.io/amo/users/claude-usage-meter?label=Firefox%20users)](https://addons.mozilla.org/firefox/addon/claude-usage-meter/)
 
-Claude Usage Monitor is a Manifest V3 browser extension for Claude.ai that shows your current usage directly from the toolbar popup. **Open source (MIT)**: all code in this repo is exactly what runs in your browser.
+**Never get cut off by a Claude usage limit again.** Claude Monitor is a free, open-source browser extension that shows your Claude usage limits live: the 5-hour session, the weekly limit and per-model caps, each with a countdown to its reset, plus desktop alerts at 80% and 95%. It works on the Free plan too.
 
-![Claude Usage Monitor popup showing session, weekly and per-model usage with reset countdowns and a trend line under each bar](docs/screenshots/overview.png)
+**Install:** [Chrome Web Store](https://chromewebstore.google.com/detail/bfhdcfiigpaaopklllpobkheakpigbfo) · [Firefox Add-ons](https://addons.mozilla.org/firefox/addon/claude-usage-meter/) · Website: [claude-monitor.com](https://claude-monitor.com/)
+
+Manifest V3, MIT licensed, unminified: all code in this repo is exactly what runs in your browser. No account, no servers, no telemetry.
+
+![Claude Monitor popup showing session, weekly and per-model usage with reset countdowns and a trend line under each bar](docs/screenshots/overview.png)
+
+## On claude.ai, and on the Free plan
+
+Turn on the optional usage bar in Settings and your session and weekly limits sit right above claude.ai's chat box, so you see them while you type.
+
+![The usage bar above claude.ai's chat box, showing session and weekly usage with reset times](docs/screenshots/on-page-bar.png)
+
+It also covers the Free plan. Since August 2026 claude.ai shows no usage limits to Free accounts, and its usage endpoint returns every field empty for them. Each chat reply still carries the 5-hour and 7-day figures, so with the bar on, the extension reads them from the reply and the popup, badge and alerts work on Free as well. More in the [Free plan guide](https://claude-monitor.com/claude-free-plan-usage).
+
+The bar is off by default. Turning it on requests `scripting` and access to `claude.ai` pages as optional permissions; turning it off unregisters the scripts and gives both permissions back.
 
 It displays your usage buckets:
 
@@ -42,11 +57,15 @@ The extension refreshes usage through Claude.ai's internal authenticated API.
 - Manual refresh is available from the popup.
 - The popup shows the extension version so you can confirm which local build is loaded.
 - A badge in the header shows your Claude plan (e.g. Max 5x).
-- When your claude.ai session expires, an inline banner says so and the last known data stays visible instead of being replaced by zeros.
+- When your claude.ai session expires, or refreshes keep failing, an inline banner says so, the badge turns gray, and the last known data stays visible, marked as stale, instead of being replaced by zeros.
+- Switching claude.ai to another account clears the previous account's data instead of showing it as current.
+- On the Free plan, where the usage endpoint returns nothing, the optional page script reads the `message_limit` event from each chat completion stream (5-hour and 7-day windows only; the reply text is never parsed or kept).
 
 ## Features
 
 - Toolbar badge showing the current session percentage: green under 50%, yellow 50 to 80%, red above 80%.
+- Optional usage bar above the claude.ai chat box, following Claude's light or dark theme.
+- Free plan support through the usage bar.
 - Popup with current session and weekly usage cards.
 - Per-model weekly sub-limit cards (Fable, Opus, Sonnet and Claude Design), offered on paid plans.
 - Usage history with a trend line under the session, weekly and spend bars, hover readout, configurable retention and JSON/CSV export.
@@ -68,6 +87,7 @@ The extension refreshes usage through Claude.ai's internal authenticated API.
 
 - **Google Chrome**: Manifest V3, uses `manifest.json`.
 - **Mozilla Firefox**: Manifest V3, uses `manifest.firefox.json` (packaged as `manifest.json` by the build script).
+- **Microsoft Edge**: runs the Chrome package; the Edge Add-ons listing is in review.
 
 The codebase uses the standard `chrome.*` extension APIs, which Firefox supports via the WebExtensions namespace.
 
@@ -115,14 +135,16 @@ For a permanent install, use the published add-on at <https://addons.mozilla.org
 - `extension/popup.html`: popup markup.
 - `extension/popup.css`: popup styling.
 - `extension/popup.js`: popup rendering, sparklines and their hover readout, manual refresh flow, and storage listeners.
-- `extension/options.html` and `extension/options.js`: settings page with notification thresholds, history retention, export and clear.
+- `extension/options.html` and `extension/options.js`: settings page with notification thresholds, the usage-bar toggle, history retention, export and clear.
+- `extension/page/bar.js`: the optional usage bar on claude.ai (isolated world, closed shadow root, no network requests).
+- `extension/page/stream.js`: the optional page-world reader for the `message_limit` event in chat completion streams (Free plan support).
 
 ## Privacy
 
 - All data is stored locally on your device via `chrome.storage.local`, including the usage history: no account, no server, no sync.
 - No analytics, no telemetry, no third parties.
-- The extension cannot read your chats, projects, files, or any other Claude.ai content.
-- Host permissions are scoped to specific Claude.ai API endpoints. See [SECURITY.md](SECURITY.md) for the full permission breakdown.
+- The extension cannot read your chats, projects, files, or any other Claude.ai content. The optional usage bar reads only the usage figures attached to each reply.
+- Required host permissions are scoped to specific Claude.ai API endpoints; access to claude.ai pages is optional and only granted if you turn on the bar. See [SECURITY.md](SECURITY.md) for the full permission breakdown.
 - Full privacy policy: <https://claude-monitor.com/privacy>
 
 ## Contributing
@@ -141,4 +163,4 @@ To report a vulnerability, email <martin.sadofschi@gmail.com> instead of opening
 
 [MIT](LICENSE) © Digital Advanced Solutions
 
-Claude Usage Monitor is an independent project and is not affiliated with Anthropic.
+Claude Monitor (formerly Claude Usage Monitor) is an independent project and is not affiliated with Anthropic.
