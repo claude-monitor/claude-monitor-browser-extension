@@ -284,7 +284,9 @@ const reviewLink = document.getElementById('reviewLink');
 if (reviewLink) {
   reviewLink.href = navigator.userAgent.includes('Firefox')
     ? 'https://addons.mozilla.org/firefox/addon/claude-usage-meter/reviews/'
-    : 'https://chromewebstore.google.com/detail/bfhdcfiigpaaopklllpobkheakpigbfo/reviews';
+    : navigator.userAgent.includes('Edg/')
+      ? 'https://microsoftedge.microsoft.com/addons/detail/ilidbhklkpefboidlfeoiiacepcefinp'
+      : 'https://chromewebstore.google.com/detail/bfhdcfiigpaaopklllpobkheakpigbfo/reviews';
 }
 
 // ─── Windows companion promo ─────────────────────────────────────────────────

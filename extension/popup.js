@@ -8,9 +8,12 @@ const SIGN_IN_URL = 'https://claude.ai/login';
 // install timer fired on the first open for anyone who came back late, which
 // asked for a review before the extension had proven itself.
 const REVIEW_NUDGE_MIN_DAYS = 3;
+// Edge runs the Chrome package but has its own store; its UA carries "Edg/".
 const REVIEW_URL = navigator.userAgent.includes('Firefox')
   ? 'https://addons.mozilla.org/firefox/addon/claude-usage-meter/reviews/'
-  : 'https://chromewebstore.google.com/detail/bfhdcfiigpaaopklllpobkheakpigbfo/reviews';
+  : navigator.userAgent.includes('Edg/')
+    ? 'https://microsoftedge.microsoft.com/addons/detail/ilidbhklkpefboidlfeoiiacepcefinp'
+    : 'https://chromewebstore.google.com/detail/bfhdcfiigpaaopklllpobkheakpigbfo/reviews';
 
 // Pro waitlist ask: later than the review ask, so it only reaches people who
 // kept using the extension. `src` tags the signup with the surface it came from.

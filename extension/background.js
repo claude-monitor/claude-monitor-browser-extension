@@ -146,7 +146,8 @@ function streamWindow(incoming, previous) {
 function setUninstallFeedbackUrl() {
   if (!chrome.runtime.setUninstallURL) return;
   const version = chrome.runtime.getManifest().version;
-  const browser = navigator.userAgent.includes('Firefox') ? 'firefox' : 'chrome';
+  const ua = navigator.userAgent;
+  const browser = ua.includes('Firefox') ? 'firefox' : ua.includes('Edg/') ? 'edge' : 'chrome';
   chrome.runtime.setUninstallURL(`https://claude-monitor.com/uninstall?v=${version}&b=${browser}`);
 }
 
