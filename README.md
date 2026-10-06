@@ -78,6 +78,7 @@ The extension refreshes usage through Claude.ai's internal authenticated API.
 - Manual refresh button.
 - Quick link to `https://claude.ai/settings/usage`.
 - Local storage caching so the last known value remains visible between refreshes.
+- Interface, notifications and store listing in English, Spanish, Brazilian Portuguese, German, French, Italian, Japanese and Korean, following the browser language.
 
 | Four layouts: Classic, Mixed, Grid, List | Six color themes |
 |---|---|
@@ -137,6 +138,7 @@ For a permanent install, use the published add-on at <https://addons.mozilla.org
 - `extension/popup.js`: popup rendering, sparklines and their hover readout, manual refresh flow, and storage listeners.
 - `extension/options.html` and `extension/options.js`: settings page with notification thresholds, the usage-bar toggle, history retention, export and clear.
 - `extension/page/bar.js`: the optional usage bar on claude.ai (isolated world, closed shadow root, no network requests).
+- `extension/_locales/`: translated strings (`messages.json`) for the eight supported languages.
 - `extension/page/stream.js`: the optional page-world reader for the `message_limit` event in chat completion streams (Free plan support).
 
 ## Privacy

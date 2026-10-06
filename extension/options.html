@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Claude Usage Monitor — Settings</title>
+  <title data-i18n="optTitle">Claude Monitor: Settings</title>
   <style>
     /* Standalone styles: this page renders embedded in the browser's own
        extension UI (white or dark chrome), so it follows the system scheme
@@ -91,45 +91,45 @@
 </head>
 <body>
 
-  <h1>Notifications</h1>
+  <h1 data-i18n="optNotifications">Notifications</h1>
   <div class="section">
     <div class="row">
-      <label for="notifEnabled">Alert me when usage crosses a threshold</label>
+      <label for="notifEnabled" data-i18n="optAlertMe">Alert me when usage crosses a threshold</label>
       <input type="checkbox" id="notifEnabled" />
     </div>
     <div class="row">
-      <label for="warnAt">Warning threshold</label>
+      <label for="warnAt" data-i18n="optWarn">Warning threshold</label>
       <span><input type="number" id="warnAt" min="1" max="100" step="1" /> %</span>
     </div>
     <div class="row">
-      <label for="critAt">Critical threshold</label>
+      <label for="critAt" data-i18n="optCrit">Critical threshold</label>
       <span><input type="number" id="critAt" min="1" max="100" step="1" /> %</span>
     </div>
   </div>
-  <p class="hint">Applies to the session, weekly and per-model caps. Each alert fires once per reset window.</p>
+  <p class="hint" data-i18n="optNotifHint">Applies to the session, weekly and per-model caps. Each alert fires once per reset window.</p>
 
   <div class="actions">
-    <button id="testBtn">Send test notification</button>
+    <button id="testBtn" data-i18n="optSendTest">Send test notification</button>
     <span id="status" role="status"></span>
   </div>
 
-  <h1 style="margin-top: 22px;">On claude.ai</h1>
+  <h1 style="margin-top: 22px;" data-i18n="optOnClaude">On claude.ai</h1>
   <div class="section">
     <div class="row">
-      <label for="pageBarEnabled">Show a usage bar above the chat box</label>
+      <label for="pageBarEnabled" data-i18n="optShowBar">Show a usage bar above the chat box</label>
       <input type="checkbox" id="pageBarEnabled" />
     </div>
   </div>
-  <p class="hint">
+  <p class="hint" data-i18n="optBarHint">
     Off by default; turning it on asks for access to claude.ai pages. The bar reads only the
     usage figures Claude attaches to each reply, never your messages. On the Free plan this is
     the only place your limits appear.
   </p>
 
-  <h1 style="margin-top: 22px;">History</h1>
+  <h1 style="margin-top: 22px;" data-i18n="optHistory">History</h1>
   <div class="section">
     <div class="row">
-      <label for="retentionDays">Keep history for</label>
+      <label for="retentionDays" data-i18n="optKeepFor">Keep history for</label>
       <select id="retentionDays">
         <option value="7">7 days</option>
         <option value="14">14 days</option>
@@ -137,44 +137,44 @@
       </select>
     </div>
     <div class="row">
-      <span>Stored snapshots</span>
+      <span data-i18n="optSnapshots">Stored snapshots</span>
       <span id="historyCount">0</span>
     </div>
   </div>
-  <p class="hint">
+  <p class="hint" data-i18n="optHistoryHint">
     Usage, paid spend and prepaid balance are recorded locally on every successful
     refresh, roughly once every 10 minutes. Nothing leaves your device. In the export,
     a missing value stays empty: it means the data was unavailable, not zero.
   </p>
 
   <div class="actions">
-    <button id="exportJsonBtn">Export JSON</button>
-    <button id="exportCsvBtn">Export CSV</button>
-    <button id="clearHistoryBtn">Clear history</button>
+    <button id="exportJsonBtn" data-i18n="optExportJson">Export JSON</button>
+    <button id="exportCsvBtn" data-i18n="optExportCsv">Export CSV</button>
+    <button id="clearHistoryBtn" data-i18n="optClearHistory">Clear history</button>
   </div>
 
   <!-- href is set in options.js, per browser -->
   <div class="promo">
-    <span><b>Finding it useful?</b> A short review is the main way other Claude users find
-    this extension. It takes a minute.</span>
+    <span><b data-i18n="optReviewTitle">Finding it useful?</b> <span data-i18n="optReviewText">A short review is the main way other Claude users find
+    this extension. It takes a minute.</span></span>
     <br />
-    <a id="reviewLink" href="#" target="_blank" rel="noopener">Leave a review ★★★★★</a>
+    <a id="reviewLink" href="#" target="_blank" rel="noopener" data-i18n="optLeaveReview">Leave a review ★★★★★</a>
   </div>
 
   <div class="promo">
-    <span><b>Pro is coming.</b> Your Claude limits on your phone, and a Slack or Discord
-    ping before you hit them. Optional and paid; this extension stays free.</span>
+    <span><b data-i18n="optProTitle">Pro is coming.</b> <span data-i18n="optProText">Your Claude limits on your phone, and a Slack or Discord
+    ping before you hit them. Optional and paid; this extension stays free.</span></span>
     <br />
-    <a href="https://claude-monitor.com/?src=ext-options#waitlist" target="_blank" rel="noopener">Join the waitlist →</a>
+    <a href="https://claude-monitor.com/?src=ext-options#waitlist" target="_blank" rel="noopener" data-i18n="joinWaitlist">Join the waitlist →</a>
   </div>
 
   <!-- Windows only; the href is set in options.js so the campaign id lives in
        one place next to the other surfaces. -->
   <div class="promo" id="winPromoRow" style="display:none">
-    <span><b>Also on Windows.</b> UsagePeek shows your usage next to the clock with the
-    browser closed, and reopens your Claude Code projects the moment a limit resets.</span>
+    <span><b data-i18n="optWinTitle">Also on Windows.</b> <span data-i18n="optWinText">UsagePeek shows your usage next to the clock with the
+    browser closed, and reopens your Claude Code projects the moment a limit resets.</span></span>
     <br />
-    <a id="winPromoLink" href="#" target="_blank" rel="noopener">Try it free for 7 days →</a>
+    <a id="winPromoLink" href="#" target="_blank" rel="noopener" data-i18n="optTryFree7">Try it free for 7 days →</a>
   </div>
 
   <script src="options.js"></script>

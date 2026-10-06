@@ -4,6 +4,15 @@
 
 const DEFAULTS = { enabled: true, warnAt: 80, critAt: 95 };
 
+// Strings live in _locales/<lang>/messages.json; the browser picks the locale.
+function msg(key, ...subs) {
+  return chrome.i18n.getMessage(key, subs.map(String)) || key;
+}
+
+document.documentElement.lang = chrome.i18n.getUILanguage();
+document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = msg(el.dataset.i18n); });
+document.querySelectorAll('#retentionDays option').forEach(opt => { opt.textContent = msg('optDays', opt.value); });
+
 const enabledEl = document.getElementById('notifEnabled');
 const warnEl    = document.getElementById('warnAt');
 const critEl    = document.getElementById('critAt');
@@ -50,7 +59,7 @@ async function save() {
     const granted = await ensureNotifPermission();
     if (!granted) {
       enabledEl.checked = false;
-      flashStatus('Permission denied');
+      flashStatus(msg('stPermDenied'));
       return;
     }
   }
@@ -61,19 +70,19 @@ async function save() {
   critEl.value = critAt;
   chrome.storage.local.set(
     { notifSettings: { enabled: enabledEl.checked, warnAt, critAt } },
-    () => flashStatus('Saved'),
+    () => flashStatus(msg('stSaved')),
   );
 }
 
 [enabledEl, warnEl, critEl].forEach(el => el.addEventListener('change', save));
 
 testBtn.addEventListener('click', async () => {
-  if (!(await ensureNotifPermission())) { flashStatus('Permission denied'); return; }
+  if (!(await ensureNotifPermission())) { flashStatus(msg('stPermDenied')); return; }
   chrome.notifications.create('usage-test', {
     type: 'basic',
     iconUrl: 'icons/icon128.png',
-    title: 'Claude session at 82%',
-    message: 'Resets in 1h 23m (test)',
+    title: msg('notifTitle', msg('nbSession'), 82),
+    message: `${msg('resetsIn', msg('durHM', 1, 23))} ${msg('testSuffix')}`,
   });
 });
 
@@ -97,16 +106,16 @@ pageBarEl.addEventListener('change', () => {
     chrome.permissions.request(PAGE_BAR_PERMS, (granted) => {
       if (!granted) {
         pageBarEl.checked = false;
-        flashStatus('Permission denied');
+        flashStatus(msg('stPermDenied'));
         return;
       }
-      chrome.storage.local.set({ pageBar: { enabled: true } }, () => flashStatus('Saved'));
+      chrome.storage.local.set({ pageBar: { enabled: true } }, () => flashStatus(msg('stSaved')));
     });
   } else {
     chrome.storage.local.set({ pageBar: { enabled: false } }, () => {
       chrome.permissions.remove(PAGE_BAR_PERMS, () => {
         void chrome.runtime.lastError;
-        flashStatus('Saved');
+        flashStatus(msg('stSaved'));
       });
     });
   }
@@ -155,7 +164,7 @@ retentionEl.addEventListener('change', () => {
     chrome.runtime.sendMessage({ type: 'PRUNE_HISTORY' }, () => {
       void chrome.runtime.lastError;   // worker asleep → prune happens on next append
       refreshHistoryCount();
-      flashStatus('Saved');
+      flashStatus(msg('stSaved'));
     });
   });
 });
@@ -163,7 +172,7 @@ retentionEl.addEventListener('change', () => {
 clearHistoryBtn.addEventListener('click', () => {
   chrome.storage.local.remove(HISTORY_KEY, () => {
     refreshHistoryCount();
-    flashStatus('History cleared');
+    flashStatus(msg('stHistoryCleared'));
   });
 });
 
@@ -266,16 +275,16 @@ function exportStamp() {
 
 exportJsonBtn.addEventListener('click', async () => {
   const history = await readHistory();
-  if (!history.length) { flashStatus('No history yet'); return; }
+  if (!history.length) { flashStatus(msg('stNoHistory')); return; }
   downloadFile(`claude-usage-history-${exportStamp()}.json`, 'application/json', buildJsonExport(history));
-  flashStatus('Exported');
+  flashStatus(msg('stExported'));
 });
 
 exportCsvBtn.addEventListener('click', async () => {
   const history = await readHistory();
-  if (!history.length) { flashStatus('No history yet'); return; }
+  if (!history.length) { flashStatus(msg('stNoHistory')); return; }
   downloadFile(`claude-usage-history-${exportStamp()}.csv`, 'text/csv', buildCsvExport(history));
-  flashStatus('Exported');
+  flashStatus(msg('stExported'));
 });
 
 // ─── Review link ─────────────────────────────────────────────────────────────

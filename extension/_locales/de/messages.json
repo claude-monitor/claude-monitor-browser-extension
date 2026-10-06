@@ -10,5 +10,533 @@
   "extDescription": {
     "message": "Claude-Nutzungslimits live: Sitzung und Woche in %, Countdown bis zum Reset, Warnungen bei 80/95 %. Free, Pro, Max, Claude Code.",
     "description": "Short description shown in the stores and the browser (max 132 characters)."
+  },
+  "intervalTitle": {
+    "message": "Aktualisierungsintervall"
+  },
+  "displayOptions": {
+    "message": "Anzeigeoptionen"
+  },
+  "metrics": {
+    "message": "Metriken"
+  },
+  "selectAll": {
+    "message": "Alle auswählen"
+  },
+  "deselectAll": {
+    "message": "Alle abwählen"
+  },
+  "fableWeekly": {
+    "message": "Fable 5 wöchentlich"
+  },
+  "opusWeekly": {
+    "message": "Opus wöchentlich"
+  },
+  "sonnetWeekly": {
+    "message": "Sonnet wöchentlich"
+  },
+  "routineRuns": {
+    "message": "Routine-Läufe"
+  },
+  "extraCredits": {
+    "message": "Zusatzguthaben"
+  },
+  "menuDesign": {
+    "message": "Design"
+  },
+  "layoutClassic": {
+    "message": "Klassisch"
+  },
+  "layoutClassicDesc": {
+    "message": "Ursprüngliches Design"
+  },
+  "layoutMixed": {
+    "message": "Gemischt"
+  },
+  "layoutMixedDesc": {
+    "message": "Ringe + Liste"
+  },
+  "layoutGrid": {
+    "message": "Raster"
+  },
+  "layoutGridDesc": {
+    "message": "Karten mit Ringen"
+  },
+  "layoutList": {
+    "message": "Liste"
+  },
+  "layoutListDesc": {
+    "message": "Kompakte Zeilen"
+  },
+  "trendLine": {
+    "message": "Trendlinie"
+  },
+  "menuTheme": {
+    "message": "Farbschema"
+  },
+  "themeAria": {
+    "message": "Farbschema $P1$",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "settingsHistory": {
+    "message": "Einstellungen und Verlauf"
+  },
+  "refreshTitle": {
+    "message": "Nutzungsdaten aktualisieren"
+  },
+  "signedOutStale": {
+    "message": "Abgemeldet: Daten veraltet"
+  },
+  "lastUpdateUnknown": {
+    "message": "Letzte Aktualisierung unbekannt"
+  },
+  "signIn": {
+    "message": "Anmelden →"
+  },
+  "couldntRefresh": {
+    "message": "Aktualisierung fehlgeschlagen: Daten veraltet"
+  },
+  "retry": {
+    "message": "Erneut versuchen"
+  },
+  "currentSession": {
+    "message": "Aktuelle Sitzung"
+  },
+  "weeklyAll": {
+    "message": "Wöchentlich · alle Modelle"
+  },
+  "weeklyIncludes": {
+    "message": "Umfasst Fable 5, Opus, Sonnet und Haiku"
+  },
+  "subcapNote": {
+    "message": "Modelllimits werden mit dem Wochenlimit zurückgesetzt"
+  },
+  "dailyRoutineRuns": {
+    "message": "Tägliche Routine-Läufe"
+  },
+  "rateInStore": {
+    "message": "Im Store bewerten"
+  },
+  "notNow": {
+    "message": "Nicht jetzt"
+  },
+  "waitlistText": {
+    "message": "Pro: deine Limits auf dem Handy"
+  },
+  "joinWaitlist": {
+    "message": "Auf die Warteliste →"
+  },
+  "dontShowAgain": {
+    "message": "Nicht mehr anzeigen"
+  },
+  "dismiss": {
+    "message": "Schließen"
+  },
+  "alsoOnWindows": {
+    "message": "Auch für Windows"
+  },
+  "winPromoBody": {
+    "message": "Nutzung neben der Uhr, auch bei geschlossenem Browser."
+  },
+  "tryFree": {
+    "message": "Kostenlos testen →"
+  },
+  "neverUpdated": {
+    "message": "Nie aktualisiert"
+  },
+  "opensClaudeTab": {
+    "message": "Öffnet claude.ai in einem neuen Tab"
+  },
+  "openUsagePage": {
+    "message": "Nutzungsseite öffnen"
+  },
+  "freeTitle": {
+    "message": "Deine Limits im Free-Plan sehen"
+  },
+  "freeTextOff": {
+    "message": "Im Free-Plan ist Claudes Nutzungsseite gesperrt, aber jede Antwort enthält weiterhin deine Limits. Aktiviere die Leiste auf claude.ai, dann erscheinen sie hier nach deiner nächsten Nachricht."
+  },
+  "freeTextOn": {
+    "message": "Die Leiste auf claude.ai ist aktiv. Schick dort eine Nachricht, dann erscheinen deine Limits hier."
+  },
+  "turnOn": {
+    "message": "Aktivieren"
+  },
+  "openClaude": {
+    "message": "claude.ai öffnen"
+  },
+  "noDataLine1": {
+    "message": "Noch keine Nutzungsdaten."
+  },
+  "noDataLine2": {
+    "message": "Klicke unten, um deine Daten zu laden."
+  },
+  "openUsagePageBtn": {
+    "message": "Claude-Nutzungsseite öffnen"
+  },
+  "resettingSoon": {
+    "message": "Wird gleich zurückgesetzt"
+  },
+  "resetsIn": {
+    "message": "Reset in $P1$",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "durDH": {
+    "message": "$P1$ T. $P2$ Std.",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      },
+      "p2": {
+        "content": "$2"
+      }
+    }
+  },
+  "durHM": {
+    "message": "$P1$ Std. $P2$ Min.",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      },
+      "p2": {
+        "content": "$2"
+      }
+    }
+  },
+  "durH": {
+    "message": "$P1$ Std.",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "durM": {
+    "message": "$P1$ Min.",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "intervalOpt": {
+    "message": "$P1$m",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "justUpdated": {
+    "message": "Gerade aktualisiert"
+  },
+  "updatedAgo": {
+    "message": "Vor $P1$ aktualisiert",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "updatedAt": {
+    "message": "Aktualisiert am $P1$",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "lastUpdateAgo": {
+    "message": "Letzte Aktualisierung vor $P1$",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "lastUpdateAt": {
+    "message": "Letzte Aktualisierung: $P1$",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "lastUpdateNow": {
+    "message": "Letzte Aktualisierung: gerade eben"
+  },
+  "noDataCaptured": {
+    "message": "Noch keine Daten erfasst"
+  },
+  "notYetUsed": {
+    "message": "Noch nicht genutzt"
+  },
+  "weeklyLimitLbl": {
+    "message": "Wochenlimit"
+  },
+  "resetTimeUnknown": {
+    "message": "Reset-Zeit unbekannt"
+  },
+  "resetDayUnknown": {
+    "message": "Reset-Tag unbekannt"
+  },
+  "balance": {
+    "message": "Guthaben $P1$",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "resetsMonthly": {
+    "message": "Monatlicher Reset"
+  },
+  "sparkSession": {
+    "message": "Sitzung"
+  },
+  "sparkWeekly": {
+    "message": "Wöchentlich"
+  },
+  "sparkSpent": {
+    "message": "Diesen Monat ausgegeben"
+  },
+  "sparkRange": {
+    "message": "$P1$: $P2$ bis $P3$",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      },
+      "p2": {
+        "content": "$2"
+      },
+      "p3": {
+        "content": "$3"
+      }
+    }
+  },
+  "spendLimitMonthly": {
+    "message": "Monatliches Ausgabenlimit erreicht"
+  },
+  "spendLimitOrg": {
+    "message": "Ausgabenlimit erreicht (Organisation)"
+  },
+  "spendLimit": {
+    "message": "Ausgabenlimit erreicht"
+  },
+  "resetsDaily": {
+    "message": "Täglicher Reset"
+  },
+  "reviewAlert": {
+    "message": "Rechtzeitig gewarnt? Bewerte uns"
+  },
+  "reviewFree": {
+    "message": "Siehst du deine Free-Limits? Bewerte uns"
+  },
+  "reviewDays": {
+    "message": "Nützlich? Bewerte uns"
+  },
+  "errAuth": {
+    "message": "Aktualisierung fehlgeschlagen: bei claude.ai anmelden"
+  },
+  "errOrg": {
+    "message": "Aktualisierung fehlgeschlagen: keine Organisation gefunden"
+  },
+  "errFree": {
+    "message": "Free-Plan: Aktualisierung nach jeder Nachricht"
+  },
+  "errRejected": {
+    "message": "Aktualisierung fehlgeschlagen: unerwartete Antwort von claude.ai"
+  },
+  "errUnreachable": {
+    "message": "Aktualisierung fehlgeschlagen: claude.ai nicht erreichbar"
+  },
+  "optTitle": {
+    "message": "Claude Monitor: Einstellungen"
+  },
+  "optNotifications": {
+    "message": "Benachrichtigungen"
+  },
+  "optAlertMe": {
+    "message": "Benachrichtigen, wenn die Nutzung eine Schwelle überschreitet"
+  },
+  "optWarn": {
+    "message": "Warnschwelle"
+  },
+  "optCrit": {
+    "message": "Kritische Schwelle"
+  },
+  "optNotifHint": {
+    "message": "Gilt für Sitzung, Wochenlimit und Modelllimits. Jede Warnung kommt einmal pro Zeitraum."
+  },
+  "optSendTest": {
+    "message": "Testbenachrichtigung senden"
+  },
+  "optOnClaude": {
+    "message": "Auf claude.ai"
+  },
+  "optShowBar": {
+    "message": "Nutzungsleiste über dem Chatfeld anzeigen"
+  },
+  "optBarHint": {
+    "message": "Standardmäßig aus; beim Aktivieren wird Zugriff auf claude.ai-Seiten angefragt. Die Leiste liest nur die Nutzungswerte, die Claude jeder Antwort beifügt, nie deine Nachrichten. Im Free-Plan ist sie der einzige Ort, an dem deine Limits erscheinen."
+  },
+  "optHistory": {
+    "message": "Verlauf"
+  },
+  "optKeepFor": {
+    "message": "Verlauf aufbewahren für"
+  },
+  "optDays": {
+    "message": "$P1$ Tage",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "optSnapshots": {
+    "message": "Gespeicherte Messpunkte"
+  },
+  "optHistoryHint": {
+    "message": "Nutzung, bezahlte Ausgaben und Prepaid-Guthaben werden bei jeder erfolgreichen Aktualisierung lokal gespeichert, etwa alle 10 Minuten. Nichts verlässt dein Gerät. Im Export bleibt ein fehlender Wert leer: Die Daten waren nicht verfügbar, nicht null."
+  },
+  "optExportJson": {
+    "message": "JSON exportieren"
+  },
+  "optExportCsv": {
+    "message": "CSV exportieren"
+  },
+  "optClearHistory": {
+    "message": "Verlauf löschen"
+  },
+  "optReviewTitle": {
+    "message": "Findest du es nützlich?"
+  },
+  "optReviewText": {
+    "message": "Eine kurze Bewertung ist der wichtigste Weg, wie andere Claude-Nutzer diese Erweiterung finden. Dauert eine Minute."
+  },
+  "optLeaveReview": {
+    "message": "Bewertung schreiben ★★★★★"
+  },
+  "optProTitle": {
+    "message": "Pro kommt bald."
+  },
+  "optProText": {
+    "message": "Deine Claude-Limits auf dem Handy und ein Hinweis per Slack oder Discord, bevor du sie erreichst. Optional und kostenpflichtig; diese Erweiterung bleibt kostenlos."
+  },
+  "optWinTitle": {
+    "message": "Auch für Windows."
+  },
+  "optWinText": {
+    "message": "UsagePeek zeigt deine Nutzung neben der Uhr, auch bei geschlossenem Browser, und öffnet deine Claude-Code-Projekte wieder, sobald ein Limit zurückgesetzt wird."
+  },
+  "optTryFree7": {
+    "message": "7 Tage kostenlos testen →"
+  },
+  "stPermDenied": {
+    "message": "Berechtigung verweigert"
+  },
+  "stSaved": {
+    "message": "Gespeichert"
+  },
+  "stHistoryCleared": {
+    "message": "Verlauf gelöscht"
+  },
+  "stNoHistory": {
+    "message": "Noch kein Verlauf"
+  },
+  "stExported": {
+    "message": "Exportiert"
+  },
+  "testSuffix": {
+    "message": "(Test)"
+  },
+  "nbSession": {
+    "message": "Claude-Sitzung"
+  },
+  "nbWeekly": {
+    "message": "Claude-Wochenlimit"
+  },
+  "nbFable": {
+    "message": "Fable 5 Wochenlimit"
+  },
+  "nbOpus": {
+    "message": "Opus Wochenlimit"
+  },
+  "nbSonnet": {
+    "message": "Sonnet Wochenlimit"
+  },
+  "nbDesign": {
+    "message": "Claude Design Wochenlimit"
+  },
+  "notifTitle": {
+    "message": "$P1$ bei $P2$ %",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      },
+      "p2": {
+        "content": "$2"
+      }
+    }
+  },
+  "almostResets": {
+    "message": "Fast am Limit, Reset in $P1$",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "almostLimit": {
+    "message": "Fast am Limit"
+  },
+  "approaching": {
+    "message": "Limit bald erreicht"
+  },
+  "barTitle": {
+    "message": "$P1$: $P2$ % genutzt",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      },
+      "p2": {
+        "content": "$2"
+      }
+    }
+  },
+  "barTitleReset": {
+    "message": "$P1$: $P2$ % genutzt, Reset in $P3$",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      },
+      "p2": {
+        "content": "$2"
+      },
+      "p3": {
+        "content": "$3"
+      }
+    }
+  },
+  "barStale": {
+    "message": "veraltet"
+  },
+  "barFreeWaiting": {
+    "message": "Deine Free-Limits erscheinen nach deiner nächsten Nachricht"
+  },
+  "barNotLoaded": {
+    "message": "Nutzung noch nicht geladen"
+  },
+  "barAria": {
+    "message": "Claude-Nutzung"
   }
 }

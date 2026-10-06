@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Claude Usage Monitor</title>
+  <title>Claude Monitor</title>
   <link rel="stylesheet" href="popup.css" />
 </head>
 <body>
@@ -19,7 +19,7 @@
         </svg>
       </div>
       <div class="title-block">
-        <span class="app-name">Claude Usage Monitor</span>
+        <span class="app-name">Claude Monitor</span>
         <span class="meta-row">
           <span class="app-version" id="appVersion">v-</span>
           <span class="plan-badge" id="planBadge" hidden></span>
@@ -27,7 +27,7 @@
       </div>
     </div>
     <div class="header-actions">
-      <select class="interval-select" id="intervalSelect" title="Auto-refresh interval">
+      <select class="interval-select" id="intervalSelect" title="Auto-refresh interval" data-i18n-title="intervalTitle">
         <option value="1">1m</option>
         <option value="2">2m</option>
         <option value="5">5m</option>
@@ -35,7 +35,7 @@
         <option value="60">60m</option>
       </select>
       <div class="view-wrap" id="viewWrap">
-        <button class="view-btn" id="viewBtn" title="Display options" aria-haspopup="true" aria-expanded="false">
+        <button class="view-btn" id="viewBtn" title="Display options" data-i18n-title="displayOptions" aria-haspopup="true" aria-expanded="false">
           <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/>
             <line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/>
@@ -46,32 +46,32 @@
         <div class="view-menu" id="viewMenu" hidden>
           <div class="view-menu-section" id="cardsSection" style="display:none">
           <div class="view-menu-head">
-            <span class="view-menu-title">Metrics</span>
-            <button class="view-menu-all" id="viewAllBtn" type="button">Select all</button>
+            <span class="view-menu-title" data-i18n="metrics">Metrics</span>
+            <button class="view-menu-all" id="viewAllBtn" type="button" data-i18n="selectAll">Select all</button>
           </div>
           <button class="view-menu-item" data-card="fable" id="fableMenuItem">
             <span class="view-check"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
             <span class="view-menu-label">
               <svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z"/><line x1="16" y1="8" x2="2" y2="22"/><line x1="17.5" y1="15" x2="9" y2="15"/></svg>
-              Fable 5 weekly
+              <span data-i18n="fableWeekly">Fable 5 weekly</span>
             </span>
-            <span class="view-menu-pct" id="fableMenuPct">—</span>
+            <span class="view-menu-pct" id="fableMenuPct">–</span>
           </button>
           <button class="view-menu-item" data-card="opus" id="opusMenuItem">
             <span class="view-check"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
             <span class="view-menu-label">
               <svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
-              Opus weekly
+              <span data-i18n="opusWeekly">Opus weekly</span>
             </span>
-            <span class="view-menu-pct" id="opusMenuPct">—</span>
+            <span class="view-menu-pct" id="opusMenuPct">–</span>
           </button>
           <button class="view-menu-item" data-card="sonnet" id="sonnetMenuItem">
             <span class="view-check"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
             <span class="view-menu-label">
               <svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-              Sonnet weekly
+              <span data-i18n="sonnetWeekly">Sonnet weekly</span>
             </span>
-            <span class="view-menu-pct" id="sonnetMenuPct">—</span>
+            <span class="view-menu-pct" id="sonnetMenuPct">–</span>
           </button>
           <button class="view-menu-item" data-card="design" id="designMenuItem">
             <span class="view-check"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
@@ -79,47 +79,47 @@
               <svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
               Claude Design
             </span>
-            <span class="view-menu-pct" id="designMenuPct">—</span>
+            <span class="view-menu-pct" id="designMenuPct">–</span>
           </button>
           <button class="view-menu-item" data-card="routine" id="routineMenuItem">
             <span class="view-check"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
             <span class="view-menu-label">
               <svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
-              Routine runs
+              <span data-i18n="routineRuns">Routine runs</span>
             </span>
-            <span class="view-menu-pct" id="routineMenuCount">—</span>
+            <span class="view-menu-pct" id="routineMenuCount">–</span>
           </button>
           <button class="view-menu-item" data-card="extra" id="extraMenuItem">
             <span class="view-check"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
             <span class="view-menu-label">
               <svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-              Extra credits
+              <span data-i18n="extraCredits">Extra credits</span>
             </span>
-            <span class="view-menu-pct" id="extraMenuPct">—</span>
+            <span class="view-menu-pct" id="extraMenuPct">–</span>
           </button>
           </div><!-- /cardsSection -->
           <div class="view-menu-divider" id="themeDivider" style="display:none"></div>
           <div class="view-menu-section">
-            <div class="view-menu-head"><span class="view-menu-title">Design</span></div>
+            <div class="view-menu-head"><span class="view-menu-title" data-i18n="menuDesign">Design</span></div>
             <div class="layout-options" id="layoutOptions">
               <button class="layout-option" data-layout="classic" aria-pressed="false">
                 <span class="layout-thumb"><svg viewBox="0 0 38 28" aria-hidden="true"><rect class="to" x="5" y="4" width="28" height="8" rx="2.5" stroke-width="1.3"/><rect class="tr2" x="8" y="9" width="14" height="2" rx="1"/><rect class="to" x="5" y="15" width="28" height="8" rx="2.5" stroke-width="1.3"/><rect class="tr2" x="8" y="20" width="10" height="2" rx="1"/></svg></span>
-                <span class="layout-label"><span class="layout-name">Classic</span><span class="layout-desc">Original design</span></span>
+                <span class="layout-label"><span class="layout-name" data-i18n="layoutClassic">Classic</span><span class="layout-desc" data-i18n="layoutClassicDesc">Original design</span></span>
                 <span class="layout-check"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
               </button>
               <button class="layout-option" data-layout="hybrid" aria-pressed="false">
                 <span class="layout-thumb"><svg viewBox="0 0 38 28" aria-hidden="true"><circle class="tr" cx="12" cy="9" r="3.4" fill="none" stroke-width="1.6"/><circle class="tr" cx="26" cy="9" r="3.4" fill="none" stroke-width="1.6"/><rect class="tb" x="7" y="17" width="24" height="2.2" rx="1.1"/><rect class="tb" x="7" y="21.5" width="15" height="2.2" rx="1.1"/></svg></span>
-                <span class="layout-label"><span class="layout-name">Mixed</span><span class="layout-desc">Rings + list</span></span>
+                <span class="layout-label"><span class="layout-name" data-i18n="layoutMixed">Mixed</span><span class="layout-desc" data-i18n="layoutMixedDesc">Rings + list</span></span>
                 <span class="layout-check"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
               </button>
               <button class="layout-option" data-layout="bento" aria-pressed="false">
                 <span class="layout-thumb"><svg viewBox="0 0 38 28" aria-hidden="true"><circle class="tr" cx="12" cy="9" r="3.2" fill="none" stroke-width="1.6"/><circle class="tr" cx="26" cy="9" r="3.2" fill="none" stroke-width="1.6"/><circle class="tr" cx="12" cy="20" r="3.2" fill="none" stroke-width="1.6"/><circle class="tr" cx="26" cy="20" r="3.2" fill="none" stroke-width="1.6"/></svg></span>
-                <span class="layout-label"><span class="layout-name">Grid</span><span class="layout-desc">Cards with rings</span></span>
+                <span class="layout-label"><span class="layout-name" data-i18n="layoutGrid">Grid</span><span class="layout-desc" data-i18n="layoutGridDesc">Cards with rings</span></span>
                 <span class="layout-check"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
               </button>
               <button class="layout-option" data-layout="list" aria-pressed="false">
                 <span class="layout-thumb"><svg viewBox="0 0 38 28" aria-hidden="true"><rect class="tb" x="7" y="6" width="18" height="2.4" rx="1.2"/><rect class="tr2" x="28" y="5" width="4" height="4" rx="1"/><rect class="tb" x="7" y="13" width="18" height="2.4" rx="1.2"/><rect class="tr2" x="28" y="12" width="4" height="4" rx="1"/><rect class="tb" x="7" y="20" width="14" height="2.4" rx="1.2"/></svg></span>
-                <span class="layout-label"><span class="layout-name">List</span><span class="layout-desc">Compact rows</span></span>
+                <span class="layout-label"><span class="layout-name" data-i18n="layoutList">List</span><span class="layout-desc" data-i18n="layoutListDesc">Compact rows</span></span>
                 <span class="layout-check"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
               </button>
             </div>
@@ -127,13 +127,13 @@
               <span class="view-check"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
               <span class="view-menu-label">
                 <svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
-                Trend line
+                <span data-i18n="trendLine">Trend line</span>
               </span>
             </button>
           </div>
           <div class="view-menu-divider"></div>
           <div class="view-menu-section">
-            <div class="view-menu-head"><span class="view-menu-title">Theme</span></div>
+            <div class="view-menu-head"><span class="view-menu-title" data-i18n="menuTheme">Theme</span></div>
             <div class="theme-swatches" id="themeSwatches">
               <button class="theme-swatch" data-theme="clay" title="Clay" aria-label="Clay theme" aria-pressed="false"></button>
               <button class="theme-swatch" data-theme="slate" title="Slate" aria-label="Slate theme" aria-pressed="false"></button>
@@ -145,14 +145,14 @@
           </div>
         </div>
       </div>
-      <button class="settings-btn" id="settingsBtn" title="Settings and history">
+      <button class="settings-btn" id="settingsBtn" title="Settings and history" data-i18n-title="settingsHistory">
         <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none"
              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/>
           <circle cx="12" cy="12" r="3"/>
         </svg>
       </button>
-      <button class="refresh-btn" id="refreshBtn" title="Refresh usage data">
+      <button class="refresh-btn" id="refreshBtn" title="Refresh usage data" data-i18n-title="refreshTitle">
         <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none"
              stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
           <polyline points="23 4 23 10 17 10"/>
@@ -175,10 +175,10 @@
         </svg>
       </span>
       <span class="stale-banner-text">
-        <b>Signed out: data is stale</b>
-        <span id="staleBannerSubtitle">Last update unknown</span>
+        <b data-i18n="signedOutStale">Signed out: data is stale</b>
+        <span id="staleBannerSubtitle" data-i18n="lastUpdateUnknown">Last update unknown</span>
       </span>
-      <button class="stale-banner-cta" id="signInBtn">Sign in →</button>
+      <button class="stale-banner-cta" id="signInBtn" data-i18n="signIn">Sign in →</button>
     </div>
 
     <!-- Refresh-failing banner: signed in, but the last reads did not land -->
@@ -192,10 +192,10 @@
         </svg>
       </span>
       <span class="stale-banner-text">
-        <b>Couldn't refresh: data is stale</b>
-        <span id="fetchFailSubtitle">Last update unknown</span>
+        <b data-i18n="couldntRefresh">Couldn't refresh: data is stale</b>
+        <span id="fetchFailSubtitle" data-i18n="lastUpdateUnknown">Last update unknown</span>
       </span>
-      <button class="stale-banner-cta" id="retryBtn">Retry</button>
+      <button class="stale-banner-cta" id="retryBtn" data-i18n="retry">Retry</button>
     </div>
 
     <!-- Extra-usage banner (credits); hidden when no data or toggled off in the View menu -->
@@ -207,7 +207,7 @@
             <line x1="12" y1="1" x2="12" y2="23"/>
             <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
           </svg>
-          Extra credits
+          <span data-i18n="extraCredits">Extra credits</span>
         </span>
         <span><span class="extra-banner-value" id="extraUsed">$0</span> / <span id="extraCap">$0</span> · <span class="extra-banner-pct" id="extraPct">0%</span></span>
       </div>
@@ -233,10 +233,10 @@
               <circle cx="12" cy="12" r="10"/>
               <polyline points="12 6 12 12 16 14"/>
             </svg>
-            <span class="card-title">Current Session</span>
+            <span class="card-title" data-i18n="currentSession">Current Session</span>
           </div>
-          <span class="card-pct" id="sessionPct">—</span>
-          <svg class="card-ring" viewBox="0 0 44 44" aria-hidden="true"><circle class="card-ring-track" cx="22" cy="22" r="19"/><circle class="card-ring-val" id="sessionRing" cx="22" cy="22" r="19" pathLength="100" stroke-dasharray="0 100" transform="rotate(-90 22 22)"/><text class="card-ring-text" id="sessionRingTxt" x="22" y="22">—</text></svg>
+          <span class="card-pct" id="sessionPct">–</span>
+          <svg class="card-ring" viewBox="0 0 44 44" aria-hidden="true"><circle class="card-ring-track" cx="22" cy="22" r="19"/><circle class="card-ring-val" id="sessionRing" cx="22" cy="22" r="19" pathLength="100" stroke-dasharray="0 100" transform="rotate(-90 22 22)"/><text class="card-ring-text" id="sessionRingTxt" x="22" y="22">–</text></svg>
         </div>
         <div class="progress-track">
           <div class="progress-fill" id="sessionBar" style="width:0%"></div>
@@ -244,7 +244,7 @@
         <svg class="spark" id="sessionSpark" viewBox="0 0 100 24" preserveAspectRatio="none"
              role="img" style="display:none"></svg>
         <div class="reset-row">
-          <span id="sessionReset">—</span>
+          <span id="sessionReset">–</span>
         </div>
         <div class="reset-label" id="sessionLabel"></div>
       </div>
@@ -260,19 +260,19 @@
               <line x1="8"  y1="2" x2="8"  y2="6"/>
               <line x1="3"  y1="10" x2="21" y2="10"/>
             </svg>
-            <span class="card-title">Weekly · all models</span>
+            <span class="card-title" data-i18n="weeklyAll">Weekly · all models</span>
           </div>
-          <span class="card-pct" id="weeklyPct">—</span>
-          <svg class="card-ring" viewBox="0 0 44 44" aria-hidden="true"><circle class="card-ring-track" cx="22" cy="22" r="19"/><circle class="card-ring-val" id="weeklyRing" cx="22" cy="22" r="19" pathLength="100" stroke-dasharray="0 100" transform="rotate(-90 22 22)"/><text class="card-ring-text" id="weeklyRingTxt" x="22" y="22">—</text></svg>
+          <span class="card-pct" id="weeklyPct">–</span>
+          <svg class="card-ring" viewBox="0 0 44 44" aria-hidden="true"><circle class="card-ring-track" cx="22" cy="22" r="19"/><circle class="card-ring-val" id="weeklyRing" cx="22" cy="22" r="19" pathLength="100" stroke-dasharray="0 100" transform="rotate(-90 22 22)"/><text class="card-ring-text" id="weeklyRingTxt" x="22" y="22">–</text></svg>
         </div>
-        <div class="card-subtitle">Includes Fable 5, Opus, Sonnet &amp; Haiku</div>
+        <div class="card-subtitle" data-i18n="weeklyIncludes">Includes Fable 5, Opus, Sonnet &amp; Haiku</div>
         <div class="progress-track">
           <div class="progress-fill" id="weeklyBar" style="width:0%"></div>
         </div>
         <svg class="spark" id="weeklySpark" viewBox="0 0 100 24" preserveAspectRatio="none"
              role="img" style="display:none"></svg>
         <div class="reset-row">
-          <span id="weeklyReset">—</span>
+          <span id="weeklyReset">–</span>
         </div>
         <div class="reset-label" id="weeklyLabel"></div>
       </div>
@@ -287,16 +287,16 @@
               <line x1="16" y1="8" x2="2" y2="22"/>
               <line x1="17.5" y1="15" x2="9" y2="15"/>
             </svg>
-            <span class="card-title">Fable 5 weekly</span>
+            <span class="card-title" data-i18n="fableWeekly">Fable 5 weekly</span>
           </div>
-          <span class="card-pct" id="fablePct">—</span>
-          <svg class="card-ring" viewBox="0 0 44 44" aria-hidden="true"><circle class="card-ring-track" cx="22" cy="22" r="19"/><circle class="card-ring-val" id="fableRing" cx="22" cy="22" r="19" pathLength="100" stroke-dasharray="0 100" transform="rotate(-90 22 22)"/><text class="card-ring-text" id="fableRingTxt" x="22" y="22">—</text></svg>
+          <span class="card-pct" id="fablePct">–</span>
+          <svg class="card-ring" viewBox="0 0 44 44" aria-hidden="true"><circle class="card-ring-track" cx="22" cy="22" r="19"/><circle class="card-ring-val" id="fableRing" cx="22" cy="22" r="19" pathLength="100" stroke-dasharray="0 100" transform="rotate(-90 22 22)"/><text class="card-ring-text" id="fableRingTxt" x="22" y="22">–</text></svg>
         </div>
         <div class="progress-track">
           <div class="progress-fill" id="fableBar" style="width:0%"></div>
         </div>
         <div class="reset-row">
-          <span id="fableReset">—</span>
+          <span id="fableReset">–</span>
         </div>
         <div class="reset-label" id="fableLabel"></div>
       </div>
@@ -311,16 +311,16 @@
               <path d="M2 17l10 5 10-5"/>
               <path d="M2 12l10 5 10-5"/>
             </svg>
-            <span class="card-title">Opus weekly</span>
+            <span class="card-title" data-i18n="opusWeekly">Opus weekly</span>
           </div>
-          <span class="card-pct" id="opusPct">—</span>
-          <svg class="card-ring" viewBox="0 0 44 44" aria-hidden="true"><circle class="card-ring-track" cx="22" cy="22" r="19"/><circle class="card-ring-val" id="opusRing" cx="22" cy="22" r="19" pathLength="100" stroke-dasharray="0 100" transform="rotate(-90 22 22)"/><text class="card-ring-text" id="opusRingTxt" x="22" y="22">—</text></svg>
+          <span class="card-pct" id="opusPct">–</span>
+          <svg class="card-ring" viewBox="0 0 44 44" aria-hidden="true"><circle class="card-ring-track" cx="22" cy="22" r="19"/><circle class="card-ring-val" id="opusRing" cx="22" cy="22" r="19" pathLength="100" stroke-dasharray="0 100" transform="rotate(-90 22 22)"/><text class="card-ring-text" id="opusRingTxt" x="22" y="22">–</text></svg>
         </div>
         <div class="progress-track">
           <div class="progress-fill" id="opusBar" style="width:0%"></div>
         </div>
         <div class="reset-row">
-          <span id="opusReset">—</span>
+          <span id="opusReset">–</span>
         </div>
         <div class="reset-label" id="opusLabel"></div>
       </div>
@@ -333,16 +333,16 @@
                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
             </svg>
-            <span class="card-title">Sonnet weekly</span>
+            <span class="card-title" data-i18n="sonnetWeekly">Sonnet weekly</span>
           </div>
-          <span class="card-pct" id="sonnetPct">—</span>
-          <svg class="card-ring" viewBox="0 0 44 44" aria-hidden="true"><circle class="card-ring-track" cx="22" cy="22" r="19"/><circle class="card-ring-val" id="sonnetRing" cx="22" cy="22" r="19" pathLength="100" stroke-dasharray="0 100" transform="rotate(-90 22 22)"/><text class="card-ring-text" id="sonnetRingTxt" x="22" y="22">—</text></svg>
+          <span class="card-pct" id="sonnetPct">–</span>
+          <svg class="card-ring" viewBox="0 0 44 44" aria-hidden="true"><circle class="card-ring-track" cx="22" cy="22" r="19"/><circle class="card-ring-val" id="sonnetRing" cx="22" cy="22" r="19" pathLength="100" stroke-dasharray="0 100" transform="rotate(-90 22 22)"/><text class="card-ring-text" id="sonnetRingTxt" x="22" y="22">–</text></svg>
         </div>
         <div class="progress-track">
           <div class="progress-fill" id="sonnetBar" style="width:0%"></div>
         </div>
         <div class="reset-row">
-          <span id="sonnetReset">—</span>
+          <span id="sonnetReset">–</span>
         </div>
         <div class="reset-label" id="sonnetLabel"></div>
       </div>
@@ -358,20 +358,20 @@
             </svg>
             <span class="card-title">Claude Design</span>
           </div>
-          <span class="card-pct" id="designPct">—</span>
-          <svg class="card-ring" viewBox="0 0 44 44" aria-hidden="true"><circle class="card-ring-track" cx="22" cy="22" r="19"/><circle class="card-ring-val" id="designRing" cx="22" cy="22" r="19" pathLength="100" stroke-dasharray="0 100" transform="rotate(-90 22 22)"/><text class="card-ring-text" id="designRingTxt" x="22" y="22">—</text></svg>
+          <span class="card-pct" id="designPct">–</span>
+          <svg class="card-ring" viewBox="0 0 44 44" aria-hidden="true"><circle class="card-ring-track" cx="22" cy="22" r="19"/><circle class="card-ring-val" id="designRing" cx="22" cy="22" r="19" pathLength="100" stroke-dasharray="0 100" transform="rotate(-90 22 22)"/><text class="card-ring-text" id="designRingTxt" x="22" y="22">–</text></svg>
         </div>
         <div class="progress-track">
           <div class="progress-fill" id="designBar" style="width:0%"></div>
         </div>
         <div class="reset-row">
-          <span id="designReset">—</span>
+          <span id="designReset">–</span>
         </div>
         <div class="reset-label" id="designLabel"></div>
       </div>
 
       <!-- Shared reset note for the per-model weekly caps above -->
-      <div class="subcap-note" id="subcapNote" style="display:none">Per-model caps reset with the weekly window</div>
+      <div class="subcap-note" id="subcapNote" style="display:none" data-i18n="subcapNote">Per-model caps reset with the weekly window</div>
 
       <!-- Daily routine runs (count-based; shown only when the plan exposes it) -->
       <div class="card compact" id="routineCard" style="display:none">
@@ -383,16 +383,16 @@
               <polyline points="1 20 1 14 7 14"/>
               <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
             </svg>
-            <span class="card-title">Daily routine runs</span>
+            <span class="card-title" data-i18n="dailyRoutineRuns">Daily routine runs</span>
           </div>
-          <span class="card-pct count" id="routinePct">—</span>
-          <svg class="card-ring" viewBox="0 0 44 44" aria-hidden="true"><circle class="card-ring-track" cx="22" cy="22" r="19"/><circle class="card-ring-val" id="routineRing" cx="22" cy="22" r="19" pathLength="100" stroke-dasharray="0 100" transform="rotate(-90 22 22)"/><text class="card-ring-text" id="routineRingTxt" x="22" y="22">—</text></svg>
+          <span class="card-pct count" id="routinePct">–</span>
+          <svg class="card-ring" viewBox="0 0 44 44" aria-hidden="true"><circle class="card-ring-track" cx="22" cy="22" r="19"/><circle class="card-ring-val" id="routineRing" cx="22" cy="22" r="19" pathLength="100" stroke-dasharray="0 100" transform="rotate(-90 22 22)"/><text class="card-ring-text" id="routineRingTxt" x="22" y="22">–</text></svg>
         </div>
         <div class="progress-track">
           <div class="progress-fill" id="routineBar" style="width:0%"></div>
         </div>
         <div class="reset-row">
-          <span id="routineReset">—</span>
+          <span id="routineReset">–</span>
         </div>
       </div>
 
@@ -402,22 +402,22 @@
          a first Free-plan reading) or after 3 days of use. Every star goes to
          the store; nobody is routed elsewhere based on how happy they are. -->
     <div class="review-nudge rate" id="reviewNudge" style="display:none">
-      <span class="review-nudge-text" id="reviewNudgeText">Finding it useful? Rate us</span>
-      <button class="review-nudge-cta review-stars" id="reviewRateBtn" title="Rate it in the store" aria-label="Rate it in the store">★★★★★</button>
-      <button class="review-nudge-dismiss" id="reviewDismissBtn" title="Not now" aria-label="Not now">✕</button>
+      <span class="review-nudge-text" id="reviewNudgeText" data-i18n="reviewDays">Finding it useful? Rate us</span>
+      <button class="review-nudge-cta review-stars" id="reviewRateBtn" title="Rate it in the store" aria-label="Rate it in the store" data-i18n-title="rateInStore" data-i18n-aria="rateInStore">★★★★★</button>
+      <button class="review-nudge-dismiss" id="reviewDismissBtn" title="Not now" aria-label="Not now" data-i18n-title="notNow" data-i18n-aria="notNow">✕</button>
     </div>
 
     <!-- Pro waitlist ask; lowest priority of the three nudges, dismissible forever -->
     <div class="review-nudge" id="waitlistNudge" style="display:none">
-      <span class="review-nudge-text">Pro: your limits on your phone</span>
-      <button class="review-nudge-cta" id="waitlistJoinBtn">Join the waitlist →</button>
-      <button class="review-nudge-dismiss" id="waitlistDismissBtn" title="Don't show again" aria-label="Dismiss">✕</button>
+      <span class="review-nudge-text" data-i18n="waitlistText">Pro: your limits on your phone</span>
+      <button class="review-nudge-cta" id="waitlistJoinBtn" data-i18n="joinWaitlist">Join the waitlist →</button>
+      <button class="review-nudge-dismiss" id="waitlistDismissBtn" title="Don't show again" aria-label="Dismiss" data-i18n-title="dontShowAgain" data-i18n-aria="dismiss">✕</button>
     </div>
 
     <!-- Windows companion promo. Windows only, never shown alongside the review
          ask, dismissible forever. Opens a tab only on an explicit click. -->
     <div class="promo-nudge" id="winPromo" style="display:none">
-      <button class="promo-nudge-dismiss" id="winPromoDismiss" title="Don't show again" aria-label="Dismiss">✕</button>
+      <button class="promo-nudge-dismiss" id="winPromoDismiss" title="Don't show again" aria-label="Dismiss" data-i18n-title="dontShowAgain" data-i18n-aria="dismiss">✕</button>
       <div class="promo-nudge-head">
         <svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none"
              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -425,16 +425,16 @@
           <line x1="8" y1="21" x2="16" y2="21"/>
           <line x1="12" y1="17" x2="12" y2="21"/>
         </svg>
-        Also on Windows
+        <span data-i18n="alsoOnWindows">Also on Windows</span>
       </div>
-      <div class="promo-nudge-body">Usage by the clock, browser closed.<button class="promo-nudge-cta" id="winPromoCta">Try it free →</button></div>
+      <div class="promo-nudge-body"><span data-i18n="winPromoBody">Usage by the clock, browser closed.</span><button class="promo-nudge-cta" id="winPromoCta" data-i18n="tryFree">Try it free →</button></div>
     </div>
 
     <!-- ── Footer ────────────────────────────────────────────────────── -->
     <div class="footer">
-      <span class="last-updated" id="lastUpdated" aria-live="polite">Never updated</span>
-      <button class="open-link" id="openUsagePage" title="Opens claude.ai in a new tab">
-        Open usage page
+      <span class="last-updated" id="lastUpdated" aria-live="polite" data-i18n="neverUpdated">Never updated</span>
+      <button class="open-link" id="openUsagePage" title="Opens claude.ai in a new tab" data-i18n-title="opensClaudeTab">
+        <span data-i18n="openUsagePage">Open usage page</span>
         <svg aria-hidden="true" width="10" height="10" viewBox="0 0 24 24" fill="none"
              stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
@@ -456,7 +456,7 @@
         <line x1="12" y1="16" x2="12" y2="12"/>
         <line x1="12" y1="8" x2="12.01" y2="8"/>
       </svg>
-      <p class="no-data-title">See your Free plan limits</p>
+      <p class="no-data-title" data-i18n="freeTitle">See your Free plan limits</p>
       <p id="freePlanText">Claude's usage page is closed on the Free plan, but every reply still carries your limits. Turn on the bar on claude.ai and they show up here after your next message.</p>
       <button class="open-usage-btn" id="freePlanActionBtn">Turn on</button>
     </div>
@@ -466,7 +466,7 @@
            stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
         <polyline points="2,12 5,12 7.5,6 10,18 12.5,9 15,12 18,12"/>
       </svg>
-      <p>No usage data yet.<br/>Click below to load your stats.</p>
+      <p><span data-i18n="noDataLine1">No usage data yet.</span><br/><span data-i18n="noDataLine2">Click below to load your stats.</span></p>
       <button class="open-usage-btn" id="openUsageBtn">
         <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none"
              stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
@@ -474,7 +474,7 @@
           <polyline points="15 3 21 3 21 9"/>
           <line x1="10" y1="14" x2="21" y2="3"/>
         </svg>
-        Open Claude Usage Page
+        <span data-i18n="openUsagePageBtn">Open Claude Usage Page</span>
       </button>
     </div>
   </div><!-- /noData -->

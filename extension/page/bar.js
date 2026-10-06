@@ -87,6 +87,11 @@
   setInterval(render, 30 * 1000);
 
   // ── Rendering ────────────────────────────────────────────────────────────
+  // Strings live in the extension's _locales; content scripts can read them.
+  function msg(key, ...subs) {
+    return chrome.i18n.getMessage(key, subs.map(String)) || key;
+  }
+
   function colorFor(pct) {
     if (pct < 50) return 'var(--green)';
     if (pct < 80) return 'var(--amber)';
@@ -100,9 +105,9 @@
     const d = Math.floor(min / 1440);
     const h = Math.floor((min % 1440) / 60);
     const m = min % 60;
-    if (d > 0) return `${d}d ${h}h`;
-    if (h > 0) return `${h}h ${m}m`;
-    return `${m}m`;
+    if (d > 0) return msg('durDH', d, h);
+    if (h > 0) return msg('durHM', h, m);
+    return msg('durM', m);
   }
 
   // Readings taken from a reply (Free plan) are never refreshed in between, so
@@ -153,7 +158,7 @@
     const pct = Math.min(100, Math.max(0, Math.round(b.percentage)));
     const reset = b.resetTime ? until(b.resetTime) : '';
     const seg = el('span', 'seg');
-    seg.title = `${label}: ${pct}% used${reset ? `, resets in ${reset}` : ''}`;
+    seg.title = reset ? msg('barTitleReset', label, pct, reset) : msg('barTitle', label, pct);
     const track = el('span', 'track');
     const fill = el('span', 'fill');
     fill.style.width = `${pct}%`;
@@ -176,15 +181,13 @@
 
     const bar = el('div', `bar${isDark() ? '' : ' light'}${stale ? ' stale' : ''}`);
     bar.setAttribute('role', 'status');
-    bar.setAttribute('aria-label', 'Claude usage');
+    bar.setAttribute('aria-label', msg('barAria'));
     if (session || weekly) {
-      if (session) bar.append(segment('Session', session));
-      if (weekly)  bar.append(segment('Weekly', weekly));
-      if (stale)   bar.append(el('span', 'note', 'stale'));
+      if (session) bar.append(segment(msg('sparkSession'), session));
+      if (weekly)  bar.append(segment(msg('sparkWeekly'), weekly));
+      if (stale)   bar.append(el('span', 'note', msg('barStale')));
     } else {
-      bar.append(el('span', 'note', free
-        ? 'Your Free plan limits appear after your next message'
-        : 'Usage not loaded yet'));
+      bar.append(el('span', 'note', free ? msg('barFreeWaiting') : msg('barNotLoaded')));
     }
     const style = el('style', null, STYLE);
     root.replaceChildren(style, bar);

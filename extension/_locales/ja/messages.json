@@ -10,5 +10,533 @@
   "extDescription": {
     "message": "Claude の利用上限をリアルタイムで確認。セッションと週間の使用率、リセットまでのカウントダウン、80/95% でアラート。Free・Pro・Max・Claude Code 対応。",
     "description": "Short description shown in the stores and the browser (max 132 characters)."
+  },
+  "intervalTitle": {
+    "message": "自動更新の間隔"
+  },
+  "displayOptions": {
+    "message": "表示オプション"
+  },
+  "metrics": {
+    "message": "指標"
+  },
+  "selectAll": {
+    "message": "すべて選択"
+  },
+  "deselectAll": {
+    "message": "すべて解除"
+  },
+  "fableWeekly": {
+    "message": "Fable 5 週間"
+  },
+  "opusWeekly": {
+    "message": "Opus 週間"
+  },
+  "sonnetWeekly": {
+    "message": "Sonnet 週間"
+  },
+  "routineRuns": {
+    "message": "ルーティン実行"
+  },
+  "extraCredits": {
+    "message": "追加クレジット"
+  },
+  "menuDesign": {
+    "message": "デザイン"
+  },
+  "layoutClassic": {
+    "message": "クラシック"
+  },
+  "layoutClassicDesc": {
+    "message": "元のデザイン"
+  },
+  "layoutMixed": {
+    "message": "ミックス"
+  },
+  "layoutMixedDesc": {
+    "message": "リング＋リスト"
+  },
+  "layoutGrid": {
+    "message": "グリッド"
+  },
+  "layoutGridDesc": {
+    "message": "リング付きカード"
+  },
+  "layoutList": {
+    "message": "リスト"
+  },
+  "layoutListDesc": {
+    "message": "コンパクト表示"
+  },
+  "trendLine": {
+    "message": "推移グラフ"
+  },
+  "menuTheme": {
+    "message": "テーマ"
+  },
+  "themeAria": {
+    "message": "$P1$ テーマ",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "settingsHistory": {
+    "message": "設定と履歴"
+  },
+  "refreshTitle": {
+    "message": "使用量データを更新"
+  },
+  "signedOutStale": {
+    "message": "ログアウト中：データが古くなっています"
+  },
+  "lastUpdateUnknown": {
+    "message": "最終更新は不明"
+  },
+  "signIn": {
+    "message": "ログイン →"
+  },
+  "couldntRefresh": {
+    "message": "更新できません：データが古くなっています"
+  },
+  "retry": {
+    "message": "再試行"
+  },
+  "currentSession": {
+    "message": "現在のセッション"
+  },
+  "weeklyAll": {
+    "message": "週間・全モデル"
+  },
+  "weeklyIncludes": {
+    "message": "Fable 5、Opus、Sonnet、Haiku を含む"
+  },
+  "subcapNote": {
+    "message": "モデル別の上限は週間上限と同時にリセットされます"
+  },
+  "dailyRoutineRuns": {
+    "message": "1日のルーティン実行"
+  },
+  "rateInStore": {
+    "message": "ストアで評価する"
+  },
+  "notNow": {
+    "message": "今はしない"
+  },
+  "waitlistText": {
+    "message": "Pro：上限をスマホで確認"
+  },
+  "joinWaitlist": {
+    "message": "ウェイトリストに登録 →"
+  },
+  "dontShowAgain": {
+    "message": "今後表示しない"
+  },
+  "dismiss": {
+    "message": "閉じる"
+  },
+  "alsoOnWindows": {
+    "message": "Windows 版もあります"
+  },
+  "winPromoBody": {
+    "message": "ブラウザを閉じても時計の横に使用量を表示。"
+  },
+  "tryFree": {
+    "message": "無料で試す →"
+  },
+  "neverUpdated": {
+    "message": "未更新"
+  },
+  "opensClaudeTab": {
+    "message": "claude.ai を新しいタブで開く"
+  },
+  "openUsagePage": {
+    "message": "使用量ページを開く"
+  },
+  "freeTitle": {
+    "message": "Free プランの上限を表示"
+  },
+  "freeTextOff": {
+    "message": "Free プランでは Claude の使用量ページを利用できませんが、各返信には上限の情報が含まれています。claude.ai でバーをオンにすると、次のメッセージの後にここに表示されます。"
+  },
+  "freeTextOn": {
+    "message": "claude.ai のバーはオンになっています。そこでメッセージを送ると、ここに上限が表示されます。"
+  },
+  "turnOn": {
+    "message": "オンにする"
+  },
+  "openClaude": {
+    "message": "claude.ai を開く"
+  },
+  "noDataLine1": {
+    "message": "使用量データはまだありません。"
+  },
+  "noDataLine2": {
+    "message": "下のボタンからデータを読み込みます。"
+  },
+  "openUsagePageBtn": {
+    "message": "Claude の使用量ページを開く"
+  },
+  "resettingSoon": {
+    "message": "まもなくリセット"
+  },
+  "resetsIn": {
+    "message": "$P1$ 後にリセット",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "durDH": {
+    "message": "$P1$日$P2$時間",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      },
+      "p2": {
+        "content": "$2"
+      }
+    }
+  },
+  "durHM": {
+    "message": "$P1$時間$P2$分",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      },
+      "p2": {
+        "content": "$2"
+      }
+    }
+  },
+  "durH": {
+    "message": "$P1$時間",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "durM": {
+    "message": "$P1$分",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "intervalOpt": {
+    "message": "$P1$分",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "justUpdated": {
+    "message": "たった今更新"
+  },
+  "updatedAgo": {
+    "message": "$P1$前に更新",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "updatedAt": {
+    "message": "$P1$ に更新",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "lastUpdateAgo": {
+    "message": "最終更新：$P1$前",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "lastUpdateAt": {
+    "message": "最終更新：$P1$",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "lastUpdateNow": {
+    "message": "最終更新：たった今"
+  },
+  "noDataCaptured": {
+    "message": "データはまだありません"
+  },
+  "notYetUsed": {
+    "message": "未使用"
+  },
+  "weeklyLimitLbl": {
+    "message": "週間上限"
+  },
+  "resetTimeUnknown": {
+    "message": "リセット時刻は不明"
+  },
+  "resetDayUnknown": {
+    "message": "リセット日は不明"
+  },
+  "balance": {
+    "message": "残高 $P1$",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "resetsMonthly": {
+    "message": "毎月リセット"
+  },
+  "sparkSession": {
+    "message": "セッション"
+  },
+  "sparkWeekly": {
+    "message": "週間"
+  },
+  "sparkSpent": {
+    "message": "今月の支出"
+  },
+  "sparkRange": {
+    "message": "$P1$：$P2$〜$P3$",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      },
+      "p2": {
+        "content": "$2"
+      },
+      "p3": {
+        "content": "$3"
+      }
+    }
+  },
+  "spendLimitMonthly": {
+    "message": "月間の支出上限に達しました"
+  },
+  "spendLimitOrg": {
+    "message": "支出上限に達しました（組織）"
+  },
+  "spendLimit": {
+    "message": "支出上限に達しました"
+  },
+  "resetsDaily": {
+    "message": "毎日リセット"
+  },
+  "reviewAlert": {
+    "message": "間に合いましたか？評価をお願いします"
+  },
+  "reviewFree": {
+    "message": "Free の上限が見えましたか？評価をお願いします"
+  },
+  "reviewDays": {
+    "message": "お役に立っていますか？評価をお願いします"
+  },
+  "errAuth": {
+    "message": "更新に失敗しました：claude.ai にログインしてください"
+  },
+  "errOrg": {
+    "message": "更新に失敗しました：組織が見つかりません"
+  },
+  "errFree": {
+    "message": "Free プラン：メッセージごとに更新されます"
+  },
+  "errRejected": {
+    "message": "更新に失敗しました：claude.ai から予期しない応答"
+  },
+  "errUnreachable": {
+    "message": "更新に失敗しました：claude.ai に接続できません"
+  },
+  "optTitle": {
+    "message": "Claude Monitor：設定"
+  },
+  "optNotifications": {
+    "message": "通知"
+  },
+  "optAlertMe": {
+    "message": "使用量がしきい値を超えたら通知する"
+  },
+  "optWarn": {
+    "message": "警告のしきい値"
+  },
+  "optCrit": {
+    "message": "重大のしきい値"
+  },
+  "optNotifHint": {
+    "message": "セッション、週間、モデル別の上限に適用されます。各アラートはリセット期間ごとに1回だけ送信されます。"
+  },
+  "optSendTest": {
+    "message": "テスト通知を送信"
+  },
+  "optOnClaude": {
+    "message": "claude.ai 上"
+  },
+  "optShowBar": {
+    "message": "チャット欄の上に使用量バーを表示"
+  },
+  "optBarHint": {
+    "message": "初期設定はオフです。オンにすると claude.ai のページへのアクセス許可を求めます。バーが読み取るのは Claude が各返信に付ける使用量の数値だけで、メッセージは読み取りません。Free プランでは上限が表示される唯一の場所です。"
+  },
+  "optHistory": {
+    "message": "履歴"
+  },
+  "optKeepFor": {
+    "message": "履歴の保存期間"
+  },
+  "optDays": {
+    "message": "$P1$日",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "optSnapshots": {
+    "message": "保存済みの記録"
+  },
+  "optHistoryHint": {
+    "message": "使用量、有料の支出、プリペイド残高は、更新が成功するたびに（約10分ごと）ローカルに記録されます。データが端末の外に出ることはありません。エクスポートでは欠けている値は空欄になります。これはデータが取得できなかったことを意味し、ゼロではありません。"
+  },
+  "optExportJson": {
+    "message": "JSON をエクスポート"
+  },
+  "optExportCsv": {
+    "message": "CSV をエクスポート"
+  },
+  "optClearHistory": {
+    "message": "履歴を消去"
+  },
+  "optReviewTitle": {
+    "message": "お役に立っていますか？"
+  },
+  "optReviewText": {
+    "message": "短いレビューは、他の Claude ユーザーがこの拡張機能を見つける一番の手がかりです。1分で終わります。"
+  },
+  "optLeaveReview": {
+    "message": "レビューを書く ★★★★★"
+  },
+  "optProTitle": {
+    "message": "Pro 版を準備中です。"
+  },
+  "optProText": {
+    "message": "Claude の上限をスマホで確認でき、上限に達する前に Slack や Discord で通知。任意の有料プランで、この拡張機能は無料のままです。"
+  },
+  "optWinTitle": {
+    "message": "Windows 版もあります。"
+  },
+  "optWinText": {
+    "message": "UsagePeek はブラウザを閉じていても時計の横に使用量を表示し、上限がリセットされた瞬間に Claude Code のプロジェクトを再開します。"
+  },
+  "optTryFree7": {
+    "message": "7日間無料で試す →"
+  },
+  "stPermDenied": {
+    "message": "許可されませんでした"
+  },
+  "stSaved": {
+    "message": "保存しました"
+  },
+  "stHistoryCleared": {
+    "message": "履歴を消去しました"
+  },
+  "stNoHistory": {
+    "message": "履歴はまだありません"
+  },
+  "stExported": {
+    "message": "エクスポートしました"
+  },
+  "testSuffix": {
+    "message": "（テスト）"
+  },
+  "nbSession": {
+    "message": "Claude セッション"
+  },
+  "nbWeekly": {
+    "message": "Claude 週間上限"
+  },
+  "nbFable": {
+    "message": "Fable 5 週間上限"
+  },
+  "nbOpus": {
+    "message": "Opus 週間上限"
+  },
+  "nbSonnet": {
+    "message": "Sonnet 週間上限"
+  },
+  "nbDesign": {
+    "message": "Claude Design 週間上限"
+  },
+  "notifTitle": {
+    "message": "$P1$：$P2$%",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      },
+      "p2": {
+        "content": "$2"
+      }
+    }
+  },
+  "almostResets": {
+    "message": "上限間近です。$P1$ 後にリセット",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "almostLimit": {
+    "message": "上限間近です"
+  },
+  "approaching": {
+    "message": "上限に近づいています"
+  },
+  "barTitle": {
+    "message": "$P1$：$P2$% 使用",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      },
+      "p2": {
+        "content": "$2"
+      }
+    }
+  },
+  "barTitleReset": {
+    "message": "$P1$：$P2$% 使用、$P3$ 後にリセット",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      },
+      "p2": {
+        "content": "$2"
+      },
+      "p3": {
+        "content": "$3"
+      }
+    }
+  },
+  "barStale": {
+    "message": "古いデータ"
+  },
+  "barFreeWaiting": {
+    "message": "Free プランの上限は次のメッセージの後に表示されます"
+  },
+  "barNotLoaded": {
+    "message": "使用量はまだ読み込まれていません"
+  },
+  "barAria": {
+    "message": "Claude の使用量"
   }
 }

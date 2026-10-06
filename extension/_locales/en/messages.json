@@ -10,5 +10,533 @@
   "extDescription": {
     "message": "Track your Claude usage limits live: session and weekly %, reset countdowns, alerts at 80/95%. Free, Pro, Max and Claude Code.",
     "description": "Short description shown in the stores and the browser (max 132 characters)."
+  },
+  "intervalTitle": {
+    "message": "Auto-refresh interval"
+  },
+  "displayOptions": {
+    "message": "Display options"
+  },
+  "metrics": {
+    "message": "Metrics"
+  },
+  "selectAll": {
+    "message": "Select all"
+  },
+  "deselectAll": {
+    "message": "Deselect all"
+  },
+  "fableWeekly": {
+    "message": "Fable 5 weekly"
+  },
+  "opusWeekly": {
+    "message": "Opus weekly"
+  },
+  "sonnetWeekly": {
+    "message": "Sonnet weekly"
+  },
+  "routineRuns": {
+    "message": "Routine runs"
+  },
+  "extraCredits": {
+    "message": "Extra credits"
+  },
+  "menuDesign": {
+    "message": "Design"
+  },
+  "layoutClassic": {
+    "message": "Classic"
+  },
+  "layoutClassicDesc": {
+    "message": "Original design"
+  },
+  "layoutMixed": {
+    "message": "Mixed"
+  },
+  "layoutMixedDesc": {
+    "message": "Rings + list"
+  },
+  "layoutGrid": {
+    "message": "Grid"
+  },
+  "layoutGridDesc": {
+    "message": "Cards with rings"
+  },
+  "layoutList": {
+    "message": "List"
+  },
+  "layoutListDesc": {
+    "message": "Compact rows"
+  },
+  "trendLine": {
+    "message": "Trend line"
+  },
+  "menuTheme": {
+    "message": "Theme"
+  },
+  "themeAria": {
+    "message": "$P1$ theme",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "settingsHistory": {
+    "message": "Settings and history"
+  },
+  "refreshTitle": {
+    "message": "Refresh usage data"
+  },
+  "signedOutStale": {
+    "message": "Signed out: data is stale"
+  },
+  "lastUpdateUnknown": {
+    "message": "Last update unknown"
+  },
+  "signIn": {
+    "message": "Sign in →"
+  },
+  "couldntRefresh": {
+    "message": "Couldn't refresh: data is stale"
+  },
+  "retry": {
+    "message": "Retry"
+  },
+  "currentSession": {
+    "message": "Current Session"
+  },
+  "weeklyAll": {
+    "message": "Weekly · all models"
+  },
+  "weeklyIncludes": {
+    "message": "Includes Fable 5, Opus, Sonnet & Haiku"
+  },
+  "subcapNote": {
+    "message": "Per-model caps reset with the weekly window"
+  },
+  "dailyRoutineRuns": {
+    "message": "Daily routine runs"
+  },
+  "rateInStore": {
+    "message": "Rate it in the store"
+  },
+  "notNow": {
+    "message": "Not now"
+  },
+  "waitlistText": {
+    "message": "Pro: your limits on your phone"
+  },
+  "joinWaitlist": {
+    "message": "Join the waitlist →"
+  },
+  "dontShowAgain": {
+    "message": "Don't show again"
+  },
+  "dismiss": {
+    "message": "Dismiss"
+  },
+  "alsoOnWindows": {
+    "message": "Also on Windows"
+  },
+  "winPromoBody": {
+    "message": "Usage by the clock, browser closed."
+  },
+  "tryFree": {
+    "message": "Try it free →"
+  },
+  "neverUpdated": {
+    "message": "Never updated"
+  },
+  "opensClaudeTab": {
+    "message": "Opens claude.ai in a new tab"
+  },
+  "openUsagePage": {
+    "message": "Open usage page"
+  },
+  "freeTitle": {
+    "message": "See your Free plan limits"
+  },
+  "freeTextOff": {
+    "message": "Claude's usage page is closed on the Free plan, but every reply still carries your limits. Turn on the bar on claude.ai and they show up here after your next message."
+  },
+  "freeTextOn": {
+    "message": "The bar on claude.ai is on. Send a message there and your limits show up here."
+  },
+  "turnOn": {
+    "message": "Turn on"
+  },
+  "openClaude": {
+    "message": "Open claude.ai"
+  },
+  "noDataLine1": {
+    "message": "No usage data yet."
+  },
+  "noDataLine2": {
+    "message": "Click below to load your stats."
+  },
+  "openUsagePageBtn": {
+    "message": "Open Claude Usage Page"
+  },
+  "resettingSoon": {
+    "message": "Resetting soon"
+  },
+  "resetsIn": {
+    "message": "Resets in $P1$",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "durDH": {
+    "message": "$P1$d $P2$h",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      },
+      "p2": {
+        "content": "$2"
+      }
+    }
+  },
+  "durHM": {
+    "message": "$P1$h $P2$m",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      },
+      "p2": {
+        "content": "$2"
+      }
+    }
+  },
+  "durH": {
+    "message": "$P1$h",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "durM": {
+    "message": "$P1$m",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "intervalOpt": {
+    "message": "$P1$m",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "justUpdated": {
+    "message": "Just updated"
+  },
+  "updatedAgo": {
+    "message": "Updated $P1$ ago",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "updatedAt": {
+    "message": "Updated $P1$",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "lastUpdateAgo": {
+    "message": "Last update $P1$ ago",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "lastUpdateAt": {
+    "message": "Last update $P1$",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "lastUpdateNow": {
+    "message": "Last update just now"
+  },
+  "noDataCaptured": {
+    "message": "No data captured yet"
+  },
+  "notYetUsed": {
+    "message": "Not yet used"
+  },
+  "weeklyLimitLbl": {
+    "message": "Weekly limit"
+  },
+  "resetTimeUnknown": {
+    "message": "Reset time unknown"
+  },
+  "resetDayUnknown": {
+    "message": "Reset day unknown"
+  },
+  "balance": {
+    "message": "Balance $P1$",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "resetsMonthly": {
+    "message": "Resets monthly"
+  },
+  "sparkSession": {
+    "message": "Session"
+  },
+  "sparkWeekly": {
+    "message": "Weekly"
+  },
+  "sparkSpent": {
+    "message": "Spent this month"
+  },
+  "sparkRange": {
+    "message": "$P1$: $P2$ to $P3$",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      },
+      "p2": {
+        "content": "$2"
+      },
+      "p3": {
+        "content": "$3"
+      }
+    }
+  },
+  "spendLimitMonthly": {
+    "message": "Monthly spend limit reached"
+  },
+  "spendLimitOrg": {
+    "message": "Spend limit reached (org level)"
+  },
+  "spendLimit": {
+    "message": "Spend limit reached"
+  },
+  "resetsDaily": {
+    "message": "Resets daily"
+  },
+  "reviewAlert": {
+    "message": "Warned in time? Rate us"
+  },
+  "reviewFree": {
+    "message": "Seeing your Free limits? Rate us"
+  },
+  "reviewDays": {
+    "message": "Finding it useful? Rate us"
+  },
+  "errAuth": {
+    "message": "Refresh failed: sign in to claude.ai"
+  },
+  "errOrg": {
+    "message": "Refresh failed: no organization found"
+  },
+  "errFree": {
+    "message": "Free plan: updates after each message"
+  },
+  "errRejected": {
+    "message": "Refresh failed: unexpected reply from claude.ai"
+  },
+  "errUnreachable": {
+    "message": "Refresh failed: claude.ai unreachable"
+  },
+  "optTitle": {
+    "message": "Claude Monitor: Settings"
+  },
+  "optNotifications": {
+    "message": "Notifications"
+  },
+  "optAlertMe": {
+    "message": "Alert me when usage crosses a threshold"
+  },
+  "optWarn": {
+    "message": "Warning threshold"
+  },
+  "optCrit": {
+    "message": "Critical threshold"
+  },
+  "optNotifHint": {
+    "message": "Applies to the session, weekly and per-model caps. Each alert fires once per reset window."
+  },
+  "optSendTest": {
+    "message": "Send test notification"
+  },
+  "optOnClaude": {
+    "message": "On claude.ai"
+  },
+  "optShowBar": {
+    "message": "Show a usage bar above the chat box"
+  },
+  "optBarHint": {
+    "message": "Off by default; turning it on asks for access to claude.ai pages. The bar reads only the usage figures Claude attaches to each reply, never your messages. On the Free plan this is the only place your limits appear."
+  },
+  "optHistory": {
+    "message": "History"
+  },
+  "optKeepFor": {
+    "message": "Keep history for"
+  },
+  "optDays": {
+    "message": "$P1$ days",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "optSnapshots": {
+    "message": "Stored snapshots"
+  },
+  "optHistoryHint": {
+    "message": "Usage, paid spend and prepaid balance are recorded locally on every successful refresh, roughly once every 10 minutes. Nothing leaves your device. In the export, a missing value stays empty: it means the data was unavailable, not zero."
+  },
+  "optExportJson": {
+    "message": "Export JSON"
+  },
+  "optExportCsv": {
+    "message": "Export CSV"
+  },
+  "optClearHistory": {
+    "message": "Clear history"
+  },
+  "optReviewTitle": {
+    "message": "Finding it useful?"
+  },
+  "optReviewText": {
+    "message": "A short review is the main way other Claude users find this extension. It takes a minute."
+  },
+  "optLeaveReview": {
+    "message": "Leave a review ★★★★★"
+  },
+  "optProTitle": {
+    "message": "Pro is coming."
+  },
+  "optProText": {
+    "message": "Your Claude limits on your phone, and a Slack or Discord ping before you hit them. Optional and paid; this extension stays free."
+  },
+  "optWinTitle": {
+    "message": "Also on Windows."
+  },
+  "optWinText": {
+    "message": "UsagePeek shows your usage next to the clock with the browser closed, and reopens your Claude Code projects the moment a limit resets."
+  },
+  "optTryFree7": {
+    "message": "Try it free for 7 days →"
+  },
+  "stPermDenied": {
+    "message": "Permission denied"
+  },
+  "stSaved": {
+    "message": "Saved"
+  },
+  "stHistoryCleared": {
+    "message": "History cleared"
+  },
+  "stNoHistory": {
+    "message": "No history yet"
+  },
+  "stExported": {
+    "message": "Exported"
+  },
+  "testSuffix": {
+    "message": "(test)"
+  },
+  "nbSession": {
+    "message": "Claude session"
+  },
+  "nbWeekly": {
+    "message": "Claude weekly limit"
+  },
+  "nbFable": {
+    "message": "Fable 5 weekly cap"
+  },
+  "nbOpus": {
+    "message": "Opus weekly cap"
+  },
+  "nbSonnet": {
+    "message": "Sonnet weekly cap"
+  },
+  "nbDesign": {
+    "message": "Claude Design weekly cap"
+  },
+  "notifTitle": {
+    "message": "$P1$ at $P2$%",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      },
+      "p2": {
+        "content": "$2"
+      }
+    }
+  },
+  "almostResets": {
+    "message": "Almost at the limit, resets in $P1$",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "almostLimit": {
+    "message": "Almost at the limit"
+  },
+  "approaching": {
+    "message": "Approaching the limit"
+  },
+  "barTitle": {
+    "message": "$P1$: $P2$% used",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      },
+      "p2": {
+        "content": "$2"
+      }
+    }
+  },
+  "barTitleReset": {
+    "message": "$P1$: $P2$% used, resets in $P3$",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      },
+      "p2": {
+        "content": "$2"
+      },
+      "p3": {
+        "content": "$3"
+      }
+    }
+  },
+  "barStale": {
+    "message": "stale"
+  },
+  "barFreeWaiting": {
+    "message": "Your Free plan limits appear after your next message"
+  },
+  "barNotLoaded": {
+    "message": "Usage not loaded yet"
+  },
+  "barAria": {
+    "message": "Claude usage"
   }
 }
