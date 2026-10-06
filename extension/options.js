@@ -278,6 +278,15 @@ exportCsvBtn.addEventListener('click', async () => {
   flashStatus('Exported');
 });
 
+// ─── Review link ─────────────────────────────────────────────────────────────
+
+const reviewLink = document.getElementById('reviewLink');
+if (reviewLink) {
+  reviewLink.href = navigator.userAgent.includes('Firefox')
+    ? 'https://addons.mozilla.org/firefox/addon/claude-usage-meter/reviews/'
+    : 'https://chromewebstore.google.com/detail/bfhdcfiigpaaopklllpobkheakpigbfo/reviews';
+}
+
 // ─── Windows companion promo ─────────────────────────────────────────────────
 // Shown only on Windows, where the app can actually be installed. The cid is
 // what Partner Center splits campaigns by, so this surface carries its own.

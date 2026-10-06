@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Claude Usage Tracker & Monitor: Session & Weekly Limits, Credits, Alerts",
   "short_name": "Claude Usage",
-  "version": "1.16.2",
+  "version": "1.17.0",
   "description": "Track your Claude usage limits live: session and weekly %, reset countdowns, alerts at 80/95%. Free, Pro, Max and Claude Code.",
   "author": "Digital Advanced Solutions",
   "minimum_chrome_version": "116",
