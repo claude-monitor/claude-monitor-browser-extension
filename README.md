@@ -157,7 +157,7 @@ Pull requests are welcome. For non-trivial changes, please open an issue first t
 
 The full security model, threat model, and vulnerability-reporting process are documented in **[SECURITY.md](SECURITY.md)**.
 
-To report a vulnerability, email <martin.sadofschi@gmail.com> instead of opening a public issue.
+To report a vulnerability, email <support@claude-monitor.com> instead of opening a public issue.
 
 ## License
 

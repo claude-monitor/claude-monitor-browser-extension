@@ -16,7 +16,7 @@ against the source in this repository, primarily
 
 **Please do not open a public GitHub issue for security vulnerabilities.**
 
-Report privately by email to **martin.sadofschi@gmail.com** with:
+Report privately by email to **support@claude-monitor.com** with:
 
 - A description of the issue and its impact.
 - Steps to reproduce, or a proof of concept.
