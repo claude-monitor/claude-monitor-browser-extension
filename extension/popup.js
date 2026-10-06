@@ -12,6 +12,14 @@ const REVIEW_URL = navigator.userAgent.includes('Firefox')
   ? 'https://addons.mozilla.org/firefox/addon/claude-usage-meter/reviews/'
   : 'https://chromewebstore.google.com/detail/bfhdcfiigpaaopklllpobkheakpigbfo/reviews';
 
+// Pro waitlist ask: later than the review ask, so it only reaches people who
+// kept using the extension. `src` tags the signup with the surface it came from.
+const WAITLIST_NUDGE_MIN_DAYS = 7;
+const WAITLIST_URL = 'https://claude-monitor.com/?src=ext-popup#waitlist';
+
+// Must match FETCH_FAIL_STALE in background.js.
+const FETCH_FAIL_STALE = 2;
+
 const SUBCARDS = ['fable', 'sonnet', 'opus', 'design'];
 // Per-sub-cap visibility. Tri-state: true = always show, false = always hide,
 // undefined = auto (show only when the API returns data for it this week).
@@ -45,6 +53,16 @@ const winPromoDismiss  = $('winPromoDismiss');
 const reviewNudge      = $('reviewNudge');
 const reviewRateBtn    = $('reviewRateBtn');
 const reviewDismissBtn = $('reviewDismissBtn');
+
+// Pro waitlist nudge
+const waitlistNudge      = $('waitlistNudge');
+const waitlistJoinBtn    = $('waitlistJoinBtn');
+const waitlistDismissBtn = $('waitlistDismissBtn');
+
+// No-data variants
+const freePlanNotice   = $('freePlanNotice');
+const noDataGeneric    = $('noDataGeneric');
+const freePlanRetryBtn = $('freePlanRetryBtn');
 
 // Session
 const sessionPct   = $('sessionPct');
@@ -131,6 +149,9 @@ const extraBalance  = $('extraBalance');
 const staleBanner   = $('staleBanner');
 const staleSubtitle = $('staleBannerSubtitle');
 const signInBtn     = $('signInBtn');
+const fetchFailBanner   = $('fetchFailBanner');
+const fetchFailSubtitle = $('fetchFailSubtitle');
+const retryBtn          = $('retryBtn');
 const cardsEl       = $('cards');
 
 // Ring gauges (Mixed & Grid layouts) + the layout picker
@@ -309,10 +330,20 @@ function formatTimestamp(epochMs) {
 
 // ── Render ────────────────────────────────────────────────────────────────
 
+// With no reading to show, a Free account gets the reason instead of the
+// generic "load your stats" prompt: that button opens a usage page Free plans
+// don't have, and the exit survey shows people uninstalling over exactly that.
+function showNoData() {
+  mainEl.style.display   = 'none';
+  noDataEl.style.display = 'block';
+  const free = currentPlan?.label === 'Free';
+  if (freePlanNotice) freePlanNotice.style.display = free ? 'block' : 'none';
+  if (noDataGeneric)  noDataGeneric.style.display  = free ? 'none' : 'block';
+}
+
 function render(data) {
   if (!data) {
-    mainEl.style.display   = 'none';
-    noDataEl.style.display = 'block';
+    showNoData();
     return;
   }
 
@@ -327,8 +358,7 @@ function render(data) {
     design?.percentage  !== null;
 
   if (!hasSomething) {
-    mainEl.style.display   = 'none';
-    noDataEl.style.display = 'block';
+    showNoData();
     return;
   }
 
@@ -879,20 +909,21 @@ function closeViewMenu() {
   viewBtn?.setAttribute('aria-expanded', 'false');
 }
 
-// ── Auth-failed banner ────────────────────────────────────────────────────
+// ── Stale-data banners (signed out, or refreshes failing) ─────────────────
 
-function renderAuthState(authBackoff, lastUpdatedTs) {
-  const failing = Boolean(authBackoff && authBackoff.fails > 0);
-  if (!failing) {
-    staleBanner.style.display = 'none';
-    cardsEl?.classList.remove('dimmed');
-    return;
-  }
-  staleBanner.style.display = 'flex';
-  cardsEl?.classList.add('dimmed');
-  staleSubtitle.textContent = lastUpdatedTs
+function renderAuthState(authBackoff, fetchFailures, lastUpdatedTs) {
+  const authFailing  = Boolean(authBackoff && authBackoff.fails > 0);
+  // Signed out explains the stale data on its own, so it wins over this one.
+  const fetchFailing = !authFailing && (fetchFailures?.count ?? 0) >= FETCH_FAIL_STALE;
+  const subtitle = lastUpdatedTs
     ? `Last update ${formatTimestamp(lastUpdatedTs).replace(/^Updated\s+/, '')}`
     : 'No data captured yet';
+
+  staleBanner.style.display = authFailing ? 'flex' : 'none';
+  if (fetchFailBanner) fetchFailBanner.style.display = fetchFailing ? 'flex' : 'none';
+  cardsEl?.classList.toggle('dimmed', authFailing || fetchFailing);
+  if (authFailing) staleSubtitle.textContent = subtitle;
+  if (fetchFailing && fetchFailSubtitle) fetchFailSubtitle.textContent = subtitle;
 }
 
 // ── Subscription badge ──────────────────────────────────────────────────────
@@ -908,7 +939,10 @@ function renderPlanBadge(plan) {
   }
 }
 
+let currentPlan = null;
+
 function applyPlan(plan) {
+  currentPlan = plan && typeof plan === 'object' ? plan : null;
   renderPlanBadge(plan);
 }
 
@@ -921,8 +955,8 @@ function loadData() {
   }
 
   chrome.storage.local.get(
-    ['claudeUsage', 'refreshInterval', 'authBackoff', 'cardPrefs', 'claudePlan', 'theme', 'layout', 'installedAt', 'reviewNudgeDismissed', 'reviewOpenDays', 'usageHistory', 'showSparkline', 'winPromoDismissed', 'winPromoUpdate'],
-    ({ claudeUsage, refreshInterval, authBackoff, cardPrefs: storedPrefs, claudePlan, theme, layout, installedAt, reviewNudgeDismissed, reviewOpenDays, usageHistory, showSparkline: sparkPref, winPromoDismissed, winPromoUpdate }) => {
+    ['claudeUsage', 'refreshInterval', 'authBackoff', 'fetchFailures', 'cardPrefs', 'claudePlan', 'theme', 'layout', 'installedAt', 'reviewNudgeDismissed', 'reviewOpenDays', 'usageHistory', 'showSparkline', 'winPromoDismissed', 'winPromoUpdate', 'waitlistNudgeDismissed'],
+    ({ claudeUsage, refreshInterval, authBackoff, fetchFailures, cardPrefs: storedPrefs, claudePlan, theme, layout, installedAt, reviewNudgeDismissed, reviewOpenDays, usageHistory, showSparkline: sparkPref, winPromoDismissed, winPromoUpdate, waitlistNudgeDismissed }) => {
       historySeries = Array.isArray(usageHistory) ? usageHistory : [];
       showSparkline = sparkPref !== false;   // absent means on
       renderSparkToggle();
@@ -936,10 +970,13 @@ function loadData() {
       applyPlan(claudePlan);
       if (intervalSelect) intervalSelect.value = String(refreshInterval || 5);
       render(claudeUsage || null);
-      renderAuthState(authBackoff, claudeUsage?.lastUpdated);
-      renderReviewNudge(trackReviewOpenDay(reviewOpenDays, Boolean(claudeUsage)), reviewNudgeDismissed, Boolean(claudeUsage));
+      renderAuthState(authBackoff, fetchFailures, claudeUsage?.lastUpdated);
+      const openDays = trackReviewOpenDay(reviewOpenDays, Boolean(claudeUsage));
+      renderReviewNudge(openDays, reviewNudgeDismissed, Boolean(claudeUsage));
       // After the review nudge: it decides whether there is room for this one.
       renderWinPromo(installedAt, winPromoDismissed, winPromoUpdate, Boolean(claudeUsage));
+      // Last: it only takes the slot when neither of the other two wants it.
+      renderWaitlistNudge(openDays, waitlistNudgeDismissed, Boolean(claudeUsage));
     }
   );
 }
@@ -1008,6 +1045,23 @@ function dismissWinPromo() {
   chrome.storage.local.set({ winPromoDismissed: true });
   chrome.storage.local.remove('winPromoUpdate');
   if (winPromo) winPromo.style.display = 'none';
+}
+
+// ── Pro waitlist nudge ────────────────────────────────────────────────────
+// The waitlist only lived on the landing page and collected nothing in three
+// months; the people who would pay for sync are the ones opening this popup.
+// One nudge at a time: it yields to the review ask and the Windows promo.
+
+function renderWaitlistNudge(openDays, dismissed, hasData) {
+  if (!waitlistNudge) return;
+  const othersShowing = [reviewNudge, winPromo].some(el => el && el.style.display !== 'none');
+  const due = openDays >= WAITLIST_NUDGE_MIN_DAYS;
+  waitlistNudge.style.display = (!dismissed && due && hasData && !othersShowing) ? 'flex' : 'none';
+}
+
+function dismissWaitlistNudge() {
+  chrome.storage.local.set({ waitlistNudgeDismissed: true });
+  if (waitlistNudge) waitlistNudge.style.display = 'none';
 }
 
 // ── Refresh flow ──────────────────────────────────────────────────────────
@@ -1160,6 +1214,17 @@ winPromoCta?.addEventListener('click', () => {
 
 winPromoDismiss?.addEventListener('click', dismissWinPromo);
 
+waitlistJoinBtn?.addEventListener('click', () => {
+  dismissWaitlistNudge();
+  chrome.tabs.create({ url: WAITLIST_URL, active: true });
+  window.close();
+});
+
+waitlistDismissBtn?.addEventListener('click', dismissWaitlistNudge);
+
+retryBtn?.addEventListener('click', triggerRefresh);
+freePlanRetryBtn?.addEventListener('click', triggerRefresh);
+
 // Listen for storage changes while popup is open
 chrome.storage.onChanged.addListener((changes) => {
   // The worker persists the snapshot first and appends the history sample after,
@@ -1171,14 +1236,15 @@ chrome.storage.onChanged.addListener((changes) => {
   if (changes.claudeUsage) {
     render(changes.claudeUsage.newValue || null);
   }
-  if (changes.claudeUsage || changes.authBackoff) {
-    chrome.storage.local.get(['claudeUsage', 'authBackoff'], ({ claudeUsage, authBackoff }) => {
-      renderAuthState(authBackoff, claudeUsage?.lastUpdated);
+  if (changes.claudeUsage || changes.authBackoff || changes.fetchFailures) {
+    chrome.storage.local.get(['claudeUsage', 'authBackoff', 'fetchFailures'], ({ claudeUsage, authBackoff, fetchFailures }) => {
+      renderAuthState(authBackoff, fetchFailures, claudeUsage?.lastUpdated);
     });
   }
   if (changes.claudePlan) {
     applyPlan(changes.claudePlan.newValue);
-    if (lastData) render(lastData);
+    // Also with no data yet: the plan decides which empty state is shown.
+    render(lastData);
   }
   if (changes.theme) {
     applyTheme(changes.theme.newValue);
