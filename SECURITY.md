@@ -65,9 +65,25 @@ Declared in [`extension/manifest.json`](extension/manifest.json):
 | host: `claude.ai/api/organizations/*/overage_spend_limit` | Read your monthly usage-credit **spend / limit** (shown in the extra-credits banner) | Read-only; no payment methods, cards, or invoices |
 | host: `claude.ai/v1/code/routines/run-budget` | Read the daily routine-run budget                      | Read-only; cannot write                                     |
 
-There is **no** `cookies`, `tabs`, `scripting`, `webRequest`, `<all_urls>`, or
-any broad host permission. There are **no content scripts**, no
-`web_accessible_resources`, and no `externally_connectable`.
+There is **no** `cookies`, `tabs`, `webRequest` or `<all_urls>` permission.
+`notifications`, `scripting` and host access to `https://claude.ai/*` are
+**optional**: none is granted at install, and each is requested only from a
+click in Settings (or the popup's Free-plan notice).
+
+By default there are **no content scripts**. They exist only while the optional
+on-page bar is turned on, and then only on `claude.ai`:
+
+- `page/bar.js` draws the usage strip above the chat box from data the
+  extension already stored. It makes no requests.
+- `page/stream.js` runs in the page's own world and reads the `message_limit`
+  event from each reply's stream: the session and weekly figures only. Lines are
+  matched on the event name before anything is parsed; the request (your
+  prompt) is never touched, and the reply text streams past without being
+  parsed, kept or passed on. On the Free plan this event is the only
+  place Claude reports limits.
+
+Turning the bar off unregisters both scripts and gives both permissions back.
+There are no `web_accessible_resources` and no `externally_connectable`.
 
 ### What the extension can and cannot access
 

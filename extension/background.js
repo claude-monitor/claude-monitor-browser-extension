@@ -9,6 +9,7 @@ const POLL_MIN   = 5;   // minutes between automatic refreshes
 const ORG_ID_TTL_MS    = 24 * 60 * 60 * 1000; // re-validate cached orgId once a day
 const AUTH_BACKOFF_MAX = 6;                    // cap consecutive auth-failure skips
 const FETCH_FAIL_STALE = 2;                    // consecutive non-auth failures before the data counts as stale
+const PLAN_SCHEMA      = 2;                    // bump to re-derive cached plans after a derivation change
 
 // Daily routine-run budget lives behind the Claude Code gateway (/v1/code/...),
 // NOT in /usage. The route 404s without the ccr-triggers beta + anthropic-version
@@ -24,8 +25,114 @@ chrome.runtime.onInstalled.addListener((details) => {
   refreshUsage();   // fetch immediately on install/update
   markInstalledAt();
   setUninstallFeedbackUrl();
+  syncPageScripts();
   if (details?.reason === 'update') markWindowsPromoOnUpdate();
 });
+
+// ── On-page bar (optional) ────────────────────────────────────────────────
+// Off by default. Turning it on grants access to claude.ai pages plus the
+// `scripting` permission, both OPTIONAL: a required permission added in an
+// update makes Chrome disable the extension for everyone until they re-accept.
+// The scripts are registered at runtime only while the toggle is on and the
+// grant is in place, and unregistered the moment either goes away.
+
+const CLAUDE_PAGES = 'https://claude.ai/*';
+const PAGE_SCRIPTS = [
+  // Page world, before claude.ai's own code runs, so its fetch is wrapped in time.
+  { id: 'cum-stream', matches: [CLAUDE_PAGES], js: ['page/stream.js'], runAt: 'document_start', world: 'MAIN' },
+  { id: 'cum-bar',    matches: [CLAUDE_PAGES], js: ['page/bar.js'],    runAt: 'document_idle' },
+];
+
+async function pageBarGranted() {
+  return chrome.permissions.contains({ origins: [CLAUDE_PAGES], permissions: ['scripting'] });
+}
+
+async function syncPageScripts() {
+  try {
+    const { pageBar } = await chrome.storage.local.get('pageBar');
+    const granted = await pageBarGranted();
+    if (!chrome.scripting?.registerContentScripts) return; // namespace absent until granted
+    const registered = (await chrome.scripting.getRegisteredContentScripts())
+      .map(s => s.id)
+      .filter(id => PAGE_SCRIPTS.some(p => p.id === id));
+
+    if (!(pageBar?.enabled && granted)) {
+      if (registered.length) await chrome.scripting.unregisterContentScripts({ ids: registered });
+      return;
+    }
+    const missing = PAGE_SCRIPTS.filter(p => !registered.includes(p.id));
+    if (!missing.length) return;
+    await chrome.scripting.registerContentScripts(missing);
+    // Registration only covers pages loaded from now on; claude.ai tabs that
+    // are already open get the scripts directly, so the bar shows up without a
+    // reload. Both scripts guard against running twice.
+    const tabs = await chrome.tabs.query({ url: CLAUDE_PAGES });
+    for (const tab of tabs) {
+      for (const script of missing) {
+        chrome.scripting.executeScript({
+          target: { tabId: tab.id },
+          files: script.js,
+          world: script.world || 'ISOLATED',
+        }).catch(() => {});
+      }
+    }
+  } catch { /* never let the bar setup break the extension */ }
+}
+
+chrome.permissions.onAdded.addListener(syncPageScripts);
+// Access revoked from the browser's own extension settings: turn the toggle off
+// too, so the options page and the popup don't claim a bar that can't run.
+chrome.permissions.onRemoved.addListener(async () => {
+  if (!(await pageBarGranted())) await chrome.storage.local.set({ pageBar: { enabled: false } });
+  syncPageScripts();
+});
+chrome.storage.onChanged.addListener((changes, area) => {
+  if (area === 'local' && changes.pageBar) syncPageScripts();
+});
+
+// Limits read from a reply by page/stream.js. On the Free plan they are the
+// only figures that exist, so they become the stored snapshot. On paid plans
+// /usage stays authoritative; a reply just means usage moved, so it triggers a
+// refresh (throttled) and the bar catches up seconds after each message.
+const STREAM_REFRESH_GAP_MS = 20 * 1000;
+const STREAM_MAX_RESET_AHEAD_MS = 8 * 24 * 60 * 60 * 1000;
+
+async function applyStreamLimits(limits) {
+  const { claudePlan, claudeUsage } = await chrome.storage.local.get(['claudePlan', 'claudeUsage']);
+  if (claudePlan?.label !== 'Free') {
+    if (!claudeUsage?.lastUpdated || Date.now() - claudeUsage.lastUpdated > STREAM_REFRESH_GAP_MS) {
+      await refreshUsage();
+    }
+    return;
+  }
+  const session = streamWindow(limits?.session, claudeUsage?.source === 'stream' ? claudeUsage.session : null);
+  const weekly  = streamWindow(limits?.weekly,  claudeUsage?.source === 'stream' ? claudeUsage.weekly  : null);
+  if (!session && !weekly) return;
+  const empty = { percentage: null, resetTime: null, label: null };
+  const stored = await persistAndBadge({
+    session: session || empty,
+    weekly: weekly || empty,
+    fable: empty, opus: empty, sonnet: empty, design: empty,
+    extra: null, prepaidBalance: null, routine: null,
+    meta: { ready: true },
+    source: 'stream',
+  });
+  if (stored) await chrome.storage.local.remove('fetchFailures');
+}
+
+// Validates one window from the page (the page world is not trusted with
+// anything beyond two numbers) and keeps the previous figure when the new one
+// is lower within the same window: the reply and the accounting round
+// independently, so a reading can dip by a point before it settles.
+function streamWindow(incoming, previous) {
+  const pct = Number(incoming?.percentage);
+  const reset = Number(incoming?.resetTime);
+  if (!Number.isFinite(pct) || pct < 0 || !Number.isFinite(reset)) return null;
+  if (reset <= Date.now() || reset > Date.now() + STREAM_MAX_RESET_AHEAD_MS) return null;
+  const next = { percentage: Math.min(pct, 100), resetTime: reset, label: null };
+  const sameWindow = previous && Math.abs((previous.resetTime || 0) - reset) < 60 * 1000;
+  return sameWindow && Number(previous.percentage) > next.percentage ? previous : next;
+}
 
 // One-question exit survey. Carries only the version and the browser family,
 // so the page can route the answer; no identifier, no usage data.
@@ -62,6 +169,7 @@ async function markInstalledAt() {
 chrome.runtime.onStartup.addListener(() => {
   setupAlarm();
   refreshUsage();
+  syncPageScripts();
 });
 
 async function setupAlarm() {
@@ -88,6 +196,12 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
     refreshUsage({ force: true })
       .then((result) => sendResponse({ ok: true, ...result }))
       .catch((error) => sendResponse({ ok: false, reason: String(error?.message || error) }));
+    return true;
+  }
+  if (msg.type === 'STREAM_LIMITS') {
+    applyStreamLimits(msg.limits)
+      .then(() => sendResponse({ ok: true }))
+      .catch(() => sendResponse({ ok: false }));
     return true;
   }
   if (msg.type === 'PRUNE_HISTORY') {
@@ -123,10 +237,22 @@ async function refreshUsage({ force = false } = {}) {
   if (apiResult.reason === 'auth-failed') {
     await bumpAuthBackoff();
     markBadgeStale();
+  } else if (apiResult.reason === 'api-data-rejected' && await isFreePlan()) {
+    // Expected, not a failure: /usage answers with every field null on the
+    // Free plan. Whatever a reply reported (applyStreamLimits) stays as is.
+    await clearAuthBackoff();
+    const { claudeUsage } = await chrome.storage.local.get('claudeUsage');
+    if (claudeUsage) updateBadge(claudeUsage);  // the poll is what moves an expired window to 0%
+    return { refreshed: false, reason: 'free-plan' };
   } else {
     await bumpFetchFailures();
   }
   return { refreshed: false, reason: apiResult.reason || 'api-fetch-failed' };
+}
+
+async function isFreePlan() {
+  const { claudePlan } = await chrome.storage.local.get('claudePlan');
+  return claudePlan?.label === 'Free';
 }
 
 // Non-auth failures (claude.ai unreachable, unexpected payload) used to leave
@@ -222,8 +348,9 @@ async function getClaudeOrgId() {
   const fresh = claudeOrgIdAt && (Date.now() - claudeOrgIdAt) < ORG_ID_TTL_MS;
   // Only short-circuit when the plan is also cached, so an existing install
   // (org id already cached) still fetches the org list once to populate the plan
-  // badge. The 'fable' key check forces one refetch after the update that added it.
-  if (claudeOrgId && fresh && claudePlan && claudePlan.subcaps && 'fable' in claudePlan.subcaps) return claudeOrgId;
+  // badge. PLAN_SCHEMA forces one refetch after an update that changes how the
+  // plan is derived (v2: Free accounts read as tier default_claude_ai).
+  if (claudeOrgId && fresh && claudePlan?.v === PLAN_SCHEMA) return claudeOrgId;
 
   const organizations = await fetchClaudeJson(`${API_BASE}/organizations`);
   const org = selectOrg(organizations);
@@ -251,7 +378,7 @@ function selectOrg(payload) {
 function derivePlan(org) {
   const tier = org?.rate_limit_tier || null;
   const caps = Array.isArray(org?.capabilities) ? org.capabilities : [];
-  return { tier, label: planLabel(tier, caps), subcaps: availableSubcaps(tier, caps) };
+  return { v: PLAN_SCHEMA, tier, label: planLabel(tier, caps, org?.raven_type), subcaps: availableSubcaps(tier, caps) };
 }
 
 // Which weekly sub-caps this plan should offer. The API exposes no reliable
@@ -264,7 +391,7 @@ function availableSubcaps(tier, caps) {
   return { fable: paid, opus: paid, sonnet: paid, design: paid };
 }
 
-function planLabel(tier, caps) {
+function planLabel(tier, caps, ravenType) {
   const t = String(tier || '').toLowerCase();
   if (t.includes('max_20x'))    return 'Max 20x';
   if (t.includes('max_5x'))     return 'Max 5x';
@@ -274,7 +401,12 @@ function planLabel(tier, caps) {
   if (t.includes('pro'))        return 'Pro';
   if (caps.includes('claude_max')) return 'Max';
   if (caps.includes('claude_pro')) return 'Pro';
-  if (t.includes('free') || t === 'default') return 'Free';
+  // raven_type is set on Team/Enterprise orgs, whose tier can read like a
+  // personal one; checked before the Free fallback so they never land there.
+  if (ravenType) return String(ravenType).toLowerCase().includes('enterprise') ? 'Enterprise' : 'Team';
+  // Free and Pro share the tier "default_claude_ai"; Pro is told apart only by
+  // the claude_pro capability checked above, so what remains here is Free.
+  if (t.includes('free') || t === 'default' || t === 'default_claude_ai') return 'Free';
   return null; // unknown tier → show nothing rather than a wrong label
 }
 
@@ -773,6 +905,9 @@ function sanitizeUsageData(data) {
     meta: {
       ready: Boolean(data.meta?.ready),
     },
+    // 'stream' = read from a reply on claude.ai (Free plan); never refreshed in
+    // between, so readers treat a passed reset as 0% rather than the old figure.
+    source: data.source === 'stream' ? 'stream' : 'api',
   };
 
   if (clone.session.percentage === null && clone.weekly.percentage === null) return null;
@@ -837,7 +972,9 @@ function shouldPersist(next) {
 }
 
 function updateBadge(data) {
-  const pct = data?.session?.percentage ?? null;
+  // A reply-sourced window that has reset is at 0% until the next message.
+  const expired = data?.source === 'stream' && data.session?.resetTime && data.session.resetTime <= Date.now();
+  const pct = expired ? 0 : (data?.session?.percentage ?? null);
 
   if (pct === null) {
     chrome.action.setBadgeText({ text: '?' });

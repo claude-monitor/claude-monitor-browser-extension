@@ -62,7 +62,11 @@ const waitlistDismissBtn = $('waitlistDismissBtn');
 // No-data variants
 const freePlanNotice   = $('freePlanNotice');
 const noDataGeneric    = $('noDataGeneric');
-const freePlanRetryBtn = $('freePlanRetryBtn');
+const freePlanText      = $('freePlanText');
+const freePlanActionBtn = $('freePlanActionBtn');
+
+const PAGE_BAR_PERMS = { origins: ['https://claude.ai/*'], permissions: ['scripting'] };
+let pageBarOn = false;
 
 // Session
 const sessionPct   = $('sessionPct');
@@ -339,9 +343,40 @@ function showNoData() {
   const free = currentPlan?.label === 'Free';
   if (freePlanNotice) freePlanNotice.style.display = free ? 'block' : 'none';
   if (noDataGeneric)  noDataGeneric.style.display  = free ? 'none' : 'block';
+  if (free) renderFreePlanNotice();
+}
+
+// The bar is the only way to read Free-plan limits, so the notice offers it.
+// Once it is on, all that is missing is a message to read them from.
+function renderFreePlanNotice() {
+  if (!freePlanText || !freePlanActionBtn) return;
+  freePlanText.textContent = pageBarOn
+    ? 'The bar on claude.ai is on. Send a message there and your limits show up here.'
+    : "Claude's usage page is closed on the Free plan, but every reply still carries your limits. Turn on the bar on claude.ai and they show up here after your next message.";
+  freePlanActionBtn.textContent = pageBarOn ? 'Open claude.ai' : 'Turn on';
+}
+
+function refreshPageBarState() {
+  chrome.storage.local.get('pageBar', ({ pageBar }) => {
+    chrome.permissions.contains(PAGE_BAR_PERMS, (granted) => {
+      pageBarOn = Boolean(pageBar?.enabled && granted);
+      if (noDataEl.style.display !== 'none') renderFreePlanNotice();
+    });
+  });
+}
+
+// Free-plan readings come from replies and are never refreshed in between: a
+// window whose reset has passed is at 0% until the next message.
+function settleStreamWindows(data) {
+  if (data?.source !== 'stream') return data;
+  const settle = (b) => (b?.resetTime && b.resetTime <= Date.now())
+    ? { percentage: 0, resetTime: null, label: 'Not yet used' }
+    : b;
+  return { ...data, session: settle(data.session), weekly: settle(data.weekly) };
 }
 
 function render(data) {
+  data = settleStreamWindows(data);
   if (!data) {
     showNoData();
     return;
@@ -968,6 +1003,7 @@ function loadData() {
         cardPrefs = { ...storedPrefs };
       }
       applyPlan(claudePlan);
+      refreshPageBarState();
       if (intervalSelect) intervalSelect.value = String(refreshInterval || 5);
       render(claudeUsage || null);
       renderAuthState(authBackoff, fetchFailures, claudeUsage?.lastUpdated);
@@ -1223,7 +1259,27 @@ waitlistJoinBtn?.addEventListener('click', () => {
 waitlistDismissBtn?.addEventListener('click', dismissWaitlistNudge);
 
 retryBtn?.addEventListener('click', triggerRefresh);
-freePlanRetryBtn?.addEventListener('click', triggerRefresh);
+
+freePlanActionBtn?.addEventListener('click', () => {
+  if (pageBarOn) {
+    chrome.tabs.create({ url: 'https://claude.ai/new', active: true });
+    window.close();
+    return;
+  }
+  // Requested straight from the click, as the permissions API requires.
+  chrome.permissions.request(PAGE_BAR_PERMS, (granted) => {
+    if (chrome.runtime.lastError || !granted) {
+      // Firefox closes the popup when its permission prompt opens; the options
+      // page hosts the same toggle and survives that.
+      if (chrome.runtime.lastError) chrome.runtime.openOptionsPage();
+      return;
+    }
+    chrome.storage.local.set({ pageBar: { enabled: true } }, () => {
+      pageBarOn = true;
+      renderFreePlanNotice();
+    });
+  });
+});
 
 // Listen for storage changes while popup is open
 chrome.storage.onChanged.addListener((changes) => {
@@ -1241,6 +1297,7 @@ chrome.storage.onChanged.addListener((changes) => {
       renderAuthState(authBackoff, fetchFailures, claudeUsage?.lastUpdated);
     });
   }
+  if (changes.pageBar) refreshPageBarState();
   if (changes.claudePlan) {
     applyPlan(changes.claudePlan.newValue);
     // Also with no data yet: the plan decides which empty state is shown.
