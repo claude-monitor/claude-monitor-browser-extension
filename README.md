@@ -8,7 +8,7 @@
 
 **Never get cut off by a Claude usage limit again.** Claude Monitor is a free, open-source browser extension that shows your Claude usage limits live: the 5-hour session, the weekly limit and per-model caps, each with a countdown to its reset, plus desktop alerts at 80% and 95%. It works on the Free plan too.
 
-**Install:** [Chrome Web Store](https://chromewebstore.google.com/detail/bfhdcfiigpaaopklllpobkheakpigbfo) · [Firefox Add-ons](https://addons.mozilla.org/firefox/addon/claude-usage-meter/) · Website: [claude-monitor.com](https://claude-monitor.com/)
+**Install:** [Chrome Web Store](https://chromewebstore.google.com/detail/bfhdcfiigpaaopklllpobkheakpigbfo) · [Firefox Add-ons](https://addons.mozilla.org/firefox/addon/claude-usage-meter/) · [Edge Add-ons](https://microsoftedge.microsoft.com/addons/detail/ilidbhklkpefboidlfeoiiacepcefinp) · Website: [claude-monitor.com](https://claude-monitor.com/)
 
 Manifest V3, MIT licensed, unminified: all code in this repo is exactly what runs in your browser. No account, no servers, no telemetry.
 
@@ -88,7 +88,7 @@ The extension refreshes usage through Claude.ai's internal authenticated API.
 
 - **Google Chrome**: Manifest V3, uses `manifest.json`.
 - **Mozilla Firefox**: Manifest V3, uses `manifest.firefox.json` (packaged as `manifest.json` by the build script).
-- **Microsoft Edge**: runs the Chrome package; the Edge Add-ons listing is in review.
+- **Microsoft Edge**: runs the Chrome package, published on [Edge Add-ons](https://microsoftedge.microsoft.com/addons/detail/ilidbhklkpefboidlfeoiiacepcefinp).
 
 The codebase uses the standard `chrome.*` extension APIs, which Firefox supports via the WebExtensions namespace.
 
