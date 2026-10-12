@@ -7,6 +7,10 @@
     "message": "Suivi d'utilisation de Claude : limites, alertes",
     "description": "Extension name on Firefox Add-ons (max 50 characters)."
   },
+  "extNameEdge": {
+    "message": "Claude Monitor : suivi d'utilisation",
+    "description": "Extension name on Microsoft Edge Add-ons (short, no feature list)."
+  },
   "extDescription": {
     "message": "Limites d'utilisation de Claude en direct : % de session et hebdo, compte à rebours, alertes 80/95 %. Free, Pro, Max, Claude Code.",
     "description": "Short description shown in the stores and the browser (max 132 characters)."

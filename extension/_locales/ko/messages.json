@@ -7,6 +7,10 @@
     "message": "Claude 사용량 트래커: 사용 한도 및 알림",
     "description": "Extension name on Firefox Add-ons (max 50 characters)."
   },
+  "extNameEdge": {
+    "message": "Claude Monitor: 사용량 트래커",
+    "description": "Extension name on Microsoft Edge Add-ons (short, no feature list)."
+  },
   "extDescription": {
     "message": "Claude 사용 한도를 실시간으로 확인하세요: 세션 및 주간 사용률, 초기화 카운트다운, 80/95% 알림. Free, Pro, Max, Claude Code 지원.",
     "description": "Short description shown in the stores and the browser (max 132 characters)."
