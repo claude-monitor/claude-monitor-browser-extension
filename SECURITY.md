@@ -68,7 +68,7 @@ Declared in [`extension/manifest.json`](extension/manifest.json):
 There is **no** `cookies`, `tabs`, `webRequest` or `<all_urls>` permission.
 `notifications`, `scripting` and host access to `https://claude.ai/*` are
 **optional**: none is granted at install, and each is requested only from a
-click in Settings (or the popup's Free-plan notice).
+click in Settings (or a notice in the popup).
 
 By default there are **no content scripts**. They exist only while the optional
 on-page bar is turned on, and then only on `claude.ai`:
@@ -89,7 +89,7 @@ There are no `web_accessible_resources` and no `externally_connectable`.
 
 | Can read (via your session)                          | Cannot access                                              |
 | ---------------------------------------------------- | --------------------------------------------------------- |
-| Session (5-hour) usage %                             | Your chats, projects, or files                            |
+| Session (5-hour) usage %                             | Your chats, projects, or files (the optional bar scans replies only for the usage event, see above) |
 | Weekly usage % (all models + per-model sub-caps)     | Organization members / member list                        |
 | Daily routine-run count                              | Billing management or payment methods                     |
 | Extra-usage credit spend + prepaid balance           | API key management (different domain — see threat model)  |
@@ -269,10 +269,13 @@ matter more than the extension code itself:
 
 ## Data Handling and Privacy
 
-- All data is stored locally in `chrome.storage.local`. Nothing is synced to any
-  server, sent to the maintainer, or shared with third parties.
+- All data is stored locally in `chrome.storage.local`. No usage data is synced
+  to any server, sent to the maintainer, or shared with third parties.
 - No analytics, no telemetry, no crash reporting, no ad networks.
-- The only network destination is `claude.ai`.
+- The extension's only network destination is `claude.ai`.
+- On uninstall, `runtime.setUninstallURL` opens an optional one-question survey
+  on claude-monitor.com. The URL carries only the extension version and browser
+  family, no identifier or usage data.
 
 Full policy: <https://claude-monitor.com/privacy>
 

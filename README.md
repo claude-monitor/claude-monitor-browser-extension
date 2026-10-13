@@ -10,7 +10,7 @@
 
 **Install:** [Chrome Web Store](https://chromewebstore.google.com/detail/bfhdcfiigpaaopklllpobkheakpigbfo) · [Firefox Add-ons](https://addons.mozilla.org/firefox/addon/claude-usage-meter/) · [Edge Add-ons](https://microsoftedge.microsoft.com/addons/detail/ilidbhklkpefboidlfeoiiacepcefinp) · Website: [claude-monitor.com](https://claude-monitor.com/)
 
-Manifest V3, MIT licensed, unminified: all code in this repo is exactly what runs in your browser. No account, no servers, no telemetry.
+Manifest V3, MIT licensed, unminified: all code in this repo is exactly what runs in your browser. No account, no telemetry, and the only network requests go to claude.ai.
 
 ![Claude Monitor popup showing session, weekly and per-model usage with reset countdowns and a trend line under each bar](docs/screenshots/overview.png)
 
@@ -145,7 +145,8 @@ For a permanent install, use the published add-on at <https://addons.mozilla.org
 
 - All data is stored locally on your device via `chrome.storage.local`, including the usage history: no account, no server, no sync.
 - No analytics, no telemetry, no third parties.
-- The extension cannot read your chats, projects, files, or any other Claude.ai content. The optional usage bar reads only the usage figures attached to each reply.
+- The extension never stores or sends your prompts, Claude's replies, projects or files. With the optional usage bar on, it scans each reply only for the usage figures attached to it.
+- Uninstalling opens an optional one-question survey on claude-monitor.com. The URL carries only the extension version and browser family.
 - Required host permissions are scoped to specific Claude.ai API endpoints; access to claude.ai pages is optional and only granted if you turn on the bar. See [SECURITY.md](SECURITY.md) for the full permission breakdown.
 - Full privacy policy: <https://claude-monitor.com/privacy>
 
