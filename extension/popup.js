@@ -90,6 +90,12 @@ const winPromo         = $('winPromo');
 const winPromoCta      = $('winPromoCta');
 const winPromoDismiss  = $('winPromoDismiss');
 
+// Alerts nudge
+const alertsNudge        = $('alertsNudge');
+const alertsNudgeText    = $('alertsNudgeText');
+const alertsNudgeBtn     = $('alertsNudgeBtn');
+const alertsNudgeDismiss = $('alertsNudgeDismiss');
+
 // Review nudge
 const reviewNudge      = $('reviewNudge');
 const reviewRateBtn    = $('reviewRateBtn');
@@ -1032,8 +1038,8 @@ function loadData() {
   }
 
   chrome.storage.local.get(
-    ['claudeUsage', 'refreshInterval', 'authBackoff', 'fetchFailures', 'cardPrefs', 'claudePlan', 'theme', 'layout', 'installedAt', 'reviewNudgeDismissed', 'reviewNudgeSnoozedUntil', 'reviewMoment', 'reviewOpenDays', 'usageHistory', 'showSparkline', 'winPromoDismissed', 'winPromoUpdate', 'waitlistNudgeDismissed'],
-    ({ claudeUsage, refreshInterval, authBackoff, fetchFailures, cardPrefs: storedPrefs, claudePlan, theme, layout, installedAt, reviewNudgeDismissed, reviewNudgeSnoozedUntil, reviewMoment, reviewOpenDays, usageHistory, showSparkline: sparkPref, winPromoDismissed, winPromoUpdate, waitlistNudgeDismissed }) => {
+    ['claudeUsage', 'refreshInterval', 'authBackoff', 'fetchFailures', 'cardPrefs', 'claudePlan', 'theme', 'layout', 'installedAt', 'reviewNudgeDismissed', 'reviewNudgeSnoozedUntil', 'reviewMoment', 'reviewOpenDays', 'usageHistory', 'showSparkline', 'winPromoDismissed', 'winPromoUpdate', 'waitlistNudgeDismissed', 'notifSettings', 'alertsNudgeDismissed'],
+    ({ claudeUsage, refreshInterval, authBackoff, fetchFailures, cardPrefs: storedPrefs, claudePlan, theme, layout, installedAt, reviewNudgeDismissed, reviewNudgeSnoozedUntil, reviewMoment, reviewOpenDays, usageHistory, showSparkline: sparkPref, winPromoDismissed, winPromoUpdate, waitlistNudgeDismissed, notifSettings, alertsNudgeDismissed }) => {
       historySeries = Array.isArray(usageHistory) ? usageHistory : [];
       showSparkline = sparkPref !== false;   // absent means on
       renderSparkToggle();
@@ -1050,13 +1056,32 @@ function loadData() {
       render(claudeUsage || null);
       renderAuthState(authBackoff, fetchFailures, claudeUsage?.lastUpdated);
       const openDays = trackReviewOpenDay(reviewOpenDays, Boolean(claudeUsage));
-      renderReviewNudge(openDays, reviewNudgeDismissed, Boolean(claudeUsage), reviewMoment, reviewNudgeSnoozedUntil);
-      // After the review nudge: it decides whether there is room for this one.
-      renderWinPromo(installedAt, winPromoDismissed, winPromoUpdate, Boolean(claudeUsage));
-      // Last: it only takes the slot when neither of the other two wants it.
-      renderWaitlistNudge(openDays, waitlistNudgeDismissed, Boolean(claudeUsage));
+      // The nudges wait for the permission check: when the alerts ask applies,
+      // it takes the slot ahead of the other three.
+      chrome.permissions.contains({ permissions: ['notifications'] }, (notifGranted) => {
+        renderAlertsNudge(notifSettings, notifGranted, alertsNudgeDismissed, Boolean(claudeUsage));
+        renderReviewNudge(openDays, reviewNudgeDismissed, Boolean(claudeUsage), reviewMoment, reviewNudgeSnoozedUntil);
+        // After the review nudge: it decides whether there is room for this one.
+        renderWinPromo(installedAt, winPromoDismissed, winPromoUpdate, Boolean(claudeUsage));
+        // Last: it only takes the slot when none of the others wants it.
+        renderWaitlistNudge(openDays, waitlistNudgeDismissed, Boolean(claudeUsage));
+      });
     }
   );
+}
+
+// ── Alerts nudge ──────────────────────────────────────────────────────────
+// Alerts default to on, but `notifications` is optional and only a click can
+// grant it, so on a fresh install they never fire. Asked for while alerts are
+// still wanted and the permission is missing.
+
+function renderAlertsNudge(settings, granted, dismissed, hasData) {
+  if (!alertsNudge) return;
+  const show = settings?.enabled !== false && !granted && !dismissed && hasData;
+  if (show && alertsNudgeText) {
+    alertsNudgeText.textContent = msg('alertsNudgeText', Number(settings?.warnAt) || 80, Number(settings?.critAt) || 95);
+  }
+  alertsNudge.style.display = show ? 'flex' : 'none';
 }
 
 // ── Review nudge ──────────────────────────────────────────────────────────
@@ -1092,7 +1117,8 @@ function renderReviewNudge(openDays, dismissed, hasData, moment, snoozedUntil) {
   const fresh = moment && Number.isFinite(moment.at) && now - moment.at < REVIEW_MOMENT_WINDOW_MS;
   const due = fresh || openDays >= REVIEW_NUDGE_MIN_DAYS;
   const snoozed = Number.isFinite(snoozedUntil) && now < snoozedUntil;
-  const show = !dismissed && !snoozed && due && hasData;
+  const alertsShowing = alertsNudge && alertsNudge.style.display !== 'none';
+  const show = !dismissed && !snoozed && due && hasData && !alertsShowing;
   if (show && reviewNudgeText) reviewNudgeText.textContent = msg(REVIEW_COPY[fresh ? moment.type : 'days'] || REVIEW_COPY.days);
   reviewNudge.style.display = show ? 'flex' : 'none';
 }
@@ -1130,10 +1156,10 @@ function winPromoUrl(cid) {
 // 320px popup read as spam. This waits for the review nudge to be settled.
 function renderWinPromo(installedAt, dismissed, updateVersion, hasData) {
   if (!winPromo) return;
-  const reviewShowing = reviewNudge && reviewNudge.style.display !== 'none';
+  const othersShowing = [alertsNudge, reviewNudge].some(el => el && el.style.display !== 'none');
   const due = updateVersion || (installedAt && (Date.now() - installedAt) >= WIN_PROMO_AFTER_MS);
   winPromoCid = updateVersion ? `ext-update-${majorMinor(updateVersion)}` : 'ext-popup';
-  const show = IS_WINDOWS && !dismissed && !reviewShowing && Boolean(due) && hasData;
+  const show = IS_WINDOWS && !dismissed && !othersShowing && Boolean(due) && hasData;
   winPromo.style.display = show ? 'block' : 'none';
 }
 
@@ -1153,11 +1179,12 @@ function dismissWinPromo() {
 // ── Pro waitlist nudge ────────────────────────────────────────────────────
 // The waitlist only lived on the landing page and collected nothing in three
 // months; the people who would pay for sync are the ones opening this popup.
-// One nudge at a time: it yields to the review ask and the Windows promo.
+// One nudge at a time: it yields to the alerts ask, the review ask and the
+// Windows promo.
 
 function renderWaitlistNudge(openDays, dismissed, hasData) {
   if (!waitlistNudge) return;
-  const othersShowing = [reviewNudge, winPromo].some(el => el && el.style.display !== 'none');
+  const othersShowing = [alertsNudge, reviewNudge, winPromo].some(el => el && el.style.display !== 'none');
   const due = openDays >= WAITLIST_NUDGE_MIN_DAYS;
   waitlistNudge.style.display = (!dismissed && due && hasData && !othersShowing) ? 'flex' : 'none';
 }
@@ -1301,6 +1328,25 @@ signInBtn?.addEventListener('click', () => {
 settingsBtn?.addEventListener('click', () => {
   chrome.runtime.openOptionsPage();
   window.close();
+});
+
+// Requested straight from the click, as the permissions API requires. The ask
+// only shows while alerts are on in settings, so the grant alone arms them.
+alertsNudgeBtn?.addEventListener('click', () => {
+  chrome.permissions.request({ permissions: ['notifications'] }, (granted) => {
+    if (chrome.runtime.lastError || !granted) {
+      // Firefox closes the popup when its permission prompt opens; the options
+      // page hosts the same toggle and survives that.
+      if (chrome.runtime.lastError) chrome.runtime.openOptionsPage();
+      return;
+    }
+    alertsNudge.style.display = 'none';
+  });
+});
+
+alertsNudgeDismiss?.addEventListener('click', () => {
+  chrome.storage.local.set({ alertsNudgeDismissed: true });
+  alertsNudge.style.display = 'none';
 });
 
 reviewRateBtn?.addEventListener('click', () => {

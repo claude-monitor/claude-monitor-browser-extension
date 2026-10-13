@@ -170,6 +170,17 @@
   "turnOn": {
     "message": "オンにする"
   },
+  "alertsNudgeText": {
+    "message": "$P1$%と$P2$%で通知を受け取る",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      },
+      "p2": {
+        "content": "$2"
+      }
+    }
+  },
   "openClaude": {
     "message": "claude.ai を開く"
   },

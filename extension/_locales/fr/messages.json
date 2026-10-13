@@ -170,6 +170,17 @@
   "turnOn": {
     "message": "Activer"
   },
+  "alertsNudgeText": {
+    "message": "Recevez des alertes à $P1$ % et $P2$ %",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      },
+      "p2": {
+        "content": "$2"
+      }
+    }
+  },
   "openClaude": {
     "message": "Ouvrir claude.ai"
   },
