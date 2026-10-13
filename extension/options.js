@@ -25,12 +25,26 @@ function clampThreshold(value, fallback) {
   return Math.min(100, Math.max(1, num));
 }
 
-chrome.storage.local.get('notifSettings', ({ notifSettings }) => {
-  const s = { ...DEFAULTS, ...(notifSettings || {}) };
-  enabledEl.checked = Boolean(s.enabled);
-  warnEl.value = clampThreshold(s.warnAt, DEFAULTS.warnAt);
-  critEl.value = clampThreshold(s.critAt, DEFAULTS.critAt);
-});
+// The stored on/off choice, kept apart from the checkbox: the box can read off
+// only because the permission is missing, and a threshold edit must not turn
+// that into an explicit "off".
+let storedEnabled = DEFAULTS.enabled;
+
+// Alerts default to on, but they can only fire once the optional permission is
+// granted, so the toggle shows both together: a fresh install reads as off.
+function renderNotifSettings() {
+  chrome.storage.local.get('notifSettings', ({ notifSettings }) => {
+    const s = { ...DEFAULTS, ...(notifSettings || {}) };
+    storedEnabled = Boolean(s.enabled);
+    chrome.permissions.contains({ permissions: ['notifications'] }, (granted) => {
+      enabledEl.checked = Boolean(s.enabled && granted);
+    });
+    warnEl.value = clampThreshold(s.warnAt, DEFAULTS.warnAt);
+    critEl.value = clampThreshold(s.critAt, DEFAULTS.critAt);
+  });
+}
+
+renderNotifSettings();
 
 let statusTimer = null;
 
@@ -43,19 +57,25 @@ function flashStatus(text) {
 // `notifications` is an optional permission, requested from a user gesture the
 // first time notifications are turned on. Chrome no longer disables the whole
 // extension on update because the permission isn't required up front.
+// Requested directly, with no contains() first: Firefox only honours it while
+// the click is still being handled, and one already granted resolves true
+// without a prompt.
 function ensureNotifPermission() {
   return new Promise((resolve) => {
-    chrome.permissions.contains({ permissions: ['notifications'] }, (has) => {
-      if (has) return resolve(true);
-      chrome.permissions.request({ permissions: ['notifications'] }, (granted) => resolve(Boolean(granted)));
+    chrome.permissions.request({ permissions: ['notifications'] }, (granted) => {
+      void chrome.runtime.lastError;
+      resolve(Boolean(granted));
     });
   });
 }
 
-async function save() {
+async function save(e) {
+  // Only the checkbox switches alerts on or off; a threshold edit keeps the
+  // stored choice.
+  const fromToggle = e?.target === enabledEl;
   // Turning notifications on needs the optional permission; if the user denies
   // it, revert the toggle and don't persist an enabled state we can't honor.
-  if (enabledEl.checked) {
+  if (fromToggle && enabledEl.checked) {
     const granted = await ensureNotifPermission();
     if (!granted) {
       enabledEl.checked = false;
@@ -68,8 +88,9 @@ async function save() {
   const critAt = Math.max(warnAt, clampThreshold(critEl.value, DEFAULTS.critAt));
   warnEl.value = warnAt;
   critEl.value = critAt;
+  if (fromToggle) storedEnabled = enabledEl.checked;
   chrome.storage.local.set(
-    { notifSettings: { enabled: enabledEl.checked, warnAt, critAt } },
+    { notifSettings: { enabled: storedEnabled, warnAt, critAt } },
     () => flashStatus(msg('stSaved')),
   );
 }
@@ -78,6 +99,7 @@ async function save() {
 
 testBtn.addEventListener('click', async () => {
   if (!(await ensureNotifPermission())) { flashStatus(msg('stPermDenied')); return; }
+  renderNotifSettings();   // granting it here also switches alerts on if they were left on
   chrome.notifications.create('usage-test', {
     type: 'basic',
     iconUrl: 'icons/icon128.png',

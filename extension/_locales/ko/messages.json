@@ -170,6 +170,17 @@
   "turnOn": {
     "message": "켜기"
   },
+  "alertsNudgeText": {
+    "message": "$P1$%와 $P2$%에서 알림 받기",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      },
+      "p2": {
+        "content": "$2"
+      }
+    }
+  },
   "openClaude": {
     "message": "claude.ai 열기"
   },

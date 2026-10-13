@@ -699,7 +699,8 @@ function clampThreshold(value, fallback) {
 async function checkThresholdNotifications(data) {
   const settings = await getNotifSettings();
   if (!settings.enabled) return;
-  // `notifications` is an optional permission (granted from the options page).
+  // `notifications` is an optional permission (granted from the options page or
+  // the popup's alerts ask).
   // If the user hasn't granted it, the API namespace is absent — skip quietly.
   if (!chrome.notifications) return;
 

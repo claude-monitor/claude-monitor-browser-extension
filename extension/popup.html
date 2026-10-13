@@ -398,6 +398,15 @@
 
     </div><!-- /cards -->
 
+    <!-- Alerts ask: alerts default to on, but the notifications permission is
+         optional and can only be granted from a click, so until then they
+         can't fire. Takes the slot before every other nudge. -->
+    <div class="review-nudge" id="alertsNudge" style="display:none">
+      <span class="review-nudge-text" id="alertsNudgeText">Get alerts at 80% and 95%</span>
+      <button class="review-nudge-cta" id="alertsNudgeBtn" data-i18n="turnOn">Turn on</button>
+      <button class="review-nudge-dismiss" id="alertsNudgeDismiss" title="Don't show again" aria-label="Dismiss" data-i18n-title="dontShowAgain" data-i18n-aria="dismiss">✕</button>
+    </div>
+
     <!-- Review ask: right after the extension proved useful (an alert in time,
          a first Free-plan reading) or after 3 days of use. Every star goes to
          the store; nobody is routed elsewhere based on how happy they are. -->
