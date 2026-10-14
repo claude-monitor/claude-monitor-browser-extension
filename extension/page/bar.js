@@ -196,13 +196,13 @@
 
   function mountInline(target) {
     ensureHost();
-    if (mode !== 'inline') {
+    const moved = host.nextElementSibling !== target || host.parentElement !== target.parentElement;
+    if (moved) target.parentElement.insertBefore(host, target);
+    // After the move: the background comes from the new surroundings.
+    if (mode !== 'inline' || moved) {
       mode = 'inline';
       host.removeAttribute('style');
       render();
-    }
-    if (host.nextElementSibling !== target || host.parentElement !== target.parentElement) {
-      target.parentElement.insertBefore(host, target);
     }
     noteHealth(true, 'inline');
   }
@@ -300,6 +300,17 @@
     if (!bg) return true;
     const [r, g, b] = bg.map(Number);
     return (0.299 * r + 0.587 * g + 0.114 * b) < 128;
+  }
+
+  // The strip sits in claude.ai's transparent sticky footer, so chat text
+  // scrolling under it shows through. Paint it with the nearest real background.
+  function pageBg() {
+    for (let node = host.parentElement; node; node = node.parentElement) {
+      const c = getComputedStyle(node).backgroundColor;
+      // Chrome reports some as color(srgb r g b / a), not rgba().
+      if (c && c !== 'transparent' && !/^rgba\(.*,\s*0\)$|\/\s*0\)$/.test(c)) return c;
+    }
+    return '';
   }
 
   // Built with DOM calls, not innerHTML: nothing here is markup, and it keeps
@@ -495,6 +506,7 @@
     const free = state.plan?.label === 'Free';
 
     const bar = el('div', `bar${pill ? ' pill' : ''}${isDark() ? '' : ' light'}${stale ? ' stale' : ''}`);
+    if (!pill) bar.style.background = pageBg();
     bar.setAttribute('role', 'status');
     bar.setAttribute('aria-label', msg('barAria'));
     bar.append(brand(pill));
