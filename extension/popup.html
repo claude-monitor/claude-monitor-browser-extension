@@ -23,12 +23,13 @@
         <span class="meta-row">
           <span class="app-version" id="appVersion">v-</span>
           <span class="plan-badge" id="planBadge" hidden></span>
+          <!-- Only with more than one Claude organization; replaces the plan badge -->
+          <select class="org-select" id="orgSelect" hidden title="Claude organization shown" aria-label="Claude organization shown" data-i18n-title="orgSelectTitle" data-i18n-aria="orgSelectTitle"></select>
         </span>
       </div>
     </div>
     <div class="header-actions">
       <select class="interval-select" id="intervalSelect" title="Auto-refresh interval" data-i18n-title="intervalTitle">
-        <option value="1">1m</option>
         <option value="2">2m</option>
         <option value="5">5m</option>
         <option value="10">10m</option>
@@ -198,6 +199,19 @@
       <button class="stale-banner-cta" id="retryBtn" data-i18n="retry">Retry</button>
     </div>
 
+    <!-- What's new: once per release that has something for the existing base,
+         at most two opens, then it yields. Bullets come from WHATS_NEW. Above
+         the cards: below them it fell out of view on a plan with every card,
+         and its two views were spent unseen. Picked with the other notices in
+         renderNotices. -->
+    <div class="whats-new" id="whatsNew" style="display:none">
+      <button class="promo-nudge-dismiss" id="whatsNewDismiss" title="Don't show again" aria-label="Dismiss" data-i18n-title="dontShowAgain" data-i18n-aria="dismiss">✕</button>
+      <div class="whats-new-title" id="whatsNewTitle"></div>
+      <ul class="whats-new-list" id="whatsNewList"></ul>
+      <button class="whats-new-cta" id="whatsNewBtn" hidden></button>
+      <p class="whats-new-note" id="whatsNewNote" data-i18n="wcBarNote" hidden>Only on claude.ai. Extracts only the usage figures from each reply; never stores or sends your messages. Turn it off anytime.</p>
+    </div>
+
     <!-- Extra-usage banner (credits); hidden when no data or toggled off in the View menu -->
     <div class="extra-banner" id="extraBanner" style="display:none">
       <div class="extra-banner-row">
@@ -246,6 +260,9 @@
         <div class="reset-row">
           <span id="sessionReset">–</span>
         </div>
+        <!-- Worker-computed pace forecast and messages-left estimate; hidden unless valid -->
+        <div class="pace-row" id="sessionForecast" hidden></div>
+        <div class="pace-row" id="sessionMsgs" hidden></div>
         <div class="reset-label" id="sessionLabel"></div>
       </div>
 
@@ -274,6 +291,7 @@
         <div class="reset-row">
           <span id="weeklyReset">–</span>
         </div>
+        <div class="pace-row" id="weeklyForecast" hidden></div>
         <div class="reset-label" id="weeklyLabel"></div>
       </div>
 
@@ -398,9 +416,12 @@
 
     </div><!-- /cards -->
 
+    <!-- Notices: at most one per open, picked in popup.js (renderNotices) in a
+         fixed order. The order of the markup below does not matter. -->
+
     <!-- Alerts ask: alerts default to on, but the notifications permission is
          optional and can only be granted from a click, so until then they
-         can't fire. Takes the slot before every other nudge. -->
+         can't fire. -->
     <div class="review-nudge" id="alertsNudge" style="display:none">
       <span class="review-nudge-text" id="alertsNudgeText">Get alerts at 80% and 95%</span>
       <button class="review-nudge-cta" id="alertsNudgeBtn" data-i18n="turnOn">Turn on</button>
@@ -412,19 +433,30 @@
          the store; nobody is routed elsewhere based on how happy they are. -->
     <div class="review-nudge rate" id="reviewNudge" style="display:none">
       <span class="review-nudge-text" id="reviewNudgeText" data-i18n="reviewDays">Finding it useful? Rate us</span>
-      <button class="review-nudge-cta review-stars" id="reviewRateBtn" title="Rate it in the store" aria-label="Rate it in the store" data-i18n-title="rateInStore" data-i18n-aria="rateInStore">★★★★★</button>
+      <button class="review-nudge-cta review-stars" id="reviewRateBtn" title="Rate it in the store" aria-label="Rate it in the store" data-i18n-title="rateInStore" data-i18n-aria="rateInStore">☆☆☆☆☆</button>
       <button class="review-nudge-dismiss" id="reviewDismissBtn" title="Not now" aria-label="Not now" data-i18n-title="notNow" data-i18n-aria="notNow">✕</button>
     </div>
 
-    <!-- Pro waitlist ask; lowest priority of the three nudges, dismissible forever -->
+    <!-- Pin ask: the badge only helps while it is on the toolbar. First week only. -->
+    <div class="review-nudge" id="pinHint" style="display:none">
+      <svg class="review-nudge-icon" aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none"
+           stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="12" y1="17" x2="12" y2="22"/>
+        <path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24z"/>
+      </svg>
+      <span class="review-nudge-text"><span data-i18n="pinHintText">Pin Claude Monitor to keep the badge in view</span> <span class="review-nudge-sub" id="pinHintHow">Puzzle-piece icon, then the pin next to the orange icon</span></span>
+      <button class="review-nudge-dismiss" id="pinHintDismiss" title="Don't show again" aria-label="Dismiss" data-i18n-title="dontShowAgain" data-i18n-aria="dismiss">✕</button>
+    </div>
+
+    <!-- Pro waitlist ask; last in the order, dismissible forever -->
     <div class="review-nudge" id="waitlistNudge" style="display:none">
       <span class="review-nudge-text" data-i18n="waitlistText">Pro: your limits on your phone</span>
       <button class="review-nudge-cta" id="waitlistJoinBtn" data-i18n="joinWaitlist">Join the waitlist →</button>
       <button class="review-nudge-dismiss" id="waitlistDismissBtn" title="Don't show again" aria-label="Dismiss" data-i18n-title="dontShowAgain" data-i18n-aria="dismiss">✕</button>
     </div>
 
-    <!-- Windows companion promo. Windows only, never shown alongside the review
-         ask, dismissible forever. Opens a tab only on an explicit click. -->
+    <!-- Windows companion promo. Windows only, dismissible forever. Opens a tab
+         only on an explicit click. -->
     <div class="promo-nudge" id="winPromo" style="display:none">
       <button class="promo-nudge-dismiss" id="winPromoDismiss" title="Don't show again" aria-label="Dismiss" data-i18n-title="dontShowAgain" data-i18n-aria="dismiss">✕</button>
       <div class="promo-nudge-head">
@@ -441,9 +473,12 @@
 
     <!-- ── Footer ────────────────────────────────────────────────────── -->
     <div class="footer">
-      <span class="last-updated" id="lastUpdated" aria-live="polite" data-i18n="neverUpdated">Never updated</span>
+      <span class="footer-left">
+        <span class="last-updated" id="lastUpdated" aria-live="polite" data-i18n="neverUpdated">Never updated</span>
+        <a class="help-link" href="https://claude-monitor.com/getting-started#troubleshooting" data-i18n="somethingWrong">Something wrong?</a>
+      </span>
       <button class="open-link" id="openUsagePage" title="Opens claude.ai in a new tab" data-i18n-title="opensClaudeTab">
-        <span data-i18n="openUsagePage">Open usage page</span>
+        <span id="openUsageLabel" data-i18n="openUsagePage">Open usage page</span>
         <svg aria-hidden="true" width="10" height="10" viewBox="0 0 24 24" fill="none"
              stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
@@ -470,22 +505,19 @@
       <button class="open-usage-btn" id="freePlanActionBtn">Turn on</button>
     </div>
 
+    <!-- Every other empty state: signed out, no workspace, a failed read, or the
+         first read still on its way. popup.js (showNoData) fills it in. -->
     <div class="no-data" id="noDataGeneric">
       <svg aria-hidden="true" width="38" height="38" viewBox="0 0 24 24" fill="none"
            stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
         <polyline points="2,12 5,12 7.5,6 10,18 12.5,9 15,12 18,12"/>
       </svg>
-      <p><span data-i18n="noDataLine1">No usage data yet.</span><br/><span data-i18n="noDataLine2">Click below to load your stats.</span></p>
-      <button class="open-usage-btn" id="openUsageBtn">
-        <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none"
-             stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
-          <polyline points="15 3 21 3 21 9"/>
-          <line x1="10" y1="14" x2="21" y2="3"/>
-        </svg>
-        <span data-i18n="openUsagePageBtn">Open Claude Usage Page</span>
-      </button>
+      <p class="no-data-title" id="emptyTitle" data-i18n="emptyLoading">Reading your usage from claude.ai…</p>
+      <p id="emptyText" hidden></p>
+      <button class="open-usage-btn" id="emptyBtn" hidden></button>
     </div>
+
+    <p class="no-data-help"><a class="help-link" href="https://claude-monitor.com/getting-started#troubleshooting" data-i18n="somethingWrong">Something wrong?</a></p>
   </div><!-- /noData -->
 
   <!-- Hover readout for the sparklines. Fixed-position, so it never adds height

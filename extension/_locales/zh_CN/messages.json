@@ -1,0 +1,10 @@
+{
+  "extName": {
+    "message": "Claude Monitor: 用量追踪器，会话和每周使用限制",
+    "description": "Extension name on the Chrome Web Store and Edge Add-ons (max 75 characters)."
+  },
+  "extDescription": {
+    "message": "实时查看 Claude 使用限制：会话和每周用量百分比、重置倒计时、80/95% 提醒。支持 Free、Pro、Max 和 Claude Code。",
+    "description": "Short description shown in the stores and the browser (max 132 characters)."
+  }
+}

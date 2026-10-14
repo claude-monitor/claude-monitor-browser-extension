@@ -1,7 +1,10 @@
-// ─── Claude Usage Monitor — Popup Script ─────────────────────────────────────
+// ─── Claude Usage Monitor: Popup Script ──────────────────────────────────────
 
 const USAGE_URL   = 'https://claude.ai/settings/usage';
 const SIGN_IN_URL = 'https://claude.ai/login';
+// Free plans have no usage page; the chat is where their limits show up.
+const CHAT_URL    = 'https://claude.ai/new';
+const HELP_URL    = 'https://claude-monitor.com/getting-started#troubleshooting';
 
 // Review nudge: shown once the popup has been opened with real data on three
 // distinct days; a click or dismiss hides it forever. The old 7-days-since-
@@ -9,26 +12,29 @@ const SIGN_IN_URL = 'https://claude.ai/login';
 // asked for a review before the extension had proven itself.
 const REVIEW_NUDGE_MIN_DAYS = 3;
 // Edge runs the Chrome package but has its own store; its UA carries "Edg/".
+// The Chrome link is tagged so the store dashboard can tell these visits, from
+// people who already have the extension, apart from new visitors.
 const REVIEW_URL = navigator.userAgent.includes('Firefox')
   ? 'https://addons.mozilla.org/firefox/addon/claude-usage-meter/reviews/'
   : navigator.userAgent.includes('Edg/')
     ? 'https://microsoftedge.microsoft.com/addons/detail/ilidbhklkpefboidlfeoiiacepcefinp'
-    : 'https://chromewebstore.google.com/detail/bfhdcfiigpaaopklllpobkheakpigbfo/reviews';
+    : 'https://chromewebstore.google.com/detail/bfhdcfiigpaaopklllpobkheakpigbfo/reviews?utm_source=extension&utm_medium=popup&utm_campaign=review';
 
 // Pro waitlist ask: later than the review ask, so it only reaches people who
 // kept using the extension. `src` tags the signup with the surface it came from.
 const WAITLIST_NUDGE_MIN_DAYS = 7;
-const WAITLIST_URL = 'https://claude-monitor.com/?src=ext-popup#waitlist';
+const WAITLIST_URL = 'https://claude-monitor.com/pro?src=ext-popup';
 
 // Must match FETCH_FAIL_STALE in background.js.
 const FETCH_FAIL_STALE = 2;
 
 // ── i18n ──────────────────────────────────────────────────────────────────
 // Strings live in _locales/<lang>/messages.json; the browser picks the locale.
-// English keeps the en-US formats it always had; other languages get their own
-// date order and currency format.
+// Dates follow the UI language only where the UI is translated; otherwise an
+// English UI would show, say, Arabic or Russian dates (14 store-only locales).
 const UI_LANG = chrome.i18n.getUILanguage();
-const LOCALE  = UI_LANG.toLowerCase().startsWith('en') ? 'en-US' : UI_LANG;
+const UI_BASES = ['es', 'de', 'fr', 'it', 'ja', 'ko'];
+const LOCALE = (UI_LANG === 'pt-BR' || UI_BASES.includes(UI_LANG.split('-')[0])) ? UI_LANG : 'en-US';
 
 function msg(key, ...subs) {
   return chrome.i18n.getMessage(key, subs.map(String)) || key;
@@ -45,7 +51,9 @@ function formatDuration(totalSec) {
 }
 
 function applyI18n() {
-  document.documentElement.lang = UI_LANG;
+  // The language the page is actually shown in, which is English for the
+  // store-only locales.
+  document.documentElement.lang = LOCALE === 'en-US' ? 'en' : UI_LANG;
   document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = msg(el.dataset.i18n); });
   document.querySelectorAll('[data-i18n-title]').forEach(el => { el.title = msg(el.dataset.i18nTitle); });
   document.querySelectorAll('[data-i18n-aria]').forEach(el => { el.setAttribute('aria-label', msg(el.dataset.i18nAria)); });
@@ -79,8 +87,9 @@ const refreshBtn    = $('refreshBtn');
 const lastUpdated   = $('lastUpdated');
 const appVersionEl  = $('appVersion');
 const planBadgeEl   = $('planBadge');
-const openUsageBtn    = $('openUsageBtn');
+const orgSelect     = $('orgSelect');
 const openUsagePage   = $('openUsagePage');
+const openUsageLabel  = $('openUsageLabel');
 const intervalSelect  = $('intervalSelect');
 const settingsBtn     = $('settingsBtn');
 const subcapNote    = $('subcapNote');
@@ -107,11 +116,27 @@ const waitlistNudge      = $('waitlistNudge');
 const waitlistJoinBtn    = $('waitlistJoinBtn');
 const waitlistDismissBtn = $('waitlistDismissBtn');
 
+// What's new card
+const whatsNewEl      = $('whatsNew');
+const whatsNewTitle   = $('whatsNewTitle');
+const whatsNewList    = $('whatsNewList');
+const whatsNewBtn     = $('whatsNewBtn');
+const whatsNewNote    = $('whatsNewNote');
+const whatsNewDismiss = $('whatsNewDismiss');
+
+// Pin hint
+const pinHint        = $('pinHint');
+const pinHintHow     = $('pinHintHow');
+const pinHintDismiss = $('pinHintDismiss');
+
 // No-data variants
 const freePlanNotice   = $('freePlanNotice');
 const noDataGeneric    = $('noDataGeneric');
 const freePlanText      = $('freePlanText');
 const freePlanActionBtn = $('freePlanActionBtn');
+const emptyTitle = $('emptyTitle');
+const emptyText  = $('emptyText');
+const emptyBtn   = $('emptyBtn');
 
 const PAGE_BAR_PERMS = { origins: ['https://claude.ai/*'], permissions: ['scripting'] };
 let pageBarOn = false;
@@ -121,12 +146,15 @@ const sessionPct   = $('sessionPct');
 const sessionBar   = $('sessionBar');
 const sessionReset = $('sessionReset');
 const sessionLabel = $('sessionLabel');
+const sessionForecast = $('sessionForecast');
+const sessionMsgs     = $('sessionMsgs');
 
 // Weekly
 const weeklyPct   = $('weeklyPct');
 const weeklyBar   = $('weeklyBar');
 const weeklyReset = $('weeklyReset');
 const weeklyLabel = $('weeklyLabel');
+const weeklyForecast = $('weeklyForecast');
 
 // Sparklines
 const sessionSpark = $('sessionSpark');
@@ -313,15 +341,24 @@ function formatResetDate(epochMs) {
   if (LOCALE !== 'en-US') {
     return d.toLocaleString(LOCALE, { weekday: 'short', day: 'numeric', month: 'long', hour: 'numeric', minute: '2-digit' });
   }
-  const weekday = d.toLocaleDateString('en-US', { weekday: 'short' });
-  const month   = d.toLocaleDateString('en-US', { month: 'long' });
-  const time    = d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+  const weekday = d.toLocaleDateString(LOCALE, { weekday: 'short' });
+  const month   = d.toLocaleDateString(LOCALE, { month: 'long' });
+  const time    = d.toLocaleTimeString(LOCALE, { hour: 'numeric', minute: '2-digit' });
   return `${weekday} ${d.getDate()} ${month} ${time}`;
 }
 
 function formatResetTime(epochMs) {
   if (!epochMs) return '';
-  return new Date(epochMs).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+  return new Date(epochMs).toLocaleTimeString(LOCALE, { hour: 'numeric', minute: '2-digit' });
+}
+
+// Hour and minute when it falls today; the short weekday in front otherwise.
+function formatClock(epochMs) {
+  const d = new Date(epochMs);
+  const time = d.toLocaleTimeString(LOCALE, { hour: 'numeric', minute: '2-digit' });
+  return d.toDateString() === new Date().toDateString()
+    ? time
+    : `${d.toLocaleDateString(LOCALE, { weekday: 'short' })} ${time}`;
 }
 
 function formatTimeUntil(epochMs) {
@@ -332,7 +369,7 @@ function formatTimeUntil(epochMs) {
 }
 
 // Usage credits reset on the 1st of each calendar month (verified: the API
-// exposes no reset timestamp, and claude.ai resets on the 1st — not the billing
+// exposes no reset timestamp, and claude.ai resets on the 1st, not the billing
 // date). Derive it locally; the hour is approximate (local midnight).
 function firstOfNextMonth() {
   const now = new Date();
@@ -342,7 +379,7 @@ function firstOfNextMonth() {
 function formatShortDate(epochMs) {
   const d = new Date(epochMs);
   if (LOCALE !== 'en-US') return d.toLocaleDateString(LOCALE, { day: 'numeric', month: 'short' });
-  return `${d.getDate()} ${d.toLocaleDateString('en-US', { month: 'short' })}`;
+  return `${d.getDate()} ${d.toLocaleDateString(LOCALE, { month: 'short' })}`;
 }
 
 function formatCredits(amount, currency) {
@@ -370,7 +407,7 @@ function readingAge(epochMs) {
   if (diffMin < 60) return { ago: msg('durM', diffMin) };
   const diffH = Math.floor(diffMin / 60);
   if (diffH < 24)   return { ago: msg('durH', diffH) };
-  return { at: `${d.toLocaleDateString()} ${d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` };
+  return { at: `${d.toLocaleDateString(LOCALE)} ${d.toLocaleTimeString(LOCALE, { hour: '2-digit', minute: '2-digit' })}` };
 }
 
 function formatTimestamp(epochMs) {
@@ -382,16 +419,51 @@ function formatTimestamp(epochMs) {
 
 // ── Render ────────────────────────────────────────────────────────────────
 
-// With no reading to show, a Free account gets the reason instead of the
-// generic "load your stats" prompt: that button opens a usage page Free plans
-// don't have, and the exit survey shows people uninstalling over exactly that.
+// The worker's last refresh outcome ({reason, at}) and the auth backoff, kept
+// here because the empty state is picked from them.
+let lastRefreshState = null;
+let authBackoffState = null;
+
+const EMPTY_STATES = {
+  signedOut: { title: 'emptySignedOutTitle', text: 'emptySignedOutText', btn: 'signIn', action: 'sign-in' },
+  org:       { title: 'emptyOrgTitle', text: 'emptyOrgText', btn: 'retry', action: 'retry' },
+  fail:      { title: 'emptyFailTitle', btn: 'retry', action: 'retry' },
+  loading:   { title: 'emptyLoading' },
+};
+
+// With no reading to show, say why, most actionable first: an expired
+// claude.ai session is the top support case, and it used to hide behind a
+// "load your stats" button that opened a usage page. A Free account gets the
+// bar offer (its only source of figures); "loading" only while nothing has
+// been tried yet. Anything left over is a read that failed.
+function emptyState() {
+  const reason = lastRefreshState?.reason;
+  if ((authBackoffState?.fails ?? 0) > 0 || reason === 'auth-failed') return 'signedOut';
+  if (reason === 'org-not-found') return 'org';
+  if (currentPlan?.label === 'Free') return 'free';
+  if (reason === 'api-fetch-failed' || reason === 'api-data-rejected') return 'fail';
+  if (!lastRefreshState || refreshInFlight || orgSwitching) return 'loading';
+  // A good read with nothing stored: the reading was just cleared (account or
+  // org switch) and the next one is on its way.
+  if (reason === 'ok') return 'loading';
+  return 'fail';
+}
+
 function showNoData() {
   mainEl.style.display   = 'none';
   noDataEl.style.display = 'block';
-  const free = currentPlan?.label === 'Free';
+  const state = emptyState();
+  const free = state === 'free';
   if (freePlanNotice) freePlanNotice.style.display = free ? 'block' : 'none';
   if (noDataGeneric)  noDataGeneric.style.display  = free ? 'none' : 'block';
-  if (free) renderFreePlanNotice();
+  if (free) { renderFreePlanNotice(); return; }
+  const s = EMPTY_STATES[state];
+  emptyTitle.textContent = msg(s.title);
+  emptyText.textContent = s.text ? msg(s.text) : '';
+  emptyText.hidden = !s.text;
+  emptyBtn.textContent = s.btn ? msg(s.btn) : '';
+  emptyBtn.hidden = !s.btn;
+  emptyBtn.dataset.action = s.action || '';
 }
 
 // The bar is the only way to read Free-plan limits, so the notice offers it.
@@ -424,6 +496,9 @@ function settleStreamWindows(data) {
 function render(data) {
   data = settleStreamWindows(data);
   if (!data) {
+    // Cleared too: a reading removed on an org or account switch must not
+    // come back from a later re-render.
+    lastData = null;
     showNoData();
     return;
   }
@@ -486,6 +561,9 @@ function render(data) {
     : (labelText(weekly?.label) || msg('resetDayUnknown'));
   weeklyLabel.textContent = '';
 
+  // ── Pace forecast and messages left ─────────────────────────────────
+  renderPace(data);
+
   // ── Weekly sub-caps (always selectable from the filter menu) ─────────
   renderSubCard('fable',  fable,  fableCard,  fablePct,  fableBar,  fableReset, weekly?.resetTime);
   renderSubCard('sonnet', sonnet, sonnetCard, sonnetPct, sonnetBar, sonnetReset, weekly?.resetTime);
@@ -546,6 +624,51 @@ function render(data) {
   renderViewMenu(data);
 }
 
+// ── Pace forecast and messages left ─────────────────────────────────────────
+// Both are computed by the worker (`forecast`, `msgLeft`); the popup only
+// decides whether they still describe the window on screen. A forecast for a
+// window that already reset, or one that went stale, would be a wrong number.
+
+const SAME_WINDOW_MS      = 60 * 1000;          // resets_at jitters between reads
+const FORECAST_MAX_AGE_MS = 30 * 60 * 1000;
+
+let forecastState = null;
+let msgLeftState  = null;
+
+// The reset time is already on the line above, so only the forecast is shown
+// here; the badge tooltip and the bar carry both (forecastLine).
+function forecastText(win, bucket) {
+  const now = Date.now();
+  if (!win || !(Number(forecastState?.at) > now - FORECAST_MAX_AGE_MS)) return null;
+  const eta = Number(win.eta);
+  const reset = Number(win.reset);
+  const current = Number(bucket?.resetTime);
+  if (!Number.isFinite(eta) || !Number.isFinite(reset) || !Number.isFinite(current)) return null;
+  if (eta <= now || eta >= reset || Math.abs(reset - current) > SAME_WINDOW_MS) return null;
+  return msg('forecastAt', formatClock(eta));
+}
+
+function msgsLeftFor(session) {
+  const m = msgLeftState;
+  const reset = Number(session?.resetTime);
+  if (!m || !Number.isFinite(m.n) || m.n < 1 || !Number.isFinite(reset) || reset <= Date.now()) return null;
+  return Math.abs(Number(m.reset) - reset) <= SAME_WINDOW_MS ? m : null;
+}
+
+function setPaceRow(el, text, title) {
+  if (!el) return;
+  el.textContent = text || '';
+  el.title = title || '';
+  el.hidden = !text;
+}
+
+function renderPace(data) {
+  setPaceRow(sessionForecast, forecastText(forecastState?.session, data?.session));
+  setPaceRow(weeklyForecast, forecastText(forecastState?.weekly, data?.weekly));
+  const left = msgsLeftFor(data?.session);
+  setPaceRow(sessionMsgs, left && msg('msgsLeft', left.n), left && msg('msgsLeftTitle', left.basedOn));
+}
+
 // ── Sparklines ───────────────────────────────────────────────────────────────
 // Drawn from the local history series the background worker writes. The number
 // says where you are; the curve says how you got there.
@@ -569,6 +692,9 @@ function gapFor(spanMs) {
 }
 
 let historySeries = [];
+// Samples before this belong to another org or account (set by the worker on
+// a switch); they stay stored but are never drawn.
+let historyCutAt = 0;
 // On by default: the curve is the reason the history is collected at all.
 let showSparkline = true;
 
@@ -620,8 +746,9 @@ function windowStart(resetTime, spanMs) {
 
 function seriesFor(fromTs, valueOf) {
   const out = [];
+  const from = Math.max(fromTs, historyCutAt);
   for (const sample of historySeries) {
-    if (!sample || !Number.isFinite(sample.t) || sample.t < fromTs) continue;
+    if (!sample || !Number.isFinite(sample.t) || sample.t < from) continue;
     const raw = valueOf(sample);
     // A missing reading is a hole in the curve, never a zero.
     if (raw === null || raw === undefined || !Number.isFinite(Number(raw))) continue;
@@ -699,9 +826,9 @@ function nearestSample(points, t) {
 // A weekly curve spans days, so the hour alone would be ambiguous there.
 function sparkTipTime(t, spanMs) {
   const d = new Date(t);
-  const time = d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+  const time = d.toLocaleTimeString(LOCALE, { hour: 'numeric', minute: '2-digit' });
   return spanMs > 24 * 60 * 60 * 1000
-    ? `${d.toLocaleDateString([], { weekday: 'short' })} ${time}`
+    ? `${d.toLocaleDateString(LOCALE, { weekday: 'short' })} ${time}`
     : time;
 }
 
@@ -850,7 +977,7 @@ function routineOffered(routine) {
 }
 
 // Credits banner is filter-listed only when there's a real spend limit to show.
-// Unlike sub-caps it has no plan-level "offered" state — data presence is it.
+// Unlike sub-caps it has no plan-level "offered" state: data presence is it.
 function extraOffered(extra) {
   return Boolean(extra && extra.monthlyLimit > 0);
 }
@@ -858,7 +985,7 @@ function extraOffered(extra) {
 // Count-based (`used / limit`), not a percentage. The API returns no reset
 // timestamp, so the reset is labelled generically. Offered only when the plan
 // exposes a routine budget; like the sub-caps it's selectable from the View
-// menu (tri-state, default shown — opt-out).
+// menu (tri-state, default shown, opt-out).
 function renderRoutineCard(routine) {
   const offered = routineOffered(routine);
   if (!offered || !cardVisible('routine', offered)) {
@@ -1014,7 +1141,8 @@ function renderAuthState(authBackoff, fetchFailures, lastUpdatedTs) {
 function renderPlanBadge(plan) {
   if (!planBadgeEl) return;
   const label = plan && typeof plan === 'object' ? plan.label : null;
-  if (label) {
+  // The org picker carries each org's plan, so it takes the badge's place.
+  if (label && !orgPickerShown()) {
     planBadgeEl.textContent = label;
     planBadgeEl.hidden = false;
   } else {
@@ -1027,9 +1155,62 @@ let currentPlan = null;
 function applyPlan(plan) {
   currentPlan = plan && typeof plan === 'object' ? plan : null;
   renderPlanBadge(plan);
+  renderFooterLink();
+}
+
+// The Free plan has no usage page on claude.ai, so the footer opens the chat.
+function renderFooterLink() {
+  if (openUsageLabel) openUsageLabel.textContent = msg(currentPlan?.label === 'Free' ? 'openClaude' : 'openUsagePage');
+}
+
+// ── Organization picker ─────────────────────────────────────────────────────
+// Accounts in more than one Claude organization pick which one is read. The
+// worker keeps the choice (claudeOrgPinned) and refreshes against it; the names
+// come from the org list it already fetches and never leave the device.
+
+let orgsState  = [];
+let orgIdState = null;
+
+function orgPickerShown() {
+  return orgsState.length > 1;
+}
+
+function applyOrgs(orgs, orgId) {
+  orgsState = Array.isArray(orgs) ? orgs.filter(o => o && typeof o.id === 'string') : [];
+  orgIdState = typeof orgId === 'string' ? orgId : null;
+  renderOrgSelect();
+  renderPlanBadge(currentPlan);
+}
+
+function renderOrgSelect() {
+  if (!orgSelect) return;
+  orgSelect.hidden = !orgPickerShown();
+  // The header row is ~100px wide: next to the version, the picker would show
+  // little more than the plan. Which org is shown matters more here.
+  if (appVersionEl) appVersionEl.hidden = !orgSelect.hidden;
+  if (orgSelect.hidden) return;
+  // Name first: two orgs on the same plan only differ there, and the closed
+  // picker is cut at ~120px. The full text is in the tooltip.
+  orgSelect.replaceChildren(...orgsState.map(o => {
+    const opt = document.createElement('option');
+    opt.value = o.id;
+    opt.textContent = [o.name, o.plan || '?'].filter(Boolean).join(' · ');
+    return opt;
+  }));
+  orgSelect.value = orgIdState || '';
+  orgSelect.title = orgSelect.selectedOptions[0]?.textContent || msg('orgSelectTitle');
 }
 
 // ── Load from storage ─────────────────────────────────────────────────────
+
+const STORED_KEYS = [
+  'claudeUsage', 'refreshInterval', 'authBackoff', 'fetchFailures', 'cardPrefs', 'claudePlan',
+  'claudeOrgs', 'claudeOrgId', 'lastRefresh', 'theme', 'layout', 'installedAt',
+  'reviewNudgeDismissed', 'reviewNudgeSnoozedUntil', 'reviewMoment', 'reviewOpenDays',
+  'usageHistory', 'historyCutAt', 'showSparkline', 'forecast', 'msgLeft', 'pageBar',
+  'whatsNew', 'pinHintDismissed', 'winPromoDismissed', 'winPromoUpdate',
+  'waitlistNudgeDismissed', 'notifSettings', 'alertsNudgeDismissed', 'alertsNudgeFirstSeen',
+];
 
 function loadData() {
   const manifestVersion = chrome.runtime.getManifest?.().version;
@@ -1037,51 +1218,204 @@ function loadData() {
     appVersionEl.textContent = `v${manifestVersion}`;
   }
 
-  chrome.storage.local.get(
-    ['claudeUsage', 'refreshInterval', 'authBackoff', 'fetchFailures', 'cardPrefs', 'claudePlan', 'theme', 'layout', 'installedAt', 'reviewNudgeDismissed', 'reviewNudgeSnoozedUntil', 'reviewMoment', 'reviewOpenDays', 'usageHistory', 'showSparkline', 'winPromoDismissed', 'winPromoUpdate', 'waitlistNudgeDismissed', 'notifSettings', 'alertsNudgeDismissed'],
-    ({ claudeUsage, refreshInterval, authBackoff, fetchFailures, cardPrefs: storedPrefs, claudePlan, theme, layout, installedAt, reviewNudgeDismissed, reviewNudgeSnoozedUntil, reviewMoment, reviewOpenDays, usageHistory, showSparkline: sparkPref, winPromoDismissed, winPromoUpdate, waitlistNudgeDismissed, notifSettings, alertsNudgeDismissed }) => {
-      historySeries = Array.isArray(usageHistory) ? usageHistory : [];
-      showSparkline = sparkPref !== false;   // absent means on
-      renderSparkToggle();
-      applyTheme(theme);
-      if (theme) mirrorTheme(theme);
-      applyLayout(layout);
-      if (layout) mirrorLayout(layout);
-      if (storedPrefs && typeof storedPrefs === 'object') {
-        cardPrefs = { ...storedPrefs };
-      }
-      applyPlan(claudePlan);
-      refreshPageBarState();
-      if (intervalSelect) intervalSelect.value = String(refreshInterval || 5);
-      render(claudeUsage || null);
-      renderAuthState(authBackoff, fetchFailures, claudeUsage?.lastUpdated);
-      const openDays = trackReviewOpenDay(reviewOpenDays, Boolean(claudeUsage));
-      // The nudges wait for the permission check: when the alerts ask applies,
-      // it takes the slot ahead of the other three.
-      chrome.permissions.contains({ permissions: ['notifications'] }, (notifGranted) => {
-        renderAlertsNudge(notifSettings, notifGranted, alertsNudgeDismissed, Boolean(claudeUsage));
-        renderReviewNudge(openDays, reviewNudgeDismissed, Boolean(claudeUsage), reviewMoment, reviewNudgeSnoozedUntil);
-        // After the review nudge: it decides whether there is room for this one.
-        renderWinPromo(installedAt, winPromoDismissed, winPromoUpdate, Boolean(claudeUsage));
-        // Last: it only takes the slot when none of the others wants it.
-        renderWaitlistNudge(openDays, waitlistNudgeDismissed, Boolean(claudeUsage));
-      });
+  chrome.storage.local.get(STORED_KEYS, (s) => {
+    historySeries = Array.isArray(s.usageHistory) ? s.usageHistory : [];
+    historyCutAt = Number(s.historyCutAt) || 0;
+    showSparkline = s.showSparkline !== false;   // absent means on
+    forecastState = s.forecast || null;
+    msgLeftState = s.msgLeft || null;
+    lastRefreshState = s.lastRefresh || null;
+    authBackoffState = s.authBackoff || null;
+    renderSparkToggle();
+    applyTheme(s.theme);
+    if (s.theme) mirrorTheme(s.theme);
+    applyLayout(s.layout);
+    if (s.layout) mirrorLayout(s.layout);
+    if (s.cardPrefs && typeof s.cardPrefs === 'object') {
+      cardPrefs = { ...s.cardPrefs };
     }
-  );
+    applyPlan(s.claudePlan);
+    applyOrgs(s.claudeOrgs, s.claudeOrgId);
+    refreshPageBarState();
+    if (intervalSelect) intervalSelect.value = String(intervalMinutes(s.refreshInterval));
+    render(s.claudeUsage || null);
+    renderAuthState(s.authBackoff, s.fetchFailures, s.claudeUsage?.lastUpdated);
+    refreshOnOpen(s.claudeUsage, s.authBackoff, s.lastRefresh, s.refreshInterval);
+    const openDays = trackReviewOpenDay(s.reviewOpenDays, Boolean(s.claudeUsage));
+    // The notices wait for the permission and toolbar checks: together they
+    // decide which single notice this open gets.
+    Promise.all([
+      permissionGranted({ permissions: ['notifications'] }),
+      permissionGranted(PAGE_BAR_PERMS),
+      toolbarPinned(),
+    ]).then(([notifGranted, barGranted, onToolbar]) => {
+      renderNotices({
+        ...s,
+        openDays,
+        notifGranted,
+        onToolbar,
+        barOn: Boolean(s.pageBar?.enabled && barGranted),
+        hasData: Boolean(s.claudeUsage),
+      });
+    });
+  });
+}
+
+function permissionGranted(perms) {
+  return new Promise((resolve) => {
+    chrome.permissions.contains(perms, (granted) => {
+      void chrome.runtime.lastError;
+      resolve(Boolean(granted));
+    });
+  });
+}
+
+// 1m is gone from the picker: a stored 1 reads as the 2-minute floor.
+function intervalMinutes(stored) {
+  const minutes = Number(stored) || 5;
+  return minutes < 2 ? 2 : minutes;
+}
+
+// Opening the popup is when someone wants a number, so a missing, signed-out
+// or older-than-one-interval reading is refreshed now instead of on the next
+// tick. 'auto' lets the worker skip it when a forced refresh ran in the last
+// minute, so reopening the popup does not hammer claude.ai.
+function refreshOnOpen(usage, authBackoff, lastRefresh, refreshInterval) {
+  const maxAgeMs = intervalMinutes(refreshInterval) * 60 * 1000;
+  const old = !Number.isFinite(lastRefresh?.at) || Date.now() - lastRefresh.at > maxAgeMs;
+  if (!usage || (authBackoff?.fails ?? 0) > 0 || old) triggerRefresh('auto');
+}
+
+// ── Notices ───────────────────────────────────────────────────────────────
+// One per open: the first entry below that applies, and only with a reading on
+// screen. Each nudge used to check which of the others was showing, which held
+// for two of them and not for seven; a single ordered pick keeps the popup to
+// one ask at a time by construction.
+
+function renderNotices(c) {
+  for (const el of [reviewNudge, whatsNewEl, alertsNudge, pinHint, winPromo, waitlistNudge]) {
+    if (el) el.style.display = 'none';
+  }
+  // An entry this build has nothing to say about is dropped, not kept around.
+  if (c.whatsNew && !WHATS_NEW[c.whatsNew.v]) chrome.storage.local.remove('whatsNew');
+  if (!c.hasData) return;
+
+  const now = Date.now();
+  const reviewOpen = !c.reviewNudgeDismissed &&
+    !(Number.isFinite(c.reviewNudgeSnoozedUntil) && now < c.reviewNudgeSnoozedUntil);
+  const moment = c.reviewMoment;
+  const freshMoment = Boolean(moment) && REVIEW_MOMENTS.includes(moment.type) &&
+    Number.isFinite(moment.at) && now - moment.at < REVIEW_MOMENT_WINDOW_MS;
+
+  const order = [
+    [reviewOpen && freshMoment, () => showReviewNudge(REVIEW_COPY[moment.type])],
+    [whatsNewDue(c.whatsNew), () => showWhatsNew(c.whatsNew, c.barOn)],
+    [alertsNudgeDue(c.notifSettings, c.notifGranted, c.alertsNudgeDismissed, c.alertsNudgeFirstSeen),
+      () => showAlertsNudge(c.notifSettings, c.alertsNudgeFirstSeen)],
+    [pinHintDue(c.onToolbar, c.pinHintDismissed, c.installedAt, now), showPinHint],
+    [reviewOpen && c.openDays >= REVIEW_NUDGE_MIN_DAYS, () => showReviewNudge(REVIEW_COPY.days)],
+    [winPromoDue(c.installedAt, c.winPromoDismissed, c.winPromoUpdate, now), () => showWinPromo(c.winPromoUpdate)],
+    [!c.waitlistNudgeDismissed && c.openDays >= WAITLIST_NUDGE_MIN_DAYS, () => { waitlistNudge.style.display = 'flex'; }],
+  ];
+  order.find(([due]) => due)?.[1]();
+}
+
+// ── What's new ────────────────────────────────────────────────────────────
+// One entry per release that has something to tell the existing base. The
+// worker arms `whatsNew` only for versions listed in its WHATS_NEW_VERSIONS.
+const WHATS_NEW = {
+  '1.21.0': { bullets: ['wn121Bar', 'wn121Pace', 'wn121Msgs'], barButton: true },
+};
+// Seen twice is enough; after that it gives the slot back on its own.
+const WHATS_NEW_MAX_VIEWS = 2;
+
+function whatsNewDue(whatsNew) {
+  return Boolean(whatsNew && WHATS_NEW[whatsNew.v] && (Number(whatsNew.views) || 0) < WHATS_NEW_MAX_VIEWS);
+}
+
+function showWhatsNew(whatsNew, barOn) {
+  const entry = WHATS_NEW[whatsNew.v];
+  whatsNewTitle.textContent = msg('whatsNewTitle', majorMinor(whatsNew.v));
+  whatsNewList.replaceChildren(...entry.bullets.slice(0, 3).map(key => {
+    const li = document.createElement('li');
+    li.textContent = msg(key);
+    return li;
+  }));
+  // The base never saw the bar (it shipped off by default), so this release
+  // offers it in one click; with the bar already on there is nothing to ask.
+  // Chrome shows no prompt for it, so the card itself says what it reads.
+  const offerBar = Boolean(entry.barButton) && !barOn;
+  whatsNewBtn.hidden = !offerBar;
+  if (whatsNewNote) whatsNewNote.hidden = !offerBar;
+  if (offerBar) setWhatsNewBtn('bar');
+  whatsNewEl.style.display = 'block';
+  chrome.storage.local.set({ whatsNew: { ...whatsNew, views: (Number(whatsNew.views) || 0) + 1 } });
+}
+
+function setWhatsNewBtn(action) {
+  whatsNewBtn.dataset.action = action;
+  whatsNewBtn.textContent = msg(action === 'bar' ? 'wnTurnOnBar' : 'openClaude');
 }
 
 // ── Alerts nudge ──────────────────────────────────────────────────────────
 // Alerts default to on, but `notifications` is optional and only a click can
 // grant it, so on a fresh install they never fire. Asked for while alerts are
 // still wanted and the permission is missing.
+// Left alone, it gives up the slot after three calendar days on screen; the
+// toggle stays in Settings. Through 1.20.2 it stayed until clicked, and while
+// it showed the review ask never did.
+const ALERTS_NUDGE_DAYS = 3;
 
-function renderAlertsNudge(settings, granted, dismissed, hasData) {
-  if (!alertsNudge) return;
-  const show = settings?.enabled !== false && !granted && !dismissed && hasData;
-  if (show && alertsNudgeText) {
+function alertsNudgeDue(settings, granted, dismissed, firstSeen) {
+  const today = new Date().toISOString().slice(0, 10);
+  const expired = firstSeen && (Date.parse(today) - Date.parse(firstSeen)) / 86400000 >= ALERTS_NUDGE_DAYS;
+  return settings?.enabled !== false && !granted && !dismissed && !expired;
+}
+
+function showAlertsNudge(settings, firstSeen) {
+  if (alertsNudgeText) {
     alertsNudgeText.textContent = msg('alertsNudgeText', Number(settings?.warnAt) || 80, Number(settings?.critAt) || 95);
   }
-  alertsNudge.style.display = show ? 'flex' : 'none';
+  alertsNudge.style.display = 'flex';
+  markAlertsNudgeSeen(firstSeen);
+}
+
+// The three days start on the first day the ask is actually on screen, so a
+// day another notice had the slot does not count.
+function markAlertsNudgeSeen(firstSeen) {
+  if (firstSeen) return;
+  chrome.storage.local.set({ alertsNudgeFirstSeen: new Date().toISOString().slice(0, 10) });
+}
+
+// ── Pin hint ──────────────────────────────────────────────────────────────
+// The badge is the at-a-glance view, and Chrome keeps a new extension's icon
+// inside the puzzle-piece menu until it is pinned. First week only.
+const PIN_HINT_WINDOW_MS = 7 * 24 * 60 * 60 * 1000;
+
+// true / false, or null where the browser can't tell (no getUserSettings).
+function toolbarPinned() {
+  try {
+    if (typeof chrome.action?.getUserSettings !== 'function') return Promise.resolve(null);
+    return chrome.action.getUserSettings()
+      .then(s => (typeof s?.isOnToolbar === 'boolean' ? s.isOnToolbar : null), () => null);
+  } catch {
+    return Promise.resolve(null);
+  }
+}
+
+function pinHintDue(onToolbar, dismissed, installedAt, now) {
+  return onToolbar === false && !dismissed && Number.isFinite(installedAt) && now - installedAt < PIN_HINT_WINDOW_MS;
+}
+
+// The menu lists the extension under its store name, which differs per
+// language, so the hint points at the icon instead. Edge pins with an eye,
+// Firefox from a gear.
+const PIN_HINT_HOW = navigator.userAgent.includes('Firefox') ? 'pinHintHowFirefox'
+  : navigator.userAgent.includes('Edg/') ? 'pinHintHowEdge' : 'pinHintHow';
+
+function showPinHint() {
+  if (pinHintHow) pinHintHow.textContent = msg(PIN_HINT_HOW);
+  pinHint.style.display = 'flex';
 }
 
 // ── Review nudge ──────────────────────────────────────────────────────────
@@ -1100,10 +1434,12 @@ function trackReviewOpenDay(stored, hasData) {
 
 // The ask lands best right after the extension earned it: an alert that came
 // in time, or a Free account seeing its limits for the first time. Those open
-// it straight away (for a few days); otherwise the 3-day rule still applies.
+// it straight away (for a few days) and come first; otherwise the 3-day rule
+// applies, further down the order.
 // The 1.14 nudge only waited for days of use and got ~4 reviews in two months.
 const REVIEW_MOMENT_WINDOW_MS = 3 * 24 * 60 * 60 * 1000;
 const REVIEW_SNOOZE_MS        = 14 * 24 * 60 * 60 * 1000;
+const REVIEW_MOMENTS          = ['alert', 'free'];
 
 const REVIEW_COPY = {
   alert: 'reviewAlert',
@@ -1111,16 +1447,9 @@ const REVIEW_COPY = {
   days:  'reviewDays',
 };
 
-function renderReviewNudge(openDays, dismissed, hasData, moment, snoozedUntil) {
-  if (!reviewNudge) return;
-  const now = Date.now();
-  const fresh = moment && Number.isFinite(moment.at) && now - moment.at < REVIEW_MOMENT_WINDOW_MS;
-  const due = fresh || openDays >= REVIEW_NUDGE_MIN_DAYS;
-  const snoozed = Number.isFinite(snoozedUntil) && now < snoozedUntil;
-  const alertsShowing = alertsNudge && alertsNudge.style.display !== 'none';
-  const show = !dismissed && !snoozed && due && hasData && !alertsShowing;
-  if (show && reviewNudgeText) reviewNudgeText.textContent = msg(REVIEW_COPY[fresh ? moment.type : 'days'] || REVIEW_COPY.days);
-  reviewNudge.style.display = show ? 'flex' : 'none';
+function showReviewNudge(copyKey) {
+  if (reviewNudgeText) reviewNudgeText.textContent = msg(copyKey);
+  reviewNudge.style.display = 'flex';
 }
 
 // Rating ends the ask for good. The first "not now" only snoozes it: closing a
@@ -1151,16 +1480,16 @@ function winPromoUrl(cid) {
   return `https://apps.microsoft.com/detail/${WIN_PROMO_PRODUCT_ID}?cid=${cid}`;
 }
 
-// Priority is explicit and the review ask wins: it feeds the extension's own
-// distribution, it resolves in a single interaction, and two asks stacked in a
-// 320px popup read as spam. This waits for the review nudge to be settled.
-function renderWinPromo(installedAt, dismissed, updateVersion, hasData) {
-  if (!winPromo) return;
-  const othersShowing = [alertsNudge, reviewNudge].some(el => el && el.style.display !== 'none');
-  const due = updateVersion || (installedAt && (Date.now() - installedAt) >= WIN_PROMO_AFTER_MS);
+// Below the review asks in the order: they feed the extension's own
+// distribution and resolve in a single interaction.
+function winPromoDue(installedAt, dismissed, updateVersion, now) {
+  const due = updateVersion || (installedAt && (now - installedAt) >= WIN_PROMO_AFTER_MS);
+  return IS_WINDOWS && !dismissed && Boolean(due);
+}
+
+function showWinPromo(updateVersion) {
   winPromoCid = updateVersion ? `ext-update-${majorMinor(updateVersion)}` : 'ext-popup';
-  const show = IS_WINDOWS && !dismissed && !othersShowing && Boolean(due) && hasData;
-  winPromo.style.display = show ? 'block' : 'none';
+  winPromo.style.display = 'block';
 }
 
 // 1.12.0 -> 1.12. Patch releases of the same minor are the same campaign, so the
@@ -1179,15 +1508,7 @@ function dismissWinPromo() {
 // ── Pro waitlist nudge ────────────────────────────────────────────────────
 // The waitlist only lived on the landing page and collected nothing in three
 // months; the people who would pay for sync are the ones opening this popup.
-// One nudge at a time: it yields to the alerts ask, the review ask and the
-// Windows promo.
-
-function renderWaitlistNudge(openDays, dismissed, hasData) {
-  if (!waitlistNudge) return;
-  const othersShowing = [alertsNudge, reviewNudge, winPromo].some(el => el && el.style.display !== 'none');
-  const due = openDays >= WAITLIST_NUDGE_MIN_DAYS;
-  waitlistNudge.style.display = (!dismissed && due && hasData && !othersShowing) ? 'flex' : 'none';
-}
+// Last in the order: it only gets an open no other notice wants.
 
 function dismissWaitlistNudge() {
   chrome.storage.local.set({ waitlistNudgeDismissed: true });
@@ -1231,18 +1552,39 @@ function flashRefreshError(reason) {
   }, 3000);
 }
 
-function triggerRefresh() {
+// An org switch is a refresh too: same spinner, and the empty state reads
+// "loading" meanwhile instead of flashing an error for the cleared reading.
+let orgSwitching = false;
+
+function setBusy() {
+  refreshBtn.classList.toggle('spinning', refreshInFlight || orgSwitching);
+  if (!lastData) showNoData();
+}
+
+// 'manual' is a click (refresh, Retry) and always reads; 'auto' is the popup
+// opening, which the worker may skip as 'throttled'.
+function triggerRefresh(source = 'manual') {
   if (refreshInFlight) return;
   refreshInFlight = true;
-  refreshBtn.classList.add('spinning');
+  setBusy();
 
-  chrome.runtime.sendMessage({ type: 'REFRESH' }, (response) => {
+  chrome.runtime.sendMessage({ type: 'REFRESH', source }, (response) => {
     const lastError = chrome.runtime.lastError; // only readable inside this callback
     refreshInFlight = false;
-    refreshBtn.classList.remove('spinning');
     // Background persists before responding; re-render from storage directly.
-    chrome.storage.local.get('claudeUsage', ({ claudeUsage }) => {
+    chrome.storage.local.get(['claudeUsage', 'lastRefresh'], ({ claudeUsage, lastRefresh }) => {
+      if (lastRefresh) lastRefreshState = lastRefresh;
+      // A worker that never got to write lastRefresh (an error, or one older
+      // than this popup) would leave the empty state on "loading" for good.
+      else if (!lastRefreshState && response?.reason !== 'throttled') {
+        lastRefreshState = { reason: response?.refreshed ? 'ok' : (response?.reason || 'api-fetch-failed'), at: Date.now() };
+      }
+      setBusy();
       render(claudeUsage || null);
+      // Only a refresh someone asked for reports failure in the footer. On
+      // open, the empty state or the stale banners already say what is wrong,
+      // and a red line the moment the popup appears reads as a crash.
+      if (source !== 'manual') return;
       if (lastError || !response || response.ok === false || response.refreshed === false) {
         flashRefreshError(response && response.reason);
       }
@@ -1252,11 +1594,37 @@ function triggerRefresh() {
 
 // ── Events ────────────────────────────────────────────────────────────────
 
-refreshBtn.addEventListener('click', triggerRefresh);
+refreshBtn.addEventListener('click', () => triggerRefresh('manual'));
 
 intervalSelect?.addEventListener('change', () => {
   const minutes = parseInt(intervalSelect.value, 10);
-  chrome.runtime.sendMessage({ type: 'SET_INTERVAL', minutes });
+  chrome.runtime.sendMessage({ type: 'SET_INTERVAL', minutes }, (response) => {
+    void chrome.runtime.lastError;
+    // The worker clamps to its 2-60 minute range; show what it kept.
+    if (response?.minutes) intervalSelect.value = String(response.minutes);
+  });
+});
+
+// Picking another org: the worker validates it, pins it and refreshes against
+// it, clearing the old org's reading. Disabled until it answers.
+orgSelect?.addEventListener('change', () => {
+  const orgId = orgSelect.value;
+  if (!orgId || orgId === orgIdState) return;
+  orgSelect.disabled = true;
+  orgSwitching = true;
+  setBusy();
+  chrome.runtime.sendMessage({ type: 'SET_ORG', orgId }, () => {
+    void chrome.runtime.lastError;
+    orgSwitching = false;
+    orgSelect.disabled = false;
+    chrome.storage.local.get(['claudeUsage', 'claudeOrgs', 'claudeOrgId', 'lastRefresh'], (s) => {
+      if (s.lastRefresh) lastRefreshState = s.lastRefresh;
+      // Also puts the picker back on the org in use when the switch is refused.
+      applyOrgs(s.claudeOrgs, s.claudeOrgId);
+      setBusy();
+      render(s.claudeUsage || null);
+    });
+  });
 });
 
 viewBtn?.addEventListener('click', (e) => {
@@ -1312,18 +1680,25 @@ document.addEventListener('keydown', (e) => {
   }
 });
 
-function openUsage() {
-  chrome.tabs.create({ url: USAGE_URL, active: true });
+function openTab(url) {
+  chrome.tabs.create({ url, active: true });
   window.close();
 }
 
-openUsageBtn?.addEventListener('click', openUsage);
-openUsagePage?.addEventListener('click', openUsage);
+openUsagePage?.addEventListener('click', () => openTab(currentPlan?.label === 'Free' ? CHAT_URL : USAGE_URL));
 
-signInBtn?.addEventListener('click', () => {
-  chrome.tabs.create({ url: SIGN_IN_URL, active: true });
-  window.close();
+signInBtn?.addEventListener('click', () => openTab(SIGN_IN_URL));
+
+emptyBtn?.addEventListener('click', () => {
+  if (emptyBtn.dataset.action === 'sign-in') openTab(SIGN_IN_URL);
+  else triggerRefresh('manual');
 });
+
+// "Something wrong?" in the footer and in every empty state.
+document.querySelectorAll('.help-link').forEach(link => link.addEventListener('click', (e) => {
+  e.preventDefault();
+  openTab(HELP_URL);
+}));
 
 settingsBtn?.addEventListener('click', () => {
   chrome.runtime.openOptionsPage();
@@ -1375,15 +1750,37 @@ waitlistJoinBtn?.addEventListener('click', () => {
 
 waitlistDismissBtn?.addEventListener('click', dismissWaitlistNudge);
 
-retryBtn?.addEventListener('click', triggerRefresh);
+// Granted without a prompt in Chrome, so the card says the bar is on before
+// the button turns into a way to see it.
+whatsNewBtn?.addEventListener('click', () => {
+  if (whatsNewBtn.dataset.action !== 'bar') { openTab(CHAT_URL); return; }
+  enablePageBar(() => {
+    const li = document.createElement('li');
+    li.textContent = msg('wcBarOn');
+    whatsNewList.append(li);
+    setWhatsNewBtn('open');
+  });
+});
 
-freePlanActionBtn?.addEventListener('click', () => {
-  if (pageBarOn) {
-    chrome.tabs.create({ url: 'https://claude.ai/new', active: true });
-    window.close();
-    return;
-  }
-  // Requested straight from the click, as the permissions API requires.
+whatsNewDismiss?.addEventListener('click', () => {
+  chrome.storage.local.remove('whatsNew');
+  whatsNewEl.style.display = 'none';
+});
+
+pinHintDismiss?.addEventListener('click', () => {
+  chrome.storage.local.set({ pinHintDismissed: true });
+  pinHint.style.display = 'none';
+});
+
+retryBtn?.addEventListener('click', () => triggerRefresh('manual'));
+
+// Turns the on-page bar on from a click here: the Free notice and the What's
+// new card. The request is the first async call in the click, as the
+// permissions API requires; `pageBarRequested` goes out in the same tick so
+// the worker can still switch the bar on if the popup closes during the
+// prompt.
+function enablePageBar(onEnabled) {
+  chrome.storage.local.set({ pageBarRequested: Date.now() });
   chrome.permissions.request(PAGE_BAR_PERMS, (granted) => {
     if (chrome.runtime.lastError || !granted) {
       // Firefox closes the popup when its permission prompt opens; the options
@@ -1393,21 +1790,39 @@ freePlanActionBtn?.addEventListener('click', () => {
     }
     chrome.storage.local.set({ pageBar: { enabled: true } }, () => {
       pageBarOn = true;
-      renderFreePlanNotice();
+      onEnabled?.();
     });
   });
+}
+
+freePlanActionBtn?.addEventListener('click', () => {
+  if (pageBarOn) openTab(CHAT_URL);
+  else enablePageBar(renderFreePlanNotice);
 });
 
 // Listen for storage changes while popup is open
 chrome.storage.onChanged.addListener((changes) => {
+  // State the renders below read, so it goes first.
+  if (changes.lastRefresh) lastRefreshState = changes.lastRefresh.newValue || null;
+  if (changes.authBackoff) authBackoffState = changes.authBackoff.newValue || null;
+  if (changes.forecast)    forecastState = changes.forecast.newValue || null;
+  if (changes.msgLeft)     msgLeftState  = changes.msgLeft.newValue || null;
+  if (changes.historyCutAt) historyCutAt = Number(changes.historyCutAt.newValue) || 0;
   // The worker persists the snapshot first and appends the history sample after,
   // so the series arrives in its own event and the curves are redrawn then.
   if (changes.usageHistory) {
     historySeries = Array.isArray(changes.usageHistory.newValue) ? changes.usageHistory.newValue : [];
-    if (lastData) renderSparklines(lastData);
   }
+  if ((changes.usageHistory || changes.historyCutAt) && lastData) renderSparklines(lastData);
   if (changes.claudeUsage) {
     render(changes.claudeUsage.newValue || null);
+  } else if (changes.lastRefresh || changes.authBackoff) {
+    // The empty state is picked from these; a reading on screen doesn't change.
+    if (!lastData) showNoData();
+  }
+  if ((changes.forecast || changes.msgLeft) && lastData) renderPace(lastData);
+  if (changes.claudeOrgs || changes.claudeOrgId) {
+    chrome.storage.local.get(['claudeOrgs', 'claudeOrgId'], ({ claudeOrgs, claudeOrgId }) => applyOrgs(claudeOrgs, claudeOrgId));
   }
   if (changes.claudeUsage || changes.authBackoff || changes.fetchFailures) {
     chrome.storage.local.get(['claudeUsage', 'authBackoff', 'fetchFailures'], ({ claudeUsage, authBackoff, fetchFailures }) => {

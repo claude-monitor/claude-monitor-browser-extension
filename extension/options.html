@@ -106,7 +106,7 @@
       <span><input type="number" id="critAt" min="1" max="100" step="1" /> %</span>
     </div>
   </div>
-  <p class="hint" data-i18n="optNotifHint">Applies to the session, weekly and per-model caps. Each alert fires once per reset window.</p>
+  <p class="hint" data-i18n="optNotifHintReset">Applies to the session, weekly and per-model caps. Each alert fires once per reset window, and once more when a session that crossed the warning threshold resets.</p>
 
   <div class="actions">
     <button id="testBtn" data-i18n="optSendTest">Send test notification</button>
@@ -165,7 +165,7 @@
     <span><b data-i18n="optProTitle">Pro is coming.</b> <span data-i18n="optProText">Your Claude limits on your phone, and a Slack or Discord
     ping before you hit them. Optional and paid; this extension stays free.</span></span>
     <br />
-    <a href="https://claude-monitor.com/?src=ext-options#waitlist" target="_blank" rel="noopener" data-i18n="joinWaitlist">Join the waitlist →</a>
+    <a href="https://claude-monitor.com/pro?src=ext-options" target="_blank" rel="noopener" data-i18n="joinWaitlist">Join the waitlist →</a>
   </div>
 
   <!-- Windows only; the href is set in options.js so the campaign id lives in

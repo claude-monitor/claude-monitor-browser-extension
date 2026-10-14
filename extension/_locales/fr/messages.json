@@ -401,7 +401,7 @@
     "message": "Afficher une barre d'utilisation au-dessus de la zone de chat"
   },
   "optBarHint": {
-    "message": "Désactivée par défaut ; l'activer demande l'accès aux pages de claude.ai. La barre lit uniquement les chiffres d'utilisation que Claude joint à chaque réponse, jamais vos messages. Avec le forfait Free, c'est le seul endroit où vos limites apparaissent."
+    "message": "Désactivée par défaut. L'activer ajoute l'autorisation scripting (Chrome accorde déjà claude.ai via les points d'accès d'utilisation). La barre extrait uniquement les chiffres d'utilisation que Claude joint à chaque réponse ; elle n'enregistre ni n'envoie jamais vos messages. Avec le forfait Free, c'est le seul endroit où vos limites apparaissent."
   },
   "optHistory": {
     "message": "Historique"
@@ -553,5 +553,196 @@
   },
   "barAria": {
     "message": "Utilisation de Claude"
+  },
+  "tipResetsAt": {
+    "message": "$P1$ : $P2$ % utilisé, réinitialisation le $P3$",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      },
+      "p2": {
+        "content": "$2"
+      },
+      "p3": {
+        "content": "$3"
+      }
+    }
+  },
+  "tipSignIn": {
+    "message": "Connectez-vous à claude.ai pour actualiser"
+  },
+  "tipFreeBarOff": {
+    "message": "Activez la barre pour voir vos limites du forfait Free"
+  },
+  "notifResetTitle": {
+    "message": "Session Claude réinitialisée"
+  },
+  "notifResetBody": {
+    "message": "Votre session Claude est revenue à 0 %."
+  },
+  "forecastLine": {
+    "message": "À ce rythme : limite ~$P1$ (réinitialisation $P2$)",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      },
+      "p2": {
+        "content": "$2"
+      }
+    }
+  },
+  "forecastAt": {
+    "message": "À ce rythme : limite ~$P1$",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "barBrandTitle": {
+    "message": "Claude Monitor (extension de navigateur, pas d'Anthropic) : cliquez pour voir les détails"
+  },
+  "barForecastShort": {
+    "message": "limite ~$P1$",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "msgsLeft": {
+    "message": "≈ $P1$ msg restants",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "msgsLeftTitle": {
+    "message": "Estimé d'après vos $P1$ derniers messages ; varie selon le modèle et la longueur",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "barPillHide": {
+    "message": "Masquer jusqu'au rechargement de la page"
+  },
+  "wcPageTitle": {
+    "message": "Bienvenue dans Claude Monitor"
+  },
+  "wcIntro": {
+    "message": "Quelques étapes rapides et vos limites Claude restent visibles pendant que vous travaillez."
+  },
+  "wcSignTitle": {
+    "message": "Connectez-vous à Claude"
+  },
+  "wcSignChecking": {
+    "message": "Vérification de votre connexion à claude.ai…"
+  },
+  "wcSignOk": {
+    "message": "Connecté à claude.ai"
+  },
+  "wcSignNeeded": {
+    "message": "Claude Monitor lit vos limites via votre connexion à claude.ai. Connectez-vous, puis revenez sur cet onglet."
+  },
+  "wcSignBtn": {
+    "message": "Se connecter à claude.ai"
+  },
+  "wcBarTitle": {
+    "message": "Afficher mes limites dans Claude"
+  },
+  "wcBarNote": {
+    "message": "Uniquement sur claude.ai. N'extrait que les chiffres d'utilisation de chaque réponse ; n'enregistre ni n'envoie jamais vos messages. Désactivable à tout moment."
+  },
+  "wcBarOn": {
+    "message": "Activée. Vos limites s'affichent au-dessus de la zone de chat sur claude.ai."
+  },
+  "wcBarDenied": {
+    "message": "Non activée. Vous pourrez le faire plus tard depuis les Paramètres."
+  },
+  "wcPinTitle": {
+    "message": "Épinglez-la à la barre d'outils"
+  },
+  "wcPinHow": {
+    "message": "Cliquez sur l'icône en forme de pièce de puzzle dans la barre d'outils, puis sur l'épingle à côté de l'icône orange en forme de pouls."
+  },
+  "wcPinHowEdge": {
+    "message": "Cliquez sur l'icône en forme de pièce de puzzle dans la barre d'outils, puis sur l'œil à côté de l'icône orange en forme de pouls."
+  },
+  "wcPinHowFirefox": {
+    "message": "Cliquez sur l'icône en forme de pièce de puzzle dans la barre d'outils, puis sur la roue dentée à côté de l'icône orange en forme de pouls et sur Épingler à la barre d'outils."
+  },
+  "wcPinOk": {
+    "message": "Épinglée. Le badge affiche votre session d'un coup d'œil."
+  },
+  "wcAlertsOk": {
+    "message": "Les alertes sont activées."
+  },
+  "wcFreeNote": {
+    "message": "Avec le forfait Free, la barre est le seul endroit où vos limites apparaissent."
+  },
+  "wcDone": {
+    "message": "Terminé"
+  },
+  "whatsNewTitle": {
+    "message": "Nouveautés de la v$P1$",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "wn121Bar": {
+    "message": "Vos limites au-dessus de la zone de chat, désormais aussi dans Claude Code sur claude.ai"
+  },
+  "wn121Pace": {
+    "message": "Si votre rythme vous mène à la limite avant la réinitialisation, vers quelle heure, et une alerte quand une session très utilisée se réinitialise"
+  },
+  "wn121Msgs": {
+    "message": "Avec la barre activée : estimation des messages restants dans votre session"
+  },
+  "wnTurnOnBar": {
+    "message": "Activer la barre"
+  },
+  "pinHintText": {
+    "message": "Épinglez Claude Monitor pour garder le badge en vue"
+  },
+  "pinHintHow": {
+    "message": "Icône de puzzle, puis l'épingle à côté de l'icône orange"
+  },
+  "pinHintHowEdge": {
+    "message": "Icône de puzzle, puis l'œil à côté de l'icône orange"
+  },
+  "pinHintHowFirefox": {
+    "message": "Icône de puzzle, roue dentée à côté de l'icône orange, Épingler à la barre d'outils"
+  },
+  "somethingWrong": {
+    "message": "Un problème ?"
+  },
+  "emptySignedOutTitle": {
+    "message": "Connectez-vous à claude.ai"
+  },
+  "emptySignedOutText": {
+    "message": "Claude Monitor lit vos limites via votre connexion à claude.ai. Connectez-vous, puis rouvrez cette fenêtre."
+  },
+  "emptyOrgTitle": {
+    "message": "Aucune organisation Claude trouvée pour ce compte"
+  },
+  "emptyOrgText": {
+    "message": "Connectez-vous à claude.ai avec le compte que vous utilisez pour discuter, puis réessayez."
+  },
+  "emptyFailTitle": {
+    "message": "Impossible de lire votre utilisation pour l'instant"
+  },
+  "emptyLoading": {
+    "message": "Lecture de votre utilisation sur claude.ai…"
+  },
+  "orgSelectTitle": {
+    "message": "Organisation Claude affichée"
+  },
+  "optNotifHintReset": {
+    "message": "S'applique à la session, à la limite hebdo et aux plafonds par modèle. Chaque alerte n'est envoyée qu'une fois par période, plus une fois quand une session qui a dépassé le seuil d'avertissement se réinitialise."
   }
 }

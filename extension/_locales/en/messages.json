@@ -401,7 +401,7 @@
     "message": "Show a usage bar above the chat box"
   },
   "optBarHint": {
-    "message": "Off by default; turning it on asks for access to claude.ai pages. The bar reads only the usage figures Claude attaches to each reply, never your messages. On the Free plan this is the only place your limits appear."
+    "message": "Off by default. Turning it on adds the scripting permission (Chrome already grants claude.ai through the usage endpoints). The bar extracts only the usage figures Claude attaches to each reply; it never stores or sends your messages. On the Free plan this is the only place your limits appear."
   },
   "optHistory": {
     "message": "History"
@@ -553,5 +553,196 @@
   },
   "barAria": {
     "message": "Claude usage"
+  },
+  "tipResetsAt": {
+    "message": "$P1$: $P2$% used, resets $P3$",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      },
+      "p2": {
+        "content": "$2"
+      },
+      "p3": {
+        "content": "$3"
+      }
+    }
+  },
+  "tipSignIn": {
+    "message": "Sign in to claude.ai to refresh"
+  },
+  "tipFreeBarOff": {
+    "message": "Turn on the bar to see your Free plan limits"
+  },
+  "notifResetTitle": {
+    "message": "Claude session reset"
+  },
+  "notifResetBody": {
+    "message": "Your Claude session is back to 0%."
+  },
+  "forecastLine": {
+    "message": "At this pace: limit at ~$P1$ (resets $P2$)",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      },
+      "p2": {
+        "content": "$2"
+      }
+    }
+  },
+  "forecastAt": {
+    "message": "At this pace: limit at ~$P1$",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "barBrandTitle": {
+    "message": "Claude Monitor (browser extension, not by Anthropic): click for details"
+  },
+  "barForecastShort": {
+    "message": "limit ~$P1$",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "msgsLeft": {
+    "message": "≈ $P1$ msgs left",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "msgsLeftTitle": {
+    "message": "Estimated from your last $P1$ messages; varies with model and length",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "barPillHide": {
+    "message": "Hide until the page reloads"
+  },
+  "wcPageTitle": {
+    "message": "Welcome to Claude Monitor"
+  },
+  "wcIntro": {
+    "message": "A few quick steps and your Claude limits stay in view while you work."
+  },
+  "wcSignTitle": {
+    "message": "Sign in to Claude"
+  },
+  "wcSignChecking": {
+    "message": "Checking your claude.ai login…"
+  },
+  "wcSignOk": {
+    "message": "Signed in to claude.ai"
+  },
+  "wcSignNeeded": {
+    "message": "Claude Monitor reads your limits through your claude.ai login. Sign in, then come back to this tab."
+  },
+  "wcSignBtn": {
+    "message": "Sign in to claude.ai"
+  },
+  "wcBarTitle": {
+    "message": "Show my limits inside Claude"
+  },
+  "wcBarNote": {
+    "message": "Only on claude.ai. Extracts only the usage figures from each reply; never stores or sends your messages. Turn it off anytime."
+  },
+  "wcBarOn": {
+    "message": "On. Your limits appear above the chat box on claude.ai."
+  },
+  "wcBarDenied": {
+    "message": "Not turned on. You can do it later from Settings."
+  },
+  "wcPinTitle": {
+    "message": "Pin it to your toolbar"
+  },
+  "wcPinHow": {
+    "message": "Click the puzzle-piece icon in the toolbar, then the pin next to the orange pulse icon."
+  },
+  "wcPinHowEdge": {
+    "message": "Click the puzzle-piece icon in the toolbar, then the eye next to the orange pulse icon."
+  },
+  "wcPinHowFirefox": {
+    "message": "Click the puzzle-piece icon in the toolbar, then the gear next to the orange pulse icon and Pin to Toolbar."
+  },
+  "wcPinOk": {
+    "message": "Pinned. The badge shows your session at a glance."
+  },
+  "wcAlertsOk": {
+    "message": "Alerts are on."
+  },
+  "wcFreeNote": {
+    "message": "On the Free plan the bar is the only place your limits appear."
+  },
+  "wcDone": {
+    "message": "Done"
+  },
+  "whatsNewTitle": {
+    "message": "New in v$P1$",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "wn121Bar": {
+    "message": "Your limits above the chat box, now also in Claude Code on claude.ai"
+  },
+  "wn121Pace": {
+    "message": "If your pace will hit a limit before it resets, roughly when; and an alert when a busy session resets"
+  },
+  "wn121Msgs": {
+    "message": "With the bar on: estimated messages left in your session"
+  },
+  "wnTurnOnBar": {
+    "message": "Turn on the bar"
+  },
+  "pinHintText": {
+    "message": "Pin Claude Monitor to keep the badge in view"
+  },
+  "pinHintHow": {
+    "message": "Puzzle-piece icon, then the pin next to the orange icon"
+  },
+  "pinHintHowEdge": {
+    "message": "Puzzle-piece icon, then the eye next to the orange icon"
+  },
+  "pinHintHowFirefox": {
+    "message": "Puzzle-piece icon, then the gear next to the orange icon, Pin to Toolbar"
+  },
+  "somethingWrong": {
+    "message": "Something wrong?"
+  },
+  "emptySignedOutTitle": {
+    "message": "Sign in to claude.ai"
+  },
+  "emptySignedOutText": {
+    "message": "Claude Monitor reads your limits through your claude.ai login. Sign in, then open this popup again."
+  },
+  "emptyOrgTitle": {
+    "message": "No Claude organization found for this account"
+  },
+  "emptyOrgText": {
+    "message": "Sign in to claude.ai with the account you chat with, then retry."
+  },
+  "emptyFailTitle": {
+    "message": "Couldn't read your usage yet"
+  },
+  "emptyLoading": {
+    "message": "Reading your usage from claude.ai…"
+  },
+  "orgSelectTitle": {
+    "message": "Claude organization shown"
+  },
+  "optNotifHintReset": {
+    "message": "Applies to the session, weekly and per-model caps. Each alert fires once per reset window, and once more when a session that crossed the warning threshold resets."
   }
 }

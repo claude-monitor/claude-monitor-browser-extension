@@ -1,0 +1,10 @@
+{
+  "extName": {
+    "message": "Claude Monitor: theo dõi mức sử dụng, giới hạn phiên và hàng tuần",
+    "description": "Extension name on the Chrome Web Store and Edge Add-ons (max 75 characters)."
+  },
+  "extDescription": {
+    "message": "Giới hạn sử dụng Claude theo thời gian thực: % phiên và tuần, đếm ngược đặt lại, cảnh báo 80/95%. Free, Pro, Max, Claude Code.",
+    "description": "Short description shown in the stores and the browser (max 132 characters)."
+  }
+}

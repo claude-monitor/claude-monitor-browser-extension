@@ -1,0 +1,10 @@
+{
+  "extName": {
+    "message": "Claude Monitor: pag-track ng paggamit, limitasyon ng session at lingguhan",
+    "description": "Extension name on the Chrome Web Store and Edge Add-ons (max 75 characters)."
+  },
+  "extDescription": {
+    "message": "Mga limitasyon ng Claude nang live: % ng session at lingguhan, countdown sa reset, alerto sa 80/95%. Free, Pro, Max, Claude Code.",
+    "description": "Short description shown in the stores and the browser (max 132 characters)."
+  }
+}

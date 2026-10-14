@@ -1,4 +1,4 @@
-// ─── Claude Usage Monitor — Options ──────────────────────────────────────────
+// ─── Claude Usage Monitor: Options ───────────────────────────────────────────
 // Notification settings, stored under `notifSettings`. The background worker
 // re-reads them on every poll, so changes apply on the next refresh.
 
@@ -110,7 +110,7 @@ testBtn.addEventListener('click', async () => {
 
 // ─── On-page bar ─────────────────────────────────────────────────────────────
 // Both permissions are optional and requested here, from the click. Turning the
-// bar off gives the access back instead of just hiding it.
+// bar off gives `scripting` back instead of just hiding it.
 
 const PAGE_BAR_PERMS = { origins: ['https://claude.ai/*'], permissions: ['scripting'] };
 const pageBarEl = document.getElementById('pageBarEnabled');
@@ -134,10 +134,21 @@ pageBarEl.addEventListener('change', () => {
       chrome.storage.local.set({ pageBar: { enabled: true } }, () => flashStatus(msg('stSaved')));
     });
   } else {
-    chrome.storage.local.set({ pageBar: { enabled: false } }, () => {
-      chrome.permissions.remove(PAGE_BAR_PERMS, () => {
+    // Chrome ignores the path in host permissions, so the required API hosts
+    // already grant claude.ai/* and a remove that names it is refused whole
+    // ("You cannot remove required permissions"), which used to leave
+    // `scripting` granted. Scripting goes on its own, after the scripts are
+    // unregistered: registrations outlive the permission and can't be removed
+    // without it. The origin is still asked for, for browsers that grant it
+    // apart.
+    chrome.storage.local.set({ pageBar: { enabled: false } }, async () => {
+      try { await chrome.scripting?.unregisterContentScripts(); } catch { /* scripting not granted */ }
+      chrome.permissions.remove({ permissions: PAGE_BAR_PERMS.permissions }, () => {
         void chrome.runtime.lastError;
-        flashStatus(msg('stSaved'));
+        chrome.permissions.remove({ origins: PAGE_BAR_PERMS.origins }, () => {
+          void chrome.runtime.lastError;
+          flashStatus(msg('stSaved'));
+        });
       });
     });
   }
@@ -224,10 +235,11 @@ function toExportSample(sample) {
           limit: sample.spend.limit ?? null,
           currency: sample.spend.currency ?? null,
           source: sample.spend.source ?? null,
+          readAt: isoOrNull(sample.spend.at),
         }
       : null,
     prepaidBalance: sample?.prepaid
-      ? { amount: sample.prepaid.amount ?? null, currency: sample.prepaid.currency ?? null }
+      ? { amount: sample.prepaid.amount ?? null, currency: sample.prepaid.currency ?? null, readAt: isoOrNull(sample.prepaid.at) }
       : null,
   };
 }
@@ -243,7 +255,8 @@ function buildJsonExport(history) {
     amountsIn: 'major',
     minorUnitsPerMajor: 100,
     notes: 'A null value means the reading was unavailable, never zero. Gaps in the '
-         + 'series mean the refresh failed. Amounts are as reported by the provider.',
+         + 'series mean the refresh failed. Amounts are as reported by the provider. '
+         + 'readAt is when an amount was read; balances are re-read every 30 minutes.',
     samples: history.map(toExportSample),
   }, null, 2);
 }
@@ -254,6 +267,7 @@ const CSV_COLUMNS = [
   'spend_used', 'spend_limit', 'spend_currency', 'spend_source',
   'prepaid_amount', 'prepaid_currency',
   'amounts_in', 'minor_units_per_major',
+  'spend_read_at', 'prepaid_read_at',
 ];
 
 function csvCell(value) {
@@ -274,6 +288,7 @@ function buildCsvExport(history) {
       s.spend?.used ?? null, s.spend?.limit ?? null, s.spend?.currency ?? null, s.spend?.source ?? null,
       s.prepaidBalance?.amount ?? null, s.prepaidBalance?.currency ?? null,
       'major', 100,
+      s.spend?.readAt ?? null, s.prepaidBalance?.readAt ?? null,
     ];
     rows.push(cells.map(csvCell).join(','));
   }
@@ -317,7 +332,7 @@ if (reviewLink) {
     ? 'https://addons.mozilla.org/firefox/addon/claude-usage-meter/reviews/'
     : navigator.userAgent.includes('Edg/')
       ? 'https://microsoftedge.microsoft.com/addons/detail/ilidbhklkpefboidlfeoiiacepcefinp'
-      : 'https://chromewebstore.google.com/detail/bfhdcfiigpaaopklllpobkheakpigbfo/reviews';
+      : 'https://chromewebstore.google.com/detail/bfhdcfiigpaaopklllpobkheakpigbfo/reviews?utm_source=extension&utm_medium=options&utm_campaign=review';
 }
 
 // ─── Windows companion promo ─────────────────────────────────────────────────

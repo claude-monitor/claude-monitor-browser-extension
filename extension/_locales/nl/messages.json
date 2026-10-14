@@ -1,0 +1,10 @@
+{
+  "extName": {
+    "message": "Claude Monitor: gebruikstracker, sessie- en weeklimieten",
+    "description": "Extension name on the Chrome Web Store and Edge Add-ons (max 75 characters)."
+  },
+  "extDescription": {
+    "message": "Je Claude-gebruikslimieten live: sessie en week in %, aftellen tot de reset, meldingen bij 80/95%. Free, Pro, Max en Claude Code.",
+    "description": "Short description shown in the stores and the browser (max 132 characters)."
+  }
+}

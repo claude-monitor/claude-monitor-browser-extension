@@ -1,0 +1,10 @@
+{
+  "extName": {
+    "message": "Claude Monitor: śledzenie użycia, limity sesyjne i tygodniowe",
+    "description": "Extension name on the Chrome Web Store and Edge Add-ons (max 75 characters)."
+  },
+  "extDescription": {
+    "message": "Limity użycia Claude na żywo: % sesji i tygodnia, odliczanie do resetu, alerty przy 80/95%. Free, Pro, Max i Claude Code.",
+    "description": "Short description shown in the stores and the browser (max 132 characters)."
+  }
+}
