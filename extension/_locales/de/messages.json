@@ -401,7 +401,7 @@
     "message": "Nutzungsleiste über dem Chatfeld anzeigen"
   },
   "optBarHint": {
-    "message": "Standardmäßig aus; beim Aktivieren wird Zugriff auf claude.ai-Seiten angefragt. Die Leiste liest nur die Nutzungswerte, die Claude jeder Antwort beifügt, nie deine Nachrichten. Im Free-Plan ist sie der einzige Ort, an dem deine Limits erscheinen."
+    "message": "Standardmäßig aus. Beim Aktivieren kommt die Berechtigung „scripting“ hinzu (Chrome gewährt claude.ai bereits über die Nutzungs-Endpunkte). Die Leiste liest nur die Nutzungswerte aus, die Claude jeder Antwort beifügt; sie speichert oder sendet nie deine Nachrichten. Im Free-Plan ist sie der einzige Ort, an dem deine Limits erscheinen."
   },
   "optHistory": {
     "message": "Verlauf"
@@ -553,5 +553,196 @@
   },
   "barAria": {
     "message": "Claude-Nutzung"
+  },
+  "tipResetsAt": {
+    "message": "$P1$: $P2$ % genutzt, Reset $P3$",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      },
+      "p2": {
+        "content": "$2"
+      },
+      "p3": {
+        "content": "$3"
+      }
+    }
+  },
+  "tipSignIn": {
+    "message": "Bei claude.ai anmelden, um zu aktualisieren"
+  },
+  "tipFreeBarOff": {
+    "message": "Aktiviere die Leiste, um deine Free-Limits zu sehen"
+  },
+  "notifResetTitle": {
+    "message": "Claude-Sitzung zurückgesetzt"
+  },
+  "notifResetBody": {
+    "message": "Deine Claude-Sitzung steht wieder bei 0 %."
+  },
+  "forecastLine": {
+    "message": "Bei diesem Tempo: Limit ~$P1$ (Reset $P2$)",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      },
+      "p2": {
+        "content": "$2"
+      }
+    }
+  },
+  "forecastAt": {
+    "message": "Bei diesem Tempo: Limit ~$P1$",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "barBrandTitle": {
+    "message": "Claude Monitor (Browser-Erweiterung, nicht von Anthropic): für Details klicken"
+  },
+  "barForecastShort": {
+    "message": "Limit ~$P1$",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "msgsLeft": {
+    "message": "≈ $P1$ Nachr. übrig",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "msgsLeftTitle": {
+    "message": "Geschätzt aus deinen letzten $P1$ Nachrichten; hängt von Modell und Länge ab",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "barPillHide": {
+    "message": "Ausblenden, bis die Seite neu geladen wird"
+  },
+  "wcPageTitle": {
+    "message": "Willkommen bei Claude Monitor"
+  },
+  "wcIntro": {
+    "message": "Ein paar schnelle Schritte, dann behältst du deine Claude-Limits beim Arbeiten im Blick."
+  },
+  "wcSignTitle": {
+    "message": "Bei Claude anmelden"
+  },
+  "wcSignChecking": {
+    "message": "Dein claude.ai-Login wird geprüft…"
+  },
+  "wcSignOk": {
+    "message": "Bei claude.ai angemeldet"
+  },
+  "wcSignNeeded": {
+    "message": "Claude Monitor liest deine Limits über deinen claude.ai-Login. Melde dich an und komm dann zu diesem Tab zurück."
+  },
+  "wcSignBtn": {
+    "message": "Bei claude.ai anmelden"
+  },
+  "wcBarTitle": {
+    "message": "Meine Limits direkt in Claude anzeigen"
+  },
+  "wcBarNote": {
+    "message": "Nur auf claude.ai. Liest aus jeder Antwort nur die Nutzungswerte aus; speichert oder sendet nie deine Nachrichten. Jederzeit abschaltbar."
+  },
+  "wcBarOn": {
+    "message": "Aktiv. Deine Limits erscheinen auf claude.ai über dem Chatfeld."
+  },
+  "wcBarDenied": {
+    "message": "Nicht aktiviert. Du kannst das später in den Einstellungen nachholen."
+  },
+  "wcPinTitle": {
+    "message": "An die Symbolleiste anheften"
+  },
+  "wcPinHow": {
+    "message": "Klicke in der Symbolleiste auf das Puzzleteil-Symbol und dann auf die Stecknadel neben dem orangefarbenen Puls-Symbol."
+  },
+  "wcPinHowEdge": {
+    "message": "Klicke in der Symbolleiste auf das Puzzleteil-Symbol und dann auf das Auge neben dem orangefarbenen Puls-Symbol."
+  },
+  "wcPinHowFirefox": {
+    "message": "Klicke in der Symbolleiste auf das Puzzleteil-Symbol, dann auf das Zahnrad neben dem orangefarbenen Puls-Symbol und auf An Symbolleiste anheften."
+  },
+  "wcPinOk": {
+    "message": "Angeheftet. Das Badge zeigt deine Sitzung auf einen Blick."
+  },
+  "wcAlertsOk": {
+    "message": "Benachrichtigungen sind aktiv."
+  },
+  "wcFreeNote": {
+    "message": "Im Free-Plan ist die Leiste der einzige Ort, an dem deine Limits erscheinen."
+  },
+  "wcDone": {
+    "message": "Fertig"
+  },
+  "whatsNewTitle": {
+    "message": "Neu in v$P1$",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "wn121Bar": {
+    "message": "Deine Limits über dem Chatfeld, jetzt auch in Claude Code auf claude.ai"
+  },
+  "wn121Pace": {
+    "message": "Ob du bei deinem Tempo vor dem Reset ans Limit kommst und ungefähr wann, dazu eine Benachrichtigung, wenn eine stark genutzte Sitzung zurückgesetzt wird"
+  },
+  "wn121Msgs": {
+    "message": "Mit aktiver Leiste: geschätzte verbleibende Nachrichten in deiner Sitzung"
+  },
+  "wnTurnOnBar": {
+    "message": "Leiste aktivieren"
+  },
+  "pinHintText": {
+    "message": "Hefte Claude Monitor an, damit das Badge sichtbar bleibt"
+  },
+  "pinHintHow": {
+    "message": "Puzzleteil-Symbol, dann die Stecknadel neben dem orangefarbenen Symbol"
+  },
+  "pinHintHowEdge": {
+    "message": "Puzzleteil-Symbol, dann das Auge neben dem orangefarbenen Symbol"
+  },
+  "pinHintHowFirefox": {
+    "message": "Puzzleteil-Symbol, Zahnrad neben dem orangefarbenen Symbol, An Symbolleiste anheften"
+  },
+  "somethingWrong": {
+    "message": "Stimmt etwas nicht?"
+  },
+  "emptySignedOutTitle": {
+    "message": "Bei claude.ai anmelden"
+  },
+  "emptySignedOutText": {
+    "message": "Claude Monitor liest deine Limits über deinen claude.ai-Login. Melde dich an und öffne dieses Fenster dann erneut."
+  },
+  "emptyOrgTitle": {
+    "message": "Für dieses Konto wurde keine Claude-Organisation gefunden"
+  },
+  "emptyOrgText": {
+    "message": "Melde dich bei claude.ai mit dem Konto an, mit dem du chattest, und versuche es dann erneut."
+  },
+  "emptyFailTitle": {
+    "message": "Deine Nutzung konnte noch nicht gelesen werden"
+  },
+  "emptyLoading": {
+    "message": "Deine Nutzung wird von claude.ai gelesen…"
+  },
+  "orgSelectTitle": {
+    "message": "Angezeigte Claude-Organisation"
+  },
+  "optNotifHintReset": {
+    "message": "Gilt für Sitzung, Wochenlimit und Modelllimits. Jede Warnung kommt einmal pro Zeitraum, und noch einmal, wenn eine Sitzung zurückgesetzt wird, die die Warnschwelle überschritten hat."
   }
 }

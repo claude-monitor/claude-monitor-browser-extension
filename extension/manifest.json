@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "__MSG_extName__",
   "short_name": "Claude Usage",
-  "version": "1.20.2",
+  "version": "1.21.0",
   "description": "__MSG_extDescription__",
   "default_locale": "en",
   "author": "Digital Advanced Solutions",
@@ -27,7 +27,7 @@
   },
   "action": {
     "default_popup": "popup.html",
-    "default_title": "Claude Usage Monitor",
+    "default_title": "Claude Monitor",
     "default_icon": {
       "16":  "icons/icon16.png",
       "32":  "icons/icon32.png",

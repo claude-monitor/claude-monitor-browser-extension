@@ -1,0 +1,10 @@
+{
+  "extName": {
+    "message": "Claude Monitor: трекер використання, ліміти на сесію й тиждень",
+    "description": "Extension name on the Chrome Web Store and Edge Add-ons (max 75 characters)."
+  },
+  "extDescription": {
+    "message": "Ліміти використання Claude у реальному часі: % сесії й тижня, відлік до скидання, сповіщення 80/95%. Free, Pro, Max, Claude Code.",
+    "description": "Short description shown in the stores and the browser (max 132 characters)."
+  }
+}

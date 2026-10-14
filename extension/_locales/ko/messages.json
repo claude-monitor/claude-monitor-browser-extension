@@ -401,7 +401,7 @@
     "message": "채팅 입력창 위에 사용량 바 표시"
   },
   "optBarHint": {
-    "message": "기본값은 꺼짐이며, 켜면 claude.ai 페이지 접근 권한을 요청합니다. 바는 Claude가 각 답변에 첨부하는 사용량 수치만 읽고 메시지는 절대 읽지 않습니다. Free 플랜에서는 한도가 표시되는 유일한 곳입니다."
+    "message": "기본값은 꺼짐입니다. 켜면 scripting 권한이 추가됩니다(Chrome은 사용량 엔드포인트를 통해 이미 claude.ai 접근을 허용합니다). 바는 Claude가 각 답변에 첨부하는 사용량 수치만 추출하며 메시지를 저장하거나 전송하지 않습니다. Free 플랜에서는 한도가 표시되는 유일한 곳입니다."
   },
   "optHistory": {
     "message": "기록"
@@ -553,5 +553,196 @@
   },
   "barAria": {
     "message": "Claude 사용량"
+  },
+  "tipResetsAt": {
+    "message": "$P1$: $P2$% 사용, $P3$에 초기화",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      },
+      "p2": {
+        "content": "$2"
+      },
+      "p3": {
+        "content": "$3"
+      }
+    }
+  },
+  "tipSignIn": {
+    "message": "새로고침하려면 claude.ai에 로그인하세요"
+  },
+  "tipFreeBarOff": {
+    "message": "Free 플랜 한도를 보려면 바를 켜세요"
+  },
+  "notifResetTitle": {
+    "message": "Claude 세션 초기화됨"
+  },
+  "notifResetBody": {
+    "message": "Claude 세션이 0%로 돌아왔습니다."
+  },
+  "forecastLine": {
+    "message": "이 속도면 ~$P1$에 한도 도달 (초기화 $P2$)",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      },
+      "p2": {
+        "content": "$2"
+      }
+    }
+  },
+  "forecastAt": {
+    "message": "이 속도면 ~$P1$에 한도 도달",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "barBrandTitle": {
+    "message": "Claude Monitor(브라우저 확장 프로그램, Anthropic 제품 아님): 클릭하면 자세히 볼 수 있습니다"
+  },
+  "barForecastShort": {
+    "message": "한도 ~$P1$",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "msgsLeft": {
+    "message": "약 $P1$개 메시지 남음",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "msgsLeftTitle": {
+    "message": "최근 메시지 $P1$개를 바탕으로 추정했으며, 모델과 길이에 따라 달라집니다",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "barPillHide": {
+    "message": "페이지를 새로 고칠 때까지 숨기기"
+  },
+  "wcPageTitle": {
+    "message": "Claude Monitor에 오신 것을 환영합니다"
+  },
+  "wcIntro": {
+    "message": "간단한 몇 단계만 거치면 작업하는 동안 Claude 한도를 계속 확인할 수 있습니다."
+  },
+  "wcSignTitle": {
+    "message": "Claude에 로그인"
+  },
+  "wcSignChecking": {
+    "message": "claude.ai 로그인 상태를 확인하는 중…"
+  },
+  "wcSignOk": {
+    "message": "claude.ai에 로그인됨"
+  },
+  "wcSignNeeded": {
+    "message": "Claude Monitor는 claude.ai 로그인을 통해 한도를 읽습니다. 로그인한 다음 이 탭으로 돌아오세요."
+  },
+  "wcSignBtn": {
+    "message": "claude.ai에 로그인"
+  },
+  "wcBarTitle": {
+    "message": "Claude 안에 내 한도 표시"
+  },
+  "wcBarNote": {
+    "message": "claude.ai에서만 동작합니다. 각 답변에서 사용량 수치만 추출하며 메시지를 저장하거나 전송하지 않습니다. 언제든 끌 수 있습니다."
+  },
+  "wcBarOn": {
+    "message": "켜짐. claude.ai 채팅 입력창 위에 한도가 표시됩니다."
+  },
+  "wcBarDenied": {
+    "message": "켜지지 않았습니다. 나중에 설정에서 켤 수 있습니다."
+  },
+  "wcPinTitle": {
+    "message": "툴바에 고정하기"
+  },
+  "wcPinHow": {
+    "message": "툴바의 퍼즐 조각 아이콘을 클릭한 다음 주황색 맥박 아이콘 옆의 핀을 클릭하세요."
+  },
+  "wcPinHowEdge": {
+    "message": "툴바의 퍼즐 조각 아이콘을 클릭한 다음 주황색 맥박 아이콘 옆의 눈 아이콘을 클릭하세요."
+  },
+  "wcPinHowFirefox": {
+    "message": "툴바의 퍼즐 조각 아이콘을 클릭한 다음 주황색 맥박 아이콘 옆의 톱니바퀴를 누르고 툴바에 고정을 선택하세요."
+  },
+  "wcPinOk": {
+    "message": "고정됨. 배지에서 세션 사용량을 한눈에 볼 수 있습니다."
+  },
+  "wcAlertsOk": {
+    "message": "알림이 켜져 있습니다."
+  },
+  "wcFreeNote": {
+    "message": "Free 플랜에서는 이 바가 한도가 표시되는 유일한 곳입니다."
+  },
+  "wcDone": {
+    "message": "완료"
+  },
+  "whatsNewTitle": {
+    "message": "v$P1$의 새로운 기능",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "wn121Bar": {
+    "message": "채팅 입력창 위에 한도 표시, 이제 claude.ai의 Claude Code에서도"
+  },
+  "wn121Pace": {
+    "message": "현재 속도로 초기화 전에 한도에 도달할 경우 대략적인 시각, 그리고 많이 사용한 세션이 초기화될 때 알림"
+  },
+  "wn121Msgs": {
+    "message": "바를 켜면 세션에 남은 메시지 수 추정 표시"
+  },
+  "wnTurnOnBar": {
+    "message": "바 켜기"
+  },
+  "pinHintText": {
+    "message": "Claude Monitor를 고정하면 배지를 항상 볼 수 있습니다"
+  },
+  "pinHintHow": {
+    "message": "퍼즐 조각 아이콘, 그다음 주황색 아이콘 옆의 핀"
+  },
+  "pinHintHowEdge": {
+    "message": "퍼즐 조각 아이콘, 그다음 주황색 아이콘 옆의 눈 아이콘"
+  },
+  "pinHintHowFirefox": {
+    "message": "퍼즐 조각 아이콘, 주황색 아이콘 옆 톱니바퀴, 툴바에 고정"
+  },
+  "somethingWrong": {
+    "message": "문제가 있나요?"
+  },
+  "emptySignedOutTitle": {
+    "message": "claude.ai에 로그인하세요"
+  },
+  "emptySignedOutText": {
+    "message": "Claude Monitor는 claude.ai 로그인을 통해 한도를 읽습니다. 로그인한 다음 이 팝업을 다시 여세요."
+  },
+  "emptyOrgTitle": {
+    "message": "이 계정의 Claude 조직을 찾을 수 없습니다"
+  },
+  "emptyOrgText": {
+    "message": "채팅에 사용하는 계정으로 claude.ai에 로그인한 다음 다시 시도하세요."
+  },
+  "emptyFailTitle": {
+    "message": "아직 사용량을 읽지 못했습니다"
+  },
+  "emptyLoading": {
+    "message": "claude.ai에서 사용량을 읽는 중…"
+  },
+  "orgSelectTitle": {
+    "message": "표시 중인 Claude 조직"
+  },
+  "optNotifHintReset": {
+    "message": "세션, 주간, 모델별 한도에 적용됩니다. 각 알림은 초기화 기간마다 한 번만 표시되며, 경고 기준을 넘은 세션이 초기화될 때 한 번 더 표시됩니다."
   }
 }

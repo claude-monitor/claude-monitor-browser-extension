@@ -401,7 +401,7 @@
     "message": "Mostrar uma barra de uso acima da caixa de chat"
   },
   "optBarHint": {
-    "message": "Desativada por padrão; ao ativar, ela pede acesso às páginas do claude.ai. A barra lê apenas os números de uso que o Claude anexa a cada resposta, nunca suas mensagens. No plano Free, é o único lugar onde seus limites aparecem."
+    "message": "Desativada por padrão. Ao ativar, ela adiciona a permissão de scripting (o Chrome já concede o claude.ai pelos endpoints de uso). A barra extrai apenas os números de uso que o Claude anexa a cada resposta; nunca guarda nem envia suas mensagens. No plano Free, é o único lugar onde seus limites aparecem."
   },
   "optHistory": {
     "message": "Histórico"
@@ -553,5 +553,196 @@
   },
   "barAria": {
     "message": "Uso do Claude"
+  },
+  "tipResetsAt": {
+    "message": "$P1$: $P2$% usado, reinicia $P3$",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      },
+      "p2": {
+        "content": "$2"
+      },
+      "p3": {
+        "content": "$3"
+      }
+    }
+  },
+  "tipSignIn": {
+    "message": "Entre no claude.ai para atualizar"
+  },
+  "tipFreeBarOff": {
+    "message": "Ative a barra para ver seus limites do plano Free"
+  },
+  "notifResetTitle": {
+    "message": "Sessão do Claude reiniciada"
+  },
+  "notifResetBody": {
+    "message": "Sua sessão do Claude voltou a 0%."
+  },
+  "forecastLine": {
+    "message": "Neste ritmo: limite ~$P1$ (reinício $P2$)",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      },
+      "p2": {
+        "content": "$2"
+      }
+    }
+  },
+  "forecastAt": {
+    "message": "Neste ritmo: limite ~$P1$",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "barBrandTitle": {
+    "message": "Claude Monitor (extensão do navegador, não é da Anthropic): clique para ver os detalhes"
+  },
+  "barForecastShort": {
+    "message": "limite ~$P1$",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "msgsLeft": {
+    "message": "≈ $P1$ msgs restantes",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "msgsLeftTitle": {
+    "message": "Estimado a partir das suas últimas $P1$ mensagens; varia conforme o modelo e o tamanho",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "barPillHide": {
+    "message": "Ocultar até recarregar a página"
+  },
+  "wcPageTitle": {
+    "message": "Boas-vindas ao Claude Monitor"
+  },
+  "wcIntro": {
+    "message": "Alguns passos rápidos e seus limites do Claude ficam à vista enquanto você trabalha."
+  },
+  "wcSignTitle": {
+    "message": "Entre no Claude"
+  },
+  "wcSignChecking": {
+    "message": "Verificando seu login no claude.ai…"
+  },
+  "wcSignOk": {
+    "message": "Conectado ao claude.ai"
+  },
+  "wcSignNeeded": {
+    "message": "O Claude Monitor lê seus limites pelo seu login no claude.ai. Entre e depois volte para esta aba."
+  },
+  "wcSignBtn": {
+    "message": "Entrar no claude.ai"
+  },
+  "wcBarTitle": {
+    "message": "Mostrar meus limites dentro do Claude"
+  },
+  "wcBarNote": {
+    "message": "Só no claude.ai. Extrai apenas os números de uso de cada resposta; nunca guarda nem envia suas mensagens. Desative quando quiser."
+  },
+  "wcBarOn": {
+    "message": "Ativada. Seus limites aparecem acima da caixa de chat no claude.ai."
+  },
+  "wcBarDenied": {
+    "message": "Não foi ativada. Você pode fazer isso depois em Configurações."
+  },
+  "wcPinTitle": {
+    "message": "Fixe na barra de ferramentas"
+  },
+  "wcPinHow": {
+    "message": "Clique no ícone de peça de quebra-cabeça na barra de ferramentas e depois no alfinete ao lado do ícone laranja de pulso."
+  },
+  "wcPinHowEdge": {
+    "message": "Clique no ícone de peça de quebra-cabeça na barra de ferramentas e depois no olho ao lado do ícone laranja de pulso."
+  },
+  "wcPinHowFirefox": {
+    "message": "Clique no ícone de peça de quebra-cabeça na barra de ferramentas, depois na engrenagem ao lado do ícone laranja de pulso e em Fixar na barra de ferramentas."
+  },
+  "wcPinOk": {
+    "message": "Fixada. O indicador mostra sua sessão de relance."
+  },
+  "wcAlertsOk": {
+    "message": "Os alertas estão ativados."
+  },
+  "wcFreeNote": {
+    "message": "No plano Free, a barra é o único lugar onde seus limites aparecem."
+  },
+  "wcDone": {
+    "message": "Concluir"
+  },
+  "whatsNewTitle": {
+    "message": "Novidades da v$P1$",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "wn121Bar": {
+    "message": "Seus limites acima da caixa de chat, agora também no Claude Code no claude.ai"
+  },
+  "wn121Pace": {
+    "message": "Se no seu ritmo você vai atingir o limite antes do reinício, por volta de que horas, e um alerta quando uma sessão muito usada reinicia"
+  },
+  "wn121Msgs": {
+    "message": "Com a barra ativada: estimativa de mensagens restantes na sua sessão"
+  },
+  "wnTurnOnBar": {
+    "message": "Ativar a barra"
+  },
+  "pinHintText": {
+    "message": "Fixe o Claude Monitor para manter o indicador à vista"
+  },
+  "pinHintHow": {
+    "message": "Ícone de quebra-cabeça e depois o alfinete ao lado do ícone laranja"
+  },
+  "pinHintHowEdge": {
+    "message": "Ícone de quebra-cabeça e depois o olho ao lado do ícone laranja"
+  },
+  "pinHintHowFirefox": {
+    "message": "Ícone de quebra-cabeça, a engrenagem ao lado do ícone laranja e Fixar na barra de ferramentas"
+  },
+  "somethingWrong": {
+    "message": "Algo errado?"
+  },
+  "emptySignedOutTitle": {
+    "message": "Entre no claude.ai"
+  },
+  "emptySignedOutText": {
+    "message": "O Claude Monitor lê seus limites pelo seu login no claude.ai. Entre e abra esta janela de novo."
+  },
+  "emptyOrgTitle": {
+    "message": "Nenhuma organização do Claude encontrada para esta conta"
+  },
+  "emptyOrgText": {
+    "message": "Entre no claude.ai com a conta que você usa para conversar e tente de novo."
+  },
+  "emptyFailTitle": {
+    "message": "Ainda não foi possível ler seu uso"
+  },
+  "emptyLoading": {
+    "message": "Lendo seu uso no claude.ai…"
+  },
+  "orgSelectTitle": {
+    "message": "Organização do Claude exibida"
+  },
+  "optNotifHintReset": {
+    "message": "Vale para a sessão, o limite semanal e os limites por modelo. Cada alerta dispara uma vez por período, e mais uma vez quando reinicia uma sessão que passou do limite de aviso."
   }
 }

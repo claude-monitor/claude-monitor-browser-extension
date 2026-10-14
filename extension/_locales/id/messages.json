@@ -1,0 +1,10 @@
+{
+  "extName": {
+    "message": "Claude Monitor: pelacak penggunaan, batas sesi dan mingguan",
+    "description": "Extension name on the Chrome Web Store and Edge Add-ons (max 75 characters)."
+  },
+  "extDescription": {
+    "message": "Batas penggunaan Claude secara langsung: % sesi dan mingguan, hitung mundur reset, peringatan 80/95%. Free, Pro, Max, Claude Code.",
+    "description": "Short description shown in the stores and the browser (max 132 characters)."
+  }
+}

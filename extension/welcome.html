@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title data-i18n="wcPageTitle">Welcome to Claude Monitor</title>
+  <link rel="stylesheet" href="welcome.css" />
+</head>
+<body>
+  <!-- Opened once by the worker on install, never on update. Everything here is
+       packaged with the extension: nothing loads from the web, and the
+       permission requests below can only come from a click on a page like this. -->
+  <main class="wrap">
+
+    <header class="head">
+      <div class="logo">
+        <svg aria-hidden="true" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" fill="none">
+          <polyline points="2,10 5,10 7.5,5 10,15 12.5,7 15,10 18,10"
+            stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div>
+        <h1 data-i18n="wcPageTitle">Welcome to Claude Monitor</h1>
+        <p class="intro" data-i18n="wcIntro">A few quick steps and your Claude limits stay in view while you work.</p>
+      </div>
+    </header>
+
+    <ol class="steps">
+
+      <!-- (a) The claude.ai session every reading depends on -->
+      <li class="step" id="stepSign" data-state="wait">
+        <span class="mark" aria-hidden="true"><span class="num">1</span></span>
+        <div class="body">
+          <h2 data-i18n="wcSignTitle">Sign in to Claude</h2>
+          <p class="status" id="signStatus" role="status" data-i18n="wcSignChecking">Checking your claude.ai login…</p>
+          <div class="actions">
+            <button class="btn" id="signBtn" hidden data-i18n="wcSignBtn">Sign in to claude.ai</button>
+            <button class="btn" id="signRetry" hidden data-i18n="retry">Retry</button>
+          </div>
+        </div>
+      </li>
+
+      <!-- (b) The main action: the on-page bar, one click -->
+      <li class="step primary" id="stepBar" data-state="todo">
+        <span class="mark" aria-hidden="true"><span class="num">2</span></span>
+        <div class="body">
+          <button class="btn btn-primary" id="barBtn" data-i18n="wcBarTitle">Show my limits inside Claude</button>
+          <p class="status" id="barStatus" role="status" hidden></p>
+          <p class="note" data-i18n="wcBarNote">Only on claude.ai. Extracts only the usage figures from each reply; never stores or sends your messages. Turn it off anytime.</p>
+          <p class="note note-free" id="freeNote" hidden data-i18n="wcFreeNote">On the Free plan the bar is the only place your limits appear.</p>
+        </div>
+      </li>
+
+      <!-- (c) Pinning; hidden where the browser can't report it -->
+      <li class="step" id="stepPin" data-state="todo" hidden>
+        <span class="mark" aria-hidden="true"><span class="num">3</span></span>
+        <div class="body">
+          <h2 data-i18n="wcPinTitle">Pin it to your toolbar</h2>
+          <p class="status" id="pinStatus" role="status">Click the puzzle-piece icon in the toolbar, then the pin next to the orange pulse icon.</p>
+        </div>
+      </li>
+
+      <!-- (d) Secondary: threshold alerts -->
+      <li class="step secondary" id="stepAlerts" data-state="todo">
+        <span class="mark" aria-hidden="true"><span class="num"></span></span>
+        <div class="body">
+          <h2 id="alertsText">Get alerts at 80% and 95%</h2>
+          <p class="status" id="alertsStatus" role="status" hidden data-i18n="wcAlertsOk">Alerts are on.</p>
+          <div class="actions">
+            <button class="btn" id="alertsBtn" data-i18n="turnOn">Turn on</button>
+          </div>
+        </div>
+      </li>
+
+    </ol>
+
+    <footer class="foot">
+      <button class="btn" id="doneBtn" data-i18n="wcDone">Done</button>
+    </footer>
+
+  </main>
+  <script src="welcome.js"></script>
+</body>
+</html>

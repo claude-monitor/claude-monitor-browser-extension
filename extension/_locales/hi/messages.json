@@ -1,0 +1,10 @@
+{
+  "extName": {
+    "message": "Claude Monitor: उपयोग ट्रैकर, सत्र और साप्ताहिक सीमाएं",
+    "description": "Extension name on the Chrome Web Store and Edge Add-ons (max 75 characters)."
+  },
+  "extDescription": {
+    "message": "Claude की उपयोग सीमाएं लाइव देखें: सत्र और साप्ताहिक %, रीसेट तक उलटी गिनती, 80/95% पर अलर्ट। Free, Pro, Max और Claude Code।",
+    "description": "Short description shown in the stores and the browser (max 132 characters)."
+  }
+}

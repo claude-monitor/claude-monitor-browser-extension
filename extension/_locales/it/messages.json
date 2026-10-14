@@ -401,7 +401,7 @@
     "message": "Mostra una barra di utilizzo sopra la casella di chat"
   },
   "optBarHint": {
-    "message": "Disattivata per impostazione predefinita; attivandola viene chiesto l'accesso alle pagine di claude.ai. La barra legge solo i dati di utilizzo che Claude allega a ogni risposta, mai i tuoi messaggi. Nel piano Free è l'unico posto in cui compaiono i tuoi limiti."
+    "message": "Disattivata per impostazione predefinita. Attivandola si aggiunge il permesso scripting (Chrome concede già claude.ai tramite gli endpoint di utilizzo). La barra estrae solo i dati di utilizzo che Claude allega a ogni risposta; non salva né invia mai i tuoi messaggi. Nel piano Free è l'unico posto in cui compaiono i tuoi limiti."
   },
   "optHistory": {
     "message": "Cronologia"
@@ -553,5 +553,196 @@
   },
   "barAria": {
     "message": "Utilizzo di Claude"
+  },
+  "tipResetsAt": {
+    "message": "$P1$: $P2$% usato, si azzera $P3$",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      },
+      "p2": {
+        "content": "$2"
+      },
+      "p3": {
+        "content": "$3"
+      }
+    }
+  },
+  "tipSignIn": {
+    "message": "Accedi a claude.ai per aggiornare"
+  },
+  "tipFreeBarOff": {
+    "message": "Attiva la barra per vedere i limiti del piano Free"
+  },
+  "notifResetTitle": {
+    "message": "Sessione Claude azzerata"
+  },
+  "notifResetBody": {
+    "message": "La tua sessione Claude è tornata allo 0%."
+  },
+  "forecastLine": {
+    "message": "A questo ritmo: limite ~$P1$ (azzeramento $P2$)",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      },
+      "p2": {
+        "content": "$2"
+      }
+    }
+  },
+  "forecastAt": {
+    "message": "A questo ritmo: limite ~$P1$",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "barBrandTitle": {
+    "message": "Claude Monitor (estensione del browser, non di Anthropic): clicca per i dettagli"
+  },
+  "barForecastShort": {
+    "message": "limite ~$P1$",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "msgsLeft": {
+    "message": "≈ $P1$ msg rimasti",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "msgsLeftTitle": {
+    "message": "Stimato dai tuoi ultimi $P1$ messaggi; varia in base al modello e alla lunghezza",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "barPillHide": {
+    "message": "Nascondi fino al ricaricamento della pagina"
+  },
+  "wcPageTitle": {
+    "message": "Ti diamo il benvenuto in Claude Monitor"
+  },
+  "wcIntro": {
+    "message": "Pochi passaggi rapidi e i tuoi limiti di Claude restano in vista mentre lavori."
+  },
+  "wcSignTitle": {
+    "message": "Accedi a Claude"
+  },
+  "wcSignChecking": {
+    "message": "Verifica dell'accesso a claude.ai…"
+  },
+  "wcSignOk": {
+    "message": "Accesso a claude.ai effettuato"
+  },
+  "wcSignNeeded": {
+    "message": "Claude Monitor legge i tuoi limiti tramite l'accesso a claude.ai. Accedi, poi torna a questa scheda."
+  },
+  "wcSignBtn": {
+    "message": "Accedi a claude.ai"
+  },
+  "wcBarTitle": {
+    "message": "Mostra i miei limiti dentro Claude"
+  },
+  "wcBarNote": {
+    "message": "Solo su claude.ai. Estrae solo i dati di utilizzo da ogni risposta; non salva né invia mai i tuoi messaggi. Puoi disattivarla quando vuoi."
+  },
+  "wcBarOn": {
+    "message": "Attiva. I tuoi limiti compaiono sopra la casella di chat su claude.ai."
+  },
+  "wcBarDenied": {
+    "message": "Non attivata. Puoi farlo più tardi dalle Impostazioni."
+  },
+  "wcPinTitle": {
+    "message": "Fissala sulla barra degli strumenti"
+  },
+  "wcPinHow": {
+    "message": "Fai clic sull'icona del puzzle nella barra degli strumenti, poi sulla puntina accanto all'icona arancione del battito."
+  },
+  "wcPinHowEdge": {
+    "message": "Fai clic sull'icona del puzzle nella barra degli strumenti, poi sull'occhio accanto all'icona arancione del battito."
+  },
+  "wcPinHowFirefox": {
+    "message": "Fai clic sull'icona del puzzle nella barra degli strumenti, poi sull'ingranaggio accanto all'icona arancione del battito e su Fissa alla barra degli strumenti."
+  },
+  "wcPinOk": {
+    "message": "Fissata. Il badge mostra la sessione a colpo d'occhio."
+  },
+  "wcAlertsOk": {
+    "message": "Gli avvisi sono attivi."
+  },
+  "wcFreeNote": {
+    "message": "Nel piano Free la barra è l'unico posto in cui compaiono i tuoi limiti."
+  },
+  "wcDone": {
+    "message": "Fatto"
+  },
+  "whatsNewTitle": {
+    "message": "Novità della v$P1$",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "wn121Bar": {
+    "message": "I tuoi limiti sopra la casella di chat, ora anche in Claude Code su claude.ai"
+  },
+  "wn121Pace": {
+    "message": "Se al tuo ritmo raggiungerai il limite prima dell'azzeramento, più o meno quando, e un avviso quando si azzera una sessione molto usata"
+  },
+  "wn121Msgs": {
+    "message": "Con la barra attiva: stima dei messaggi rimanenti nella sessione"
+  },
+  "wnTurnOnBar": {
+    "message": "Attiva la barra"
+  },
+  "pinHintText": {
+    "message": "Fissa Claude Monitor per tenere il badge in vista"
+  },
+  "pinHintHow": {
+    "message": "Icona del puzzle, poi la puntina accanto all'icona arancione"
+  },
+  "pinHintHowEdge": {
+    "message": "Icona del puzzle, poi l'occhio accanto all'icona arancione"
+  },
+  "pinHintHowFirefox": {
+    "message": "Icona del puzzle, ingranaggio accanto all'icona arancione, Fissa alla barra degli strumenti"
+  },
+  "somethingWrong": {
+    "message": "Qualcosa non va?"
+  },
+  "emptySignedOutTitle": {
+    "message": "Accedi a claude.ai"
+  },
+  "emptySignedOutText": {
+    "message": "Claude Monitor legge i tuoi limiti tramite l'accesso a claude.ai. Accedi, poi riapri questa finestra."
+  },
+  "emptyOrgTitle": {
+    "message": "Nessuna organizzazione Claude trovata per questo account"
+  },
+  "emptyOrgText": {
+    "message": "Accedi a claude.ai con l'account che usi per chattare, poi riprova."
+  },
+  "emptyFailTitle": {
+    "message": "Non è stato ancora possibile leggere il tuo utilizzo"
+  },
+  "emptyLoading": {
+    "message": "Lettura dell'utilizzo da claude.ai…"
+  },
+  "orgSelectTitle": {
+    "message": "Organizzazione Claude mostrata"
+  },
+  "optNotifHintReset": {
+    "message": "Vale per la sessione, il limite settimanale e i limiti per modello. Ogni avviso arriva una sola volta per periodo, più una volta quando si azzera una sessione che ha superato la soglia di avviso."
   }
 }

@@ -1,0 +1,10 @@
+{
+  "extName": {
+    "message": "Claude Monitor: تتبع الاستخدام وحدود الجلسة والحدود الأسبوعية",
+    "description": "Extension name on the Chrome Web Store and Edge Add-ons (max 75 characters)."
+  },
+  "extDescription": {
+    "message": "حدود استخدام Claude مباشرة: نسبة الجلسة والأسبوع، عدّ تنازلي حتى إعادة التعيين، تنبيهات عند 80/95%. Free وPro وMax وClaude Code.",
+    "description": "Short description shown in the stores and the browser (max 132 characters)."
+  }
+}

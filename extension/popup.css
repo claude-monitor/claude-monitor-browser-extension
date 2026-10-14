@@ -1,4 +1,4 @@
-/* ─── Claude Usage Monitor — Popup UI ──────────────────────────────────────
+/* ─── Claude Usage Monitor: Popup UI ───────────────────────────────────────
    Warm-dark "Anthropic-honest" theme: warm near-black surfaces, clay accent
    (the real Anthropic signature, not the generic AI-purple), semantic
    green/amber/red reserved for usage state. */
@@ -12,12 +12,12 @@
   --border:    #352c26;  /* hairlines */
   --border-lt: #45392f;  /* hover / control borders */
 
-  /* Warm ink — all AA on --bg-1 */
+  /* Warm ink, all AA on --bg-1 */
   --text-pri:  #f4eee7;
   --text-sec:  #b9ada1;
   --text-dim:  #9c9286;
 
-  /* Clay accent — the real Anthropic color */
+  /* Clay accent: the real Anthropic color */
   --accent:        #d97757;  /* fills, logo, selection */
   --accent-bright: #ea9576;  /* text / links / hover on dark */
   --accent-ink:    #1b1410;  /* text ON clay fills */
@@ -86,7 +86,7 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* Keyboard focus — every interactive control */
+/* Keyboard focus: every interactive control */
 :focus-visible {
   outline: 2px solid var(--accent-bright);
   outline-offset: 2px;
@@ -155,7 +155,9 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
-.meta-row { display: flex; align-items: center; gap: 6px; }
+.meta-row { display: flex; align-items: center; gap: 6px; min-width: 0; }
+
+.app-version[hidden] { display: none; }
 
 .plan-badge {
   font-size: 9.5px;
@@ -170,6 +172,37 @@ body {
 }
 
 .plan-badge[hidden] { display: none; }
+
+/* Org picker: dressed as the plan badge it replaces, with a chevron. Shrinks
+   with the header and cuts long org names with an ellipsis. */
+.org-select {
+  min-width: 0;
+  max-width: 120px;
+  font-family: inherit;
+  font-size: 9.5px;
+  font-weight: 700;
+  color: var(--accent-bright);
+  background-color: rgba(217, 119, 87, 0.14);
+  border: 1px solid rgba(217, 119, 87, 0.32);
+  border-radius: 4px;
+  padding: 1px 14px 1px 5px;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5' viewBox='0 0 8 5'%3E%3Cpath d='M1 1l3 3 3-3' stroke='%239c9286' stroke-width='1.3' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 4px center;
+}
+
+.org-select:hover { border-color: var(--accent); }
+.org-select:focus { outline: none; border-color: var(--accent); }
+.org-select:disabled { opacity: 0.6; cursor: progress; }
+.org-select[hidden] { display: none; }
+.org-select option { background: var(--bg-1); color: var(--text-pri); font-weight: 400; }
 
 .header-actions {
   display: flex;
@@ -596,6 +629,17 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
+/* Pace forecast and messages-left estimate, under the reset line. Estimates,
+   so quieter than the measured figures above them. */
+.pace-row {
+  color: var(--text-dim);
+  font-size: 11px;
+  margin-top: 2px;
+  font-variant-numeric: tabular-nums;
+}
+
+.pace-row[hidden] { display: none; }
+
 .reset-label {
   color: var(--text-dim);
   font-style: italic;
@@ -792,6 +836,62 @@ body {
 
 .review-nudge-dismiss:hover { color: var(--text-pri); }
 
+.review-nudge-icon { color: var(--accent-bright); flex-shrink: 0; }
+
+/* Second, quieter half of a one-line nudge (e.g. how to pin). */
+.review-nudge-sub { color: var(--text-dim); }
+
+/* ── What's new ──────────────────────────────────────────────────────────── */
+/* Same family as the footer nudges; a title, up to three bullets and an
+   optional action. Dismissed with the same corner cross as the promo. */
+
+.whats-new {
+  position: relative;
+  padding: 9px 14px 10px;
+  border-bottom: 1px solid var(--border);
+  background: color-mix(in srgb, var(--accent) 7%, var(--bg-1));
+  font-size: 11px;
+  color: var(--text-sec);
+}
+
+.whats-new-title {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--text-pri);
+  padding-right: 18px;
+}
+
+.whats-new-list {
+  margin: 4px 0 0 15px;
+  line-height: 1.45;
+}
+
+.whats-new-list li::marker { color: var(--accent-bright); }
+
+.whats-new-cta {
+  margin-top: 6px;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: var(--accent-bright);
+  font-size: 11px;
+  font-weight: 600;
+  font-family: inherit;
+}
+
+.whats-new-cta:hover { text-decoration: underline; }
+.whats-new-cta[hidden] { display: none; }
+
+/* What the bar reads, under its button (as in the welcome page and Settings). */
+.whats-new-note {
+  margin: 4px 0 0;
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--text-dim);
+}
+.whats-new-note[hidden] { display: none; }
+
 /* ── Windows companion promo ─────────────────────────────────────────────── */
 /* Two lines, hard limit: Chrome caps the popup at 600px and the promo is what
    pushed it past that on Windows. The full argument lives on the store page.
@@ -862,12 +962,30 @@ body {
   background: var(--bg-1);
 }
 
+/* Timestamp with the help link under it: stacked, so long translations of
+   either never push the open-link off the row. */
+.footer-left {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  line-height: 1.35;
+}
+
 .last-updated {
   font-size: 11px;
   color: var(--text-dim);
 }
 
 .last-updated.error { color: var(--red); }
+
+.help-link {
+  font-size: 10.5px;
+  color: var(--text-dim);
+  text-decoration: none;
+  align-self: flex-start;
+}
+
+.help-link:hover { color: var(--accent-bright); text-decoration: underline; }
 
 .open-link {
   font-size: 11px;
@@ -932,6 +1050,18 @@ body {
 }
 
 .no-data .no-data-title + p { margin-top: 6px; }
+
+.no-data p[hidden],
+.open-usage-btn[hidden] { display: none; }
+
+/* "Something wrong?" under every empty state. */
+.no-data-help {
+  margin-top: -14px;
+  padding: 0 20px 18px;
+  text-align: center;
+}
+
+.no-data-help .help-link { font-size: 11px; }
 
 /* ── Reduced motion ──────────────────────────────────────────────────────── */
 
@@ -1051,7 +1181,7 @@ body {
 :root[data-layout="hybrid"] .card-subtitle,
 :root[data-layout="hybrid"] .card-note { display: none; }
 
-/* ── Layout: Mixed — rings on Session + Weekly, list rows for the sub-caps ──── */
+/* ── Layout: Mixed: rings on Session + Weekly, list rows for the sub-caps ──── */
 
 :root[data-layout="hybrid"] #sessionCard .card-header,
 :root[data-layout="hybrid"] #weeklyCard .card-header { margin-bottom: 0; align-items: center; }
@@ -1067,7 +1197,7 @@ body {
 :root[data-layout="hybrid"] #sessionCard .reset-row,
 :root[data-layout="hybrid"] #weeklyCard .reset-row { margin-top: 4px; }
 
-/* ── Layout: Grid (bento) — every metric becomes a centred ring tile ───────── */
+/* ── Layout: Grid (bento): every metric becomes a centred ring tile ────────── */
 
 :root[data-layout="bento"] .cards {
   display: grid;
@@ -1092,6 +1222,7 @@ body {
 :root[data-layout="bento"] .card-pct,
 :root[data-layout="bento"] .progress-track,
 :root[data-layout="bento"] .reset-row,
+:root[data-layout="bento"] .pace-row,
 :root[data-layout="bento"] .reset-label,
 :root[data-layout="bento"] .card-subtitle,
 :root[data-layout="bento"] .card-note { display: none; }
