@@ -325,7 +325,7 @@
       color: var(--text);
     }
     .bar.light { --text: #3d3a35; --dim: #7a766f; --track: rgba(0,0,0,0.09); }
-    .bar.stale { opacity: 0.6; }
+    .bar.stale > * { opacity: 0.6; }
     .bar.pill {
       gap: 10px; flex-wrap: nowrap; padding: 4px 6px 4px 8px; border-radius: 999px;
       background: #30302e; border: 1px solid rgba(255,255,255,0.12); box-shadow: 0 2px 10px rgba(0,0,0,0.35);
