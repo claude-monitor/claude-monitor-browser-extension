@@ -2,13 +2,13 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Release](https://img.shields.io/github/v/release/claude-monitor/claude-monitor-browser-extension?label=release)](https://github.com/claude-monitor/claude-monitor-browser-extension/releases/latest)
-[![Chrome Web Store users](https://img.shields.io/chrome-web-store/users/bfhdcfiigpaaopklllpobkheakpigbfo?label=Chrome%20users)](https://chromewebstore.google.com/detail/bfhdcfiigpaaopklllpobkheakpigbfo)
-[![Chrome Web Store rating](https://img.shields.io/chrome-web-store/rating/bfhdcfiigpaaopklllpobkheakpigbfo?label=rating)](https://chromewebstore.google.com/detail/bfhdcfiigpaaopklllpobkheakpigbfo/reviews)
+[![Chrome Web Store users](https://img.shields.io/chrome-web-store/users/bfhdcfiigpaaopklllpobkheakpigbfo?label=Chrome%20users)](https://chromewebstore.google.com/detail/bfhdcfiigpaaopklllpobkheakpigbfo?utm_source=github&utm_medium=readme)
+[![Chrome Web Store rating](https://img.shields.io/chrome-web-store/rating/bfhdcfiigpaaopklllpobkheakpigbfo?label=rating)](https://chromewebstore.google.com/detail/bfhdcfiigpaaopklllpobkheakpigbfo/reviews?utm_source=github&utm_medium=readme)
 [![Firefox Add-ons](https://img.shields.io/amo/users/claude-usage-meter?label=Firefox%20users)](https://addons.mozilla.org/firefox/addon/claude-usage-meter/)
 
 **Never get cut off by a Claude usage limit again.** Claude Monitor is a free, open-source browser extension that shows your Claude usage limits live: the 5-hour session, the weekly limit and per-model caps, each with a countdown to its reset, plus desktop alerts at 80% and 95%. It works on the Free plan too.
 
-**Install:** [Chrome Web Store](https://chromewebstore.google.com/detail/bfhdcfiigpaaopklllpobkheakpigbfo) · [Firefox Add-ons](https://addons.mozilla.org/firefox/addon/claude-usage-meter/) · [Edge Add-ons](https://microsoftedge.microsoft.com/addons/detail/ilidbhklkpefboidlfeoiiacepcefinp) · Website: [claude-monitor.com](https://claude-monitor.com/)
+**Install:** [Chrome Web Store](https://chromewebstore.google.com/detail/bfhdcfiigpaaopklllpobkheakpigbfo?utm_source=github&utm_medium=readme) · [Firefox Add-ons](https://addons.mozilla.org/firefox/addon/claude-usage-meter/) · [Edge Add-ons](https://microsoftedge.microsoft.com/addons/detail/ilidbhklkpefboidlfeoiiacepcefinp) · Website: [claude-monitor.com](https://claude-monitor.com/)
 
 Manifest V3, MIT licensed, unminified: all code in this repo is exactly what runs in your browser. No account, no telemetry, and the only network requests go to claude.ai.
 
@@ -16,13 +16,13 @@ Manifest V3, MIT licensed, unminified: all code in this repo is exactly what run
 
 ## On claude.ai, and on the Free plan
 
-Turn on the optional usage bar in Settings and your session and weekly limits sit right above claude.ai's chat box, so you see them while you type.
+Turn on the optional usage bar (one click on the welcome page that opens at install, or later from the popup or Settings) and your session and weekly limits sit right above claude.ai's chat box, in chats, projects and Claude Code on the web, so you see them while you type. If the bar can't find the chat box, it shows as a small pill in the bottom-right corner instead.
 
 ![The usage bar above claude.ai's chat box, showing session and weekly usage with reset times](docs/screenshots/on-page-bar.png)
 
 It also covers the Free plan. Since August 2026 claude.ai shows no usage limits to Free accounts, and its usage endpoint returns every field empty for them. Each chat reply still carries the 5-hour and 7-day figures, so with the bar on, the extension reads them from the reply and the popup, badge and alerts work on Free as well. More in the [Free plan guide](https://claude-monitor.com/claude-free-plan-usage).
 
-The bar is off by default. Turning it on requests `scripting` and access to `claude.ai` pages as optional permissions; turning it off unregisters the scripts and gives both permissions back.
+The bar is off by default. Turning it on requests `scripting` and access to `claude.ai` pages as optional permissions; turning it off unregisters the scripts and gives `scripting` back. In Chrome, access to `claude.ai` itself stays granted, because Chrome already counts the required API permissions as access to the whole site (see [SECURITY.md](SECURITY.md)).
 
 It displays your usage buckets:
 
@@ -47,29 +47,32 @@ Every successful refresh is recorded locally as one sample, so the popup can dra
 
 ## Notifications
 
-Desktop alerts fire at 80% and 95% for your session, weekly and per-model caps, once per threshold per reset window. Thresholds are configurable in the settings page, and the whole feature can be turned off. The `notifications` permission is optional and requested at runtime, so the extension never asks for it until you enable alerts.
+Desktop alerts fire at 80% and 95% for your session, weekly and per-model caps, once per threshold per reset window. A session that crossed the warning threshold also gets one notification when it resets. Thresholds are configurable in the settings page, and the whole feature can be turned off. The `notifications` permission is optional and requested at runtime, so the extension never asks for it until you enable alerts.
 
 ## How it works
 
 The extension refreshes usage through Claude.ai's internal authenticated API.
 
-- Automatic refresh at a configurable interval: 1, 2, 5, 10 or 60 minutes.
+- Automatic refresh at a configurable interval: 2, 5, 10 or 60 minutes. Session and weekly usage are read on every refresh; routine runs, credits and the prepaid balance change slowly and are re-read every 30 minutes (or on a manual refresh).
 - Manual refresh is available from the popup.
 - The popup shows the extension version so you can confirm which local build is loaded.
 - A badge in the header shows your Claude plan (e.g. Max 5x).
 - When your claude.ai session expires, or refreshes keep failing, an inline banner says so, the badge turns gray, and the last known data stays visible, marked as stale, instead of being replaced by zeros.
 - Switching claude.ai to another account clears the previous account's data instead of showing it as current.
-- On the Free plan, where the usage endpoint returns nothing, the optional page script reads the `message_limit` event from each chat completion stream (5-hour and 7-day windows only; the reply text is never parsed or kept).
+- On the Free plan, where the usage endpoint returns nothing, the optional page script reads the limits Claude attaches to each reply: the `message_limit` event of the chat completion stream, or the limit frame of the newer `StreamTimeline` stream. It extracts only the limit fields (utilization and reset of the 5-hour and 7-day windows); it never stores or sends anything else, and the reply text is never parsed or kept (compressed frames, which carry the reply, are skipped without being decompressed).
 
 ## Features
 
-- Toolbar badge showing the current session percentage: green under 50%, yellow 50 to 80%, red above 80%.
+- Toolbar badge showing the current session percentage: green under 50%, yellow 50 to 80%, red above 80%. When a weekly limit or per-model cap has reached your alert threshold and is fuller than the session, the badge shows that one instead, in red with a W prefix (e.g. `W95`). Hover the icon for both windows and when each resets.
 - Optional usage bar above the claude.ai chat box, following Claude's light or dark theme.
 - Free plan support through the usage bar.
 - Popup with current session and weekly usage cards.
 - Per-model weekly sub-limit cards (Fable, Opus, Sonnet and Claude Design), offered on paid plans.
 - Usage history with a trend line under the session, weekly and spend bars, hover readout, configurable retention and JSON/CSV export.
-- Desktop notifications at 80% and 95%, with configurable thresholds.
+- Desktop notifications at 80% and 95%, with configurable thresholds, and one when a session that crossed the warning threshold resets.
+- Pace forecast: when your session (or week) is filling fast enough to hit the limit before it resets, the popup, the bar and the toolbar tooltip show roughly when.
+- Estimated messages left in the session, from the usage figures of your last replies (with the bar on).
+- Organization picker in the popup header for accounts with more than one Claude organization.
 - **Display options** menu in the popup: a **Metrics** section to show/hide optional cards (per-model weekly limits, daily routine runs and extra credits, with Select all / Deselect all), a **Design** section for the four layouts and the trend line, and a **Theme** section with six color palettes; your choices are remembered.
 - Daily routine-runs card (`used / limit`), shown only on plans that include routine runs.
 - Paid extra-credits card with spend, monthly limit and prepaid balance.
@@ -78,7 +81,7 @@ The extension refreshes usage through Claude.ai's internal authenticated API.
 - Manual refresh button.
 - Quick link to `https://claude.ai/settings/usage`.
 - Local storage caching so the last known value remains visible between refreshes.
-- Interface, notifications and store listing in English, Spanish, Brazilian Portuguese, German, French, Italian, Japanese and Korean, following the browser language.
+- Interface, notifications and store listing in English, Spanish, Brazilian Portuguese, German, French, Italian, Japanese and Korean, following the browser language. The store listing is also available in 14 more languages, where the interface stays in English.
 
 | Four layouts: Classic, Mixed, Grid, List | Six color themes |
 |---|---|
@@ -139,15 +142,16 @@ For a permanent install, use the published add-on at <https://addons.mozilla.org
 - `extension/options.html` and `extension/options.js`: settings page with notification thresholds, the usage-bar toggle, history retention, export and clear.
 - `extension/page/bar.js`: the optional usage bar on claude.ai (isolated world, closed shadow root, no network requests).
 - `extension/_locales/`: translated strings (`messages.json`) for the eight supported languages.
-- `extension/page/stream.js`: the optional page-world reader for the `message_limit` event in chat completion streams (Free plan support).
+- `extension/page/stream.js`: the optional page-world reader for the limits attached to each reply (the `message_limit` event of chat completion streams and the limit frame of `StreamTimeline` streams); it extracts only the limit fields and never stores or sends anything else.
+- `extension/welcome.html`, `extension/welcome.js` and `extension/welcome.css`: the packaged welcome page opened once at install (sign-in check, the bar in one click, pinning, alerts).
 
 ## Privacy
 
 - All data is stored locally on your device via `chrome.storage.local`, including the usage history: no account, no server, no sync.
 - No analytics, no telemetry, no third parties.
 - The extension never stores or sends your prompts, Claude's replies, projects or files. With the optional usage bar on, it scans each reply only for the usage figures attached to it.
-- Uninstalling opens an optional one-question survey on claude-monitor.com. The URL carries only the extension version and browser family.
-- Required host permissions are scoped to specific Claude.ai API endpoints; access to claude.ai pages is optional and only granted if you turn on the bar. See [SECURITY.md](SECURITY.md) for the full permission breakdown.
+- Uninstalling opens an optional one-question survey on claude-monitor.com. The URL carries the extension version and browser family; in Chrome and Edge, from 1.21, also five coarse values after the `#` (plan type, bar on or off, whether the bar found the chat box, the result of the last refresh, and an install-age bucket). A `#` fragment does not reach the server when the page opens; the page sends those values only if you tick its checkbox when you answer the survey. No identifier, organization or usage figure is ever in the URL.
+- The manifest lists five claude.ai API paths, and five read-only `GET` requests to them are all the code makes. Chrome ignores the path in host permissions, though, so it grants access to all of claude.ai and says so at install ("Read and change your data on claude.ai"). What keeps the extension to those five reads is this public code, the signed release checksums and store review, not the browser. See [SECURITY.md](SECURITY.md) for the full permission breakdown and a test you can run yourself.
 - Full privacy policy: <https://claude-monitor.com/privacy>
 
 ## Contributing

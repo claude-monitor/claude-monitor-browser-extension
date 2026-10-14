@@ -1,6 +1,6 @@
 {
   "extName": {
-    "message": "Claude 使用量トラッカー：セッション・週間の利用上限、クレジット、アラート",
+    "message": "Claude 使用量トラッカー：セッション・週間の使用制限、クレジット、アラート",
     "description": "Extension name on the Chrome Web Store and Edge Add-ons (max 75 characters)."
   },
   "extNameFirefox": {
@@ -401,7 +401,7 @@
     "message": "チャット欄の上に使用量バーを表示"
   },
   "optBarHint": {
-    "message": "初期設定はオフです。オンにすると claude.ai のページへのアクセス許可を求めます。バーが読み取るのは Claude が各返信に付ける使用量の数値だけで、メッセージは読み取りません。Free プランでは上限が表示される唯一の場所です。"
+    "message": "初期設定はオフです。オンにすると scripting 権限が追加されます（Chrome では使用量エンドポイントを通じて claude.ai へのアクセスがすでに許可されています）。バーは Claude が各返信に付ける使用量の数値だけを取り出し、メッセージを保存・送信することはありません。Free プランでは上限が表示される唯一の場所です。"
   },
   "optHistory": {
     "message": "履歴"
@@ -553,5 +553,196 @@
   },
   "barAria": {
     "message": "Claude の使用量"
+  },
+  "tipResetsAt": {
+    "message": "$P1$：$P2$% 使用、$P3$ にリセット",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      },
+      "p2": {
+        "content": "$2"
+      },
+      "p3": {
+        "content": "$3"
+      }
+    }
+  },
+  "tipSignIn": {
+    "message": "更新するには claude.ai にログインしてください"
+  },
+  "tipFreeBarOff": {
+    "message": "Free プランの上限を見るにはバーをオンにしてください"
+  },
+  "notifResetTitle": {
+    "message": "Claude セッションがリセットされました"
+  },
+  "notifResetBody": {
+    "message": "Claude セッションが 0% に戻りました。"
+  },
+  "forecastLine": {
+    "message": "このペースだと ~$P1$ に上限到達（リセット $P2$）",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      },
+      "p2": {
+        "content": "$2"
+      }
+    }
+  },
+  "forecastAt": {
+    "message": "このペースだと ~$P1$ に上限到達",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "barBrandTitle": {
+    "message": "Claude Monitor（ブラウザ拡張機能、Anthropic 製ではありません）：クリックで詳細を表示"
+  },
+  "barForecastShort": {
+    "message": "上限 ~$P1$",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "msgsLeft": {
+    "message": "残り約 $P1$ 件",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "msgsLeftTitle": {
+    "message": "直近 $P1$ 件のメッセージから推定。モデルや長さによって変わります",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "barPillHide": {
+    "message": "ページを再読み込みするまで非表示"
+  },
+  "wcPageTitle": {
+    "message": "Claude Monitor へようこそ"
+  },
+  "wcIntro": {
+    "message": "簡単な手順をいくつか済ませれば、作業中も Claude の上限をいつでも確認できます。"
+  },
+  "wcSignTitle": {
+    "message": "Claude にログイン"
+  },
+  "wcSignChecking": {
+    "message": "claude.ai のログイン状態を確認しています…"
+  },
+  "wcSignOk": {
+    "message": "claude.ai にログイン済み"
+  },
+  "wcSignNeeded": {
+    "message": "Claude Monitor は claude.ai のログインを使って上限を読み取ります。ログインしてから、このタブに戻ってください。"
+  },
+  "wcSignBtn": {
+    "message": "claude.ai にログイン"
+  },
+  "wcBarTitle": {
+    "message": "Claude の画面に上限を表示"
+  },
+  "wcBarNote": {
+    "message": "claude.ai 上でのみ動作します。各返信から使用量の数値だけを取り出し、メッセージを保存・送信することはありません。いつでもオフにできます。"
+  },
+  "wcBarOn": {
+    "message": "オンです。claude.ai のチャット欄の上に上限が表示されます。"
+  },
+  "wcBarDenied": {
+    "message": "オンになっていません。あとで設定からオンにできます。"
+  },
+  "wcPinTitle": {
+    "message": "ツールバーに固定"
+  },
+  "wcPinHow": {
+    "message": "ツールバーのパズルピースのアイコンをクリックし、オレンジ色の波形アイコンの横にあるピンをクリックします。"
+  },
+  "wcPinHowEdge": {
+    "message": "ツールバーのパズルピースのアイコンをクリックし、オレンジ色の波形アイコンの横にある目のアイコンをクリックします。"
+  },
+  "wcPinHowFirefox": {
+    "message": "ツールバーのパズルピースのアイコンをクリックし、オレンジ色の波形アイコンの横にある歯車から「ツールバーにピン留め」を選びます。"
+  },
+  "wcPinOk": {
+    "message": "固定しました。バッジでセッションの状況がひと目でわかります。"
+  },
+  "wcAlertsOk": {
+    "message": "通知はオンです。"
+  },
+  "wcFreeNote": {
+    "message": "Free プランでは、上限が表示されるのはこのバーだけです。"
+  },
+  "wcDone": {
+    "message": "完了"
+  },
+  "whatsNewTitle": {
+    "message": "v$P1$ の新機能",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "wn121Bar": {
+    "message": "チャット欄の上に上限を表示。claude.ai の Claude Code にも対応しました"
+  },
+  "wn121Pace": {
+    "message": "このペースでリセット前に上限に達しそうなら、そのおおよその時刻。よく使ったセッションがリセットされたときの通知も"
+  },
+  "wn121Msgs": {
+    "message": "バーをオンにすると、セッションの残りメッセージ数の目安を表示"
+  },
+  "wnTurnOnBar": {
+    "message": "バーをオンにする"
+  },
+  "pinHintText": {
+    "message": "Claude Monitor を固定すると、バッジを常に確認できます"
+  },
+  "pinHintHow": {
+    "message": "パズルピースのアイコン、次にオレンジ色のアイコンの横のピン"
+  },
+  "pinHintHowEdge": {
+    "message": "パズルピースのアイコン、次にオレンジ色のアイコンの横の目のアイコン"
+  },
+  "pinHintHowFirefox": {
+    "message": "パズルピースのアイコン、オレンジ色のアイコンの横の歯車、ツールバーにピン留め"
+  },
+  "somethingWrong": {
+    "message": "うまくいきませんか？"
+  },
+  "emptySignedOutTitle": {
+    "message": "claude.ai にログインしてください"
+  },
+  "emptySignedOutText": {
+    "message": "Claude Monitor は claude.ai のログインを使って上限を読み取ります。ログインしてから、このポップアップをもう一度開いてください。"
+  },
+  "emptyOrgTitle": {
+    "message": "このアカウントの Claude 組織が見つかりません"
+  },
+  "emptyOrgText": {
+    "message": "チャットに使っているアカウントで claude.ai にログインしてから、再試行してください。"
+  },
+  "emptyFailTitle": {
+    "message": "使用量をまだ読み取れていません"
+  },
+  "emptyLoading": {
+    "message": "claude.ai から使用量を読み取っています…"
+  },
+  "orgSelectTitle": {
+    "message": "表示中の Claude 組織"
+  },
+  "optNotifHintReset": {
+    "message": "セッション、週間、モデル別の上限に適用されます。各アラートはリセット期間ごとに1回だけ送信され、警告のしきい値を超えたセッションがリセットされたときにもう1回送信されます。"
   }
 }
