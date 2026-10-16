@@ -496,12 +496,16 @@ async function requestRefresh(source) {
 
 // The bar's brand mark. Opening the popup from a page message has no user
 // gesture behind it, which the browser may refuse; Settings is the fallback.
+// A second click while the popup is up is refused too (the popup holds the
+// focus); that click already closes it, so it toggles instead of opening Settings.
 async function openDetails() {
   if (chrome.action?.openPopup) {
     try {
       await chrome.action.openPopup();
       return 'popup';
     } catch { /* no focused window, or not allowed here */ }
+    const popups = await chrome.runtime.getContexts?.({ contextTypes: ['POPUP'] }).catch(() => []);
+    if (popups?.length) return 'closed';
   }
   chrome.runtime.openOptionsPage();
   return 'options';
