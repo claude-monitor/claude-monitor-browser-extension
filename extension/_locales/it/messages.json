@@ -421,7 +421,7 @@
     "message": "Rilevazioni salvate"
   },
   "optHistoryHint": {
-    "message": "Utilizzo, spesa a pagamento e saldo prepagato vengono registrati in locale a ogni aggiornamento riuscito, circa ogni 10 minuti. Nulla lascia il tuo dispositivo. Nell'esportazione un valore mancante resta vuoto: significa che il dato non era disponibile, non che era zero."
+    "message": "Utilizzo, spesa a pagamento e saldo prepagato vengono registrati in locale a ogni aggiornamento riuscito, circa ogni 10 minuti. La cronologia resta solo in questo browser. Nell'esportazione un valore mancante resta vuoto: significa che il dato non era disponibile, non che era zero."
   },
   "optExportJson": {
     "message": "Esporta JSON"

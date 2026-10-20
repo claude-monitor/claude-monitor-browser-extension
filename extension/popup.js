@@ -4,7 +4,21 @@ const USAGE_URL   = 'https://claude.ai/settings/usage';
 const SIGN_IN_URL = 'https://claude.ai/login';
 // Free plans have no usage page; the chat is where their limits show up.
 const CHAT_URL    = 'https://claude.ai/new';
-const HELP_URL    = 'https://claude-monitor.com/getting-started#troubleshooting';
+const HELP_URL    = siteUrl('getting-started', '#troubleshooting');
+
+// claude-monitor.com comes in the same languages as this UI (UI_BASES below,
+// plus pt-BR). Spanish keeps the slugs of the first Spanish site, the rest put
+// /<lang> before the English slug, and every other UI language (shown in
+// English) gets the English page. Reads the language itself because it runs
+// before the i18n block. Same rule as siteUrl() in options.js.
+function siteUrl(page, rest = '') {
+  const lang = chrome.i18n.getUILanguage();
+  const base = lang.split('-')[0];
+  const prefix = lang === 'pt-BR' ? '/pt-br'
+    : ['es', 'de', 'fr', 'it', 'ja', 'ko'].includes(base) ? `/${base}` : '';
+  const slug = prefix === '/es' && page === 'getting-started' ? 'guia-de-instalacion' : page;
+  return `https://claude-monitor.com${prefix}/${slug}${rest}`;
+}
 
 // Review nudge: shown once the popup has been opened with real data on three
 // distinct days; a click or dismiss hides it forever. The old 7-days-since-
@@ -23,7 +37,7 @@ const REVIEW_URL = navigator.userAgent.includes('Firefox')
 // Pro waitlist ask: later than the review ask, so it only reaches people who
 // kept using the extension. `src` tags the signup with the surface it came from.
 const WAITLIST_NUDGE_MIN_DAYS = 7;
-const WAITLIST_URL = 'https://claude-monitor.com/pro?src=ext-popup';
+const WAITLIST_URL = siteUrl('pro', '?src=ext-popup');
 
 // Must match FETCH_FAIL_STALE in background.js.
 const FETCH_FAIL_STALE = 2;
@@ -1695,10 +1709,13 @@ emptyBtn?.addEventListener('click', () => {
 });
 
 // "Something wrong?" in the footer and in every empty state.
-document.querySelectorAll('.help-link').forEach(link => link.addEventListener('click', (e) => {
-  e.preventDefault();
-  openTab(HELP_URL);
-}));
+document.querySelectorAll('.help-link').forEach(link => {
+  link.href = HELP_URL;
+  link.addEventListener('click', (e) => {
+    e.preventDefault();
+    openTab(HELP_URL);
+  });
+});
 
 settingsBtn?.addEventListener('click', () => {
   chrome.runtime.openOptionsPage();

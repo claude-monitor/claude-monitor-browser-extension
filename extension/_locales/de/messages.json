@@ -421,7 +421,7 @@
     "message": "Gespeicherte Messpunkte"
   },
   "optHistoryHint": {
-    "message": "Nutzung, bezahlte Ausgaben und Prepaid-Guthaben werden bei jeder erfolgreichen Aktualisierung lokal gespeichert, etwa alle 10 Minuten. Nichts verlässt dein Gerät. Im Export bleibt ein fehlender Wert leer: Die Daten waren nicht verfügbar, nicht null."
+    "message": "Nutzung, bezahlte Ausgaben und Prepaid-Guthaben werden bei jeder erfolgreichen Aktualisierung lokal gespeichert, etwa alle 10 Minuten. Der Verlauf liegt nur in diesem Browser. Im Export bleibt ein fehlender Wert leer: Die Daten waren nicht verfügbar, nicht null."
   },
   "optExportJson": {
     "message": "JSON exportieren"

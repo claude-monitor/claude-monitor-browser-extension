@@ -421,7 +421,7 @@
     "message": "Registros guardados"
   },
   "optHistoryHint": {
-    "message": "El uso, el gasto pagado y el saldo prepago se guardan localmente en cada actualización correcta, más o menos cada 10 minutos. Nada sale de tu dispositivo. En la exportación, un valor faltante queda vacío: significa que el dato no estaba disponible, no que era cero."
+    "message": "El uso, el gasto pagado y el saldo prepago se guardan localmente en cada actualización correcta, más o menos cada 10 minutos. El historial queda solo en este navegador. En la exportación, un valor faltante queda vacío: significa que el dato no estaba disponible, no que era cero."
   },
   "optExportJson": {
     "message": "Exportar JSON"

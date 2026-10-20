@@ -421,7 +421,7 @@
     "message": "Registros salvos"
   },
   "optHistoryHint": {
-    "message": "Uso, gasto pago e saldo pré-pago são registrados localmente a cada atualização bem-sucedida, mais ou menos a cada 10 minutos. Nada sai do seu dispositivo. Na exportação, um valor ausente fica vazio: significa que o dado não estava disponível, não que era zero."
+    "message": "Uso, gasto pago e saldo pré-pago são registrados localmente a cada atualização bem-sucedida, mais ou menos a cada 10 minutos. O histórico fica só neste navegador. Na exportação, um valor ausente fica vazio: significa que o dado não estava disponível, não que era zero."
   },
   "optExportJson": {
     "message": "Exportar JSON"
