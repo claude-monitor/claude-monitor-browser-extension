@@ -335,6 +335,24 @@ if (reviewLink) {
       : 'https://chromewebstore.google.com/detail/bfhdcfiigpaaopklllpobkheakpigbfo/reviews?utm_source=extension&utm_medium=options&utm_campaign=review';
 }
 
+// ─── Pro waitlist link ───────────────────────────────────────────────────────
+
+// claude-monitor.com comes in the same languages as this UI. Spanish keeps the
+// slugs of the first Spanish site, the rest put /<lang> before the English
+// slug, and every other UI language (shown in English) gets the English page.
+// Same rule as siteUrl() in popup.js.
+function siteUrl(page, rest = '') {
+  const lang = chrome.i18n.getUILanguage();
+  const base = lang.split('-')[0];
+  const prefix = lang === 'pt-BR' ? '/pt-br'
+    : ['es', 'de', 'fr', 'it', 'ja', 'ko'].includes(base) ? `/${base}` : '';
+  const slug = prefix === '/es' && page === 'getting-started' ? 'guia-de-instalacion' : page;
+  return `https://claude-monitor.com${prefix}/${slug}${rest}`;
+}
+
+const waitlistLink = document.getElementById('waitlistLink');
+if (waitlistLink) waitlistLink.href = siteUrl('pro', '?src=ext-options');
+
 // ─── Windows companion promo ─────────────────────────────────────────────────
 // Shown only on Windows, where the app can actually be installed. The cid is
 // what Partner Center splits campaigns by, so this surface carries its own.

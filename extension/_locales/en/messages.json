@@ -421,7 +421,7 @@
     "message": "Stored snapshots"
   },
   "optHistoryHint": {
-    "message": "Usage, paid spend and prepaid balance are recorded locally on every successful refresh, roughly once every 10 minutes. Nothing leaves your device. In the export, a missing value stays empty: it means the data was unavailable, not zero."
+    "message": "Usage, paid spend and prepaid balance are recorded locally on every successful refresh, roughly once every 10 minutes. The history is stored only in this browser. In the export, a missing value stays empty: it means the data was unavailable, not zero."
   },
   "optExportJson": {
     "message": "Export JSON"

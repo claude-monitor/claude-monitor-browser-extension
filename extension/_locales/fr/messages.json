@@ -421,7 +421,7 @@
     "message": "Relevés enregistrés"
   },
   "optHistoryHint": {
-    "message": "L'utilisation, les dépenses payées et le solde prépayé sont enregistrés localement à chaque actualisation réussie, environ toutes les 10 minutes. Rien ne quitte votre appareil. Dans l'export, une valeur manquante reste vide : la donnée n'était pas disponible, ce n'est pas zéro."
+    "message": "L'utilisation, les dépenses payées et le solde prépayé sont enregistrés localement à chaque actualisation réussie, environ toutes les 10 minutes. L'historique est conservé uniquement dans ce navigateur. Dans l'export, une valeur manquante reste vide : la donnée n'était pas disponible, ce n'est pas zéro."
   },
   "optExportJson": {
     "message": "Exporter en JSON"

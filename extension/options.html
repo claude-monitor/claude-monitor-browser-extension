@@ -143,7 +143,7 @@
   </div>
   <p class="hint" data-i18n="optHistoryHint">
     Usage, paid spend and prepaid balance are recorded locally on every successful
-    refresh, roughly once every 10 minutes. Nothing leaves your device. In the export,
+    refresh, roughly once every 10 minutes. The history is stored only in this browser. In the export,
     a missing value stays empty: it means the data was unavailable, not zero.
   </p>
 
@@ -161,11 +161,12 @@
     <a id="reviewLink" href="#" target="_blank" rel="noopener" data-i18n="optLeaveReview">Leave a review ★★★★★</a>
   </div>
 
+  <!-- href is set in options.js, in the UI language -->
   <div class="promo">
     <span><b data-i18n="optProTitle">Pro is coming.</b> <span data-i18n="optProText">Your Claude limits on your phone, and a Slack or Discord
     ping before you hit them. Optional and paid; this extension stays free.</span></span>
     <br />
-    <a href="https://claude-monitor.com/pro?src=ext-options" target="_blank" rel="noopener" data-i18n="joinWaitlist">Join the waitlist →</a>
+    <a id="waitlistLink" href="#" target="_blank" rel="noopener" data-i18n="joinWaitlist">Join the waitlist →</a>
   </div>
 
   <!-- Windows only; the href is set in options.js so the campaign id lives in
