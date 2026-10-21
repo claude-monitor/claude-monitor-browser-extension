@@ -4,7 +4,7 @@
     "description": "Extension name on the Chrome Web Store and Edge Add-ons (max 75 characters)."
   },
   "extNameFirefox": {
-    "message": "Claude Usage Tracker: Session & Weekly Limits",
+    "message": "Claude Monitor: Session & Weekly Usage Limits",
     "description": "Extension name on Firefox Add-ons (max 50 characters)."
   },
   "extNameEdge": {
