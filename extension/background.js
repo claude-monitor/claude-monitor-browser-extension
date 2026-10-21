@@ -838,45 +838,29 @@ function mapApiUsageToStoredShape(usage) {
   const weekly  = pickBucket(scoped.weekly,  usage?.seven_day);
   const opus    = pickBucket(scoped.opus,    usage?.seven_day_opus);
   const sonnet  = pickBucket(scoped.sonnet,  usage?.seven_day_sonnet);
-  return {
-    session: {
-      percentage: normalizePct(session?.utilization),
-      resetTime: parseApiTime(session?.resets_at),
-      label: session?.resets_at ? null : 'Not yet used',
-    },
-    weekly: {
-      percentage: normalizePct(weekly?.utilization),
-      resetTime: parseApiTime(weekly?.resets_at),
-      label: weekly?.resets_at ? null : 'Weekly limit',
-    },
+  const data = {
+    session: storedBucket(session),
+    weekly:  storedBucket(weekly, 'Weekly limit'),
     // Fable has no flat seven_day_* bucket; its weekly cap only exists as a
     // weekly_scoped entry in the limits array.
-    fable: {
-      percentage: normalizePct(scoped.fable?.utilization),
-      resetTime: parseApiTime(scoped.fable?.resets_at),
-      label: scoped.fable?.resets_at ? null : 'Not yet used',
-    },
-    opus: {
-      percentage: normalizePct(opus?.utilization),
-      resetTime: parseApiTime(opus?.resets_at),
-      label: opus?.resets_at ? null : 'Not yet used',
-    },
-    sonnet: {
-      percentage: normalizePct(sonnet?.utilization),
-      resetTime: parseApiTime(sonnet?.resets_at),
-      label: sonnet?.resets_at ? null : 'Not yet used',
-    },
-    design: {
-      percentage: normalizePct(usage?.seven_day_omelette?.utilization),
-      resetTime: parseApiTime(usage?.seven_day_omelette?.resets_at),
-      label: usage?.seven_day_omelette?.resets_at ? null : 'Not yet used',
-    },
+    fable:   storedBucket(scoped.fable),
+    opus:    storedBucket(opus),
+    sonnet:  storedBucket(sonnet),
+    design:  storedBucket(usage?.seven_day_omelette),
     extra: mapExtraUsage(usage?.extra_usage),
-    meta: {
-      ready:
-        normalizePct(session?.utilization) !== null ||
-        normalizePct(weekly?.utilization) !== null,
-    },
+  };
+  data.meta = { ready: data.session.percentage !== null || data.weekly.percentage !== null };
+  return data;
+}
+
+// One API bucket ({ utilization, resets_at }) in the stored shape. A bucket with
+// no reset yet carries a fallback label instead, in English (the popup
+// translates it at display time).
+function storedBucket(bucket, emptyLabel = 'Not yet used') {
+  return {
+    percentage: normalizePct(bucket?.utilization),
+    resetTime: parseApiTime(bucket?.resets_at),
+    label: bucket?.resets_at ? null : emptyLabel,
   };
 }
 
@@ -1448,36 +1432,12 @@ function sanitizeUsageData(data) {
   if (!data || typeof data !== 'object') return null;
 
   const clone = {
-    session: {
-      percentage: normalizePct(data.session?.percentage),
-      resetTime: data.session?.resetTime ?? null,
-      label: data.session?.label ?? null,
-    },
-    weekly: {
-      percentage: normalizePct(data.weekly?.percentage),
-      resetTime: data.weekly?.resetTime ?? null,
-      label: data.weekly?.label ?? null,
-    },
-    fable: {
-      percentage: normalizePct(data.fable?.percentage),
-      resetTime: data.fable?.resetTime ?? null,
-      label: data.fable?.label ?? null,
-    },
-    opus: {
-      percentage: normalizePct(data.opus?.percentage),
-      resetTime: data.opus?.resetTime ?? null,
-      label: data.opus?.label ?? null,
-    },
-    sonnet: {
-      percentage: normalizePct(data.sonnet?.percentage),
-      resetTime: data.sonnet?.resetTime ?? null,
-      label: data.sonnet?.label ?? null,
-    },
-    design: {
-      percentage: normalizePct(data.design?.percentage),
-      resetTime: data.design?.resetTime ?? null,
-      label: data.design?.label ?? null,
-    },
+    session: sanitizeBucket(data.session),
+    weekly:  sanitizeBucket(data.weekly),
+    fable:   sanitizeBucket(data.fable),
+    opus:    sanitizeBucket(data.opus),
+    sonnet:  sanitizeBucket(data.sonnet),
+    design:  sanitizeBucket(data.design),
     extra: sanitizeExtra(data.extra),
     prepaidBalance: sanitizePrepaid(data.prepaidBalance),
     routine: sanitizeRoutine(data.routine),
@@ -1491,6 +1451,16 @@ function sanitizeUsageData(data) {
 
   if (clone.session.percentage === null && clone.weekly.percentage === null) return null;
   return clone;
+}
+
+// Keeps only the three stored fields of a bucket (the stream's raw utilization
+// goes here) and drops a percentage that isn't a usable number.
+function sanitizeBucket(bucket) {
+  return {
+    percentage: normalizePct(bucket?.percentage),
+    resetTime: bucket?.resetTime ?? null,
+    label: bucket?.label ?? null,
+  };
 }
 
 function sanitizeRoutine(routine) {
