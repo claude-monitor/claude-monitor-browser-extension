@@ -1507,7 +1507,9 @@ function sanitizeExtra(extra) {
   const monthlyLimit = Number(extra.monthlyLimit);
   if (!Number.isFinite(usedCredits) || !Number.isFinite(monthlyLimit) || monthlyLimit <= 0) return null;
   const utilization = Number(extra.utilization);
-  const resetTime = Number(extra.resetTime);
+  // ?? NaN, not a bare Number(): Number(null) is 0, which stored "no reset"
+  // (extra_usage has none) as a reset in 1970.
+  const resetTime = Number(extra.resetTime ?? NaN);
   return {
     isEnabled: Boolean(extra.isEnabled),
     usedCredits,
