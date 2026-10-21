@@ -154,6 +154,7 @@ async function syncPageScriptsNow() {
 }
 
 chrome.permissions.onAdded.addListener(async () => {
+  listenNotificationClicks();
   await consumePageBarRequest();
   syncPageScripts();
   updateUninstallUrl();
@@ -1214,13 +1215,23 @@ function formatTimeUntil(epochMs) {
 // A click on any usage alert opens the official usage page, or a new chat on
 // the Free plan, where that page shows nothing. After a reset the chat is
 // where people want to go, whatever the plan.
-chrome.notifications?.onClicked.addListener(async (id) => {
+async function onNotificationClicked(id) {
   if (!id.startsWith('usage-')) return;
   chrome.notifications.clear(id);
   const chat = id === 'usage-reset-session' || await isFreePlan();
   const url = chat ? 'https://claude.ai/new' : 'https://claude.ai/settings/usage';
   chrome.tabs.create({ url, active: true });
-});
+}
+
+// The namespace only exists once `notifications` is granted. A grant while the
+// worker is running adds it to this worker too, but this ran at startup, when
+// it was still absent: the grant event attaches the listener as well, or the
+// first alerts after the grant open nothing when clicked.
+function listenNotificationClicks() {
+  const clicked = chrome.notifications?.onClicked;
+  if (clicked && !clicked.hasListener(onNotificationClicked)) clicked.addListener(onNotificationClicked);
+}
+listenNotificationClicks();
 
 // ── Usage history ─────────────────────────────────────────────────────────
 // Local time series behind the popup sparkline and the JSON/CSV export. It
@@ -1466,7 +1477,9 @@ function sanitizeExtra(extra) {
   const monthlyLimit = Number(extra.monthlyLimit);
   if (!Number.isFinite(usedCredits) || !Number.isFinite(monthlyLimit) || monthlyLimit <= 0) return null;
   const utilization = Number(extra.utilization);
-  const resetTime = Number(extra.resetTime);
+  // ?? NaN, not a bare Number(): Number(null) is 0, which stored "no reset"
+  // (extra_usage has none) as a reset in 1970.
+  const resetTime = Number(extra.resetTime ?? NaN);
   return {
     isEnabled: Boolean(extra.isEnabled),
     usedCredits,
