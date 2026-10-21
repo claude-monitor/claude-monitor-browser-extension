@@ -113,9 +113,9 @@ permissions"). Up to 1.20.2, turning the bar off left `scripting` granted;
 the update to 1.21.0 gives it back when the bar is off.
 There are no `web_accessible_resources` and no `externally_connectable`.
 
-### What the extension reads and never reads
+### What the extension reads and does not read
 
-| Reads (via your session)                             | Never reads                                                |
+| Reads (via your session)                             | Does not read                                              |
 | ---------------------------------------------------- | --------------------------------------------------------- |
 | Session (5-hour) usage %                             | Your chats, projects, or files (the optional bar scans replies only for the usage event, see above) |
 | Weekly usage % (all models + per-model sub-caps)     | Organization members / member list                        |
