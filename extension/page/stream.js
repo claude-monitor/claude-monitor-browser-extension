@@ -14,8 +14,8 @@
  * limit event's line is decoded; StreamTimeline frames are matched on the
  * bytes of the "5h"/"7d" labels and walked as numbers and lengths. Compressed
  * frames (the reply) are skipped unread; only their 5-byte header is read. A
- * send (PerformAction) is noticed by its URL alone; no request body is ever
- * read. It stores nothing and sends nothing else: the figures go to the
+ * PerformAction request (a send, but also opening a chat) is noticed by its
+ * URL alone; no request body is ever read. It stores nothing and sends nothing else: the figures go to the
  * extension's own bar script on this page (window.postMessage, same origin).
  * Reading stops at 8 MB per response. The one body parsed whole is the small
  * JSON error a send refused at the limit gets instead of a stream (no
@@ -41,7 +41,8 @@
 
   const COMPLETION_PATH = /^\/api\/organizations\/([^/]+)\/chat_conversations\/[^/]+\/(?:retry_)?completion$/;
   const TIMELINE_PATH = /^\/claudeai-rpc\/[\w.]*ConversationService\/StreamTimeline$/;
-  // Sending a message in the unified interface. Only the URL is looked at.
+  // Sending a message in the unified interface, and also opening or starting a
+  // chat (observed 2026-10-24). Only the URL is looked at.
   const ACTION_PATH = /^\/claudeai-rpc\/[\w.]*ConversationService\/PerformAction$/;
   // The event arrives near the end of the stream, after the reply. A long reply
   // is still far below this; past it we stop reading rather than buffer forever.
@@ -194,14 +195,18 @@
   // A send whose limits never came (stopped, failed) stops counting after this.
   const REPLY_WINDOW_MS = 10 * 60 * 1000;
 
-  // A limits event counts as a message (`reply`) only when a send from this
+  // A limits event counts as a message (`reply`) only when an action from this
   // page came first and reply frames followed it: reopened streams replay the
-  // timeline, reply frames and limits included, with nothing sent. Page-wide
-  // on purpose: the stream reopens often, and the limits can arrive on a
-  // different stream than the reply did.
+  // timeline, reply frames and limits included, with nothing sent. Opening a
+  // chat is an action too and its snapshot comes in gzip frames, but its
+  // stream carries no limits event (observed 2026-10-24), so it never counts.
+  // Page-wide on purpose: the stream reopens often, and the limits can arrive
+  // on a different stream than the reply did.
   let sentAt = 0;
   let sawReply = false;
   // Events already reported from this page; a reopened stream replays them.
+  // The frame holds the event's id, so two events with the same figures still
+  // get different keys.
   const recentKeys = [];
 
   async function scanTimeline(body) {
