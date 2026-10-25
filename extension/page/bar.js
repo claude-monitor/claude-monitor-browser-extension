@@ -13,6 +13,8 @@
   const HOST_ID = 'claude-usage-monitor-bar';
   // Must match FETCH_FAIL_STALE in background.js.
   const FETCH_FAIL_STALE = 2;
+  // Must match NOTIF_DEFAULTS.warnAt in background.js.
+  const WARN_AT_DEFAULT = 80;
 
   // Chat routes get a floating pill when the chat box can't be found, so a
   // redesign of the composer never leaves the bar silently missing. /code has
@@ -84,6 +86,8 @@
   });
 
   // ── Data ─────────────────────────────────────────────────────────────────
+  // The alert threshold decides when a per-model cap joins the strip.
+  const SETTINGS_KEYS = ['notifSettings'];
   const KEYS = ['claudeUsage', 'claudePlan', 'authBackoff', 'fetchFailures', 'pageBar',
     'forecast', 'msgLeft', 'reviewMoment', 'reviewNudgeDismissed', 'reviewNudgeSnoozedUntil', 'barFirstSeen'];
 
@@ -93,10 +97,11 @@
   let health = null;
 
   function load() {
-    chrome.storage.local.get([...KEYS, 'barHealth'], (s) => {
+    chrome.storage.local.get([...KEYS, ...SETTINGS_KEYS, 'barHealth'], (s) => {
       state = {
         usage: s.claudeUsage || null,
         plan: s.claudePlan || null,
+        notifSettings: s.notifSettings || null,
         authBackoff: s.authBackoff || null,
         fetchFailures: s.fetchFailures || null,
         enabled: s.pageBar?.enabled !== false,
@@ -120,7 +125,7 @@
   }
 
   chrome.storage.onChanged.addListener((changes, area) => {
-    if (area !== 'local' || !KEYS.some(k => k in changes)) return;
+    if (area !== 'local' || ![...KEYS, ...SETTINGS_KEYS].some(k => k in changes)) return;
     load();
   });
 
@@ -280,6 +285,23 @@
     if (!b || b.percentage === null || b.percentage === undefined) return null;
     if (fromStream && b.resetTime && b.resetTime <= Date.now()) return { percentage: 0, resetTime: null };
     return b;
+  }
+
+  // A per-model cap gets its own segment once it is the tightest weekly window:
+  // at or past the warning threshold and fuller than the weekly limit (the
+  // badge's rule). A chat in that model is cut off when the cap runs out,
+  // whatever the weekly limit says. Caps without a reset share the week's.
+  function tightestCap(usage, weekly) {
+    const raw = Math.round(Number(state.notifSettings?.warnAt));
+    const warnAt = Number.isFinite(raw) ? Math.min(100, Math.max(1, raw)) : WARN_AT_DEFAULT;
+    const names = { fable: msg('fableWeekly'), opus: msg('opusWeekly'), sonnet: msg('sonnetWeekly'), design: 'Claude Design' };
+    let best = null;
+    for (const [key, label] of Object.entries(names)) {
+      const b = bucket(usage?.[key], false);
+      if (!b || b.percentage < warnAt || b.percentage <= (weekly?.percentage ?? -1)) continue;
+      if (!best || b.percentage > best.b.percentage) best = { label, b: { ...b, resetTime: b.resetTime ?? weekly?.resetTime ?? null } };
+    }
+    return best;
   }
 
   function forecastFor(session, now) {
@@ -519,6 +541,10 @@
     } else {
       bar.append(el('span', 'note', free ? msg('barFreeWaiting') : msg('barNotLoaded')));
     }
+    // Right after the last segment, ahead of the notes. Free plan readings
+    // come from replies, which carry no per-model caps.
+    const cap = (session || weekly) && !fromStream ? tightestCap(state.usage, weekly) : null;
+    if (cap) [...bar.querySelectorAll('.seg')].pop().after(segment(cap.label, cap.b, { compact: pill }));
     if (pill) bar.append(closeButton(msg('barPillHide'), () => { pillClosed = true; unmount(); }));
     const style = el('style', null, STYLE);
     root.replaceChildren(style, bar);
