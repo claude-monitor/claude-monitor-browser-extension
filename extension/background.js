@@ -434,6 +434,8 @@ chrome.alarms.onAlarm.addListener((alarm) => {
     refreshUsage();
   } else if (alarm.name === RESET_ALARM) {
     notifySessionReset(alarm);
+  } else if (alarm.name.startsWith(WEEKLY_RESET_ALARM)) {
+    notifyWeeklyReset(alarm);
   }
 });
 
@@ -729,7 +731,7 @@ async function getClaudeOrgId() {
   if (claudeOrgId && orgId && orgId !== claudeOrgId) {
     await chrome.storage.local.remove(['claudeUsage', 'fetchFailures', 'notifState', 'msgLog', 'msgLeft', 'forecast', 'extrasCache']);
     await chrome.storage.local.set({ historyCutAt: Date.now() });
-    chrome.alarms.clear(RESET_ALARM);  // that session's reset is not this org's
+    clearResetAlarms();  // those resets are not this org's
     chrome.action.setBadgeText({ text: '' });
     chrome.action.setTitle({ title: BADGE_NAME });
   }
@@ -1143,14 +1145,20 @@ async function checkThresholdNotifications(data) {
 
   if (dirty) await chrome.storage.local.set({ notifState: state });
   await scheduleResetAlarm(data?.session, settings.warnAt);
+  await scheduleWeeklyResetAlarms(data, settings.warnAt);
 }
 
-// Reset alert: a session that crossed the warning threshold gets one more
-// notification a minute after it resets. It rides on the alerts toggle and the
-// `notifications` grant already checked above; no setting or permission of its
-// own. resets_at jitters by up to a second or so between reads, so the alarm is
-// moved only when the reset itself moved.
+// Reset alerts: a session, weekly limit or per-model cap that crossed the
+// warning threshold gets one more notification a minute after it resets. They
+// ride on the alerts toggle and the `notifications` grant already checked
+// above; no setting or permission of their own. resets_at jitters by up to a
+// second or so between reads, so an alarm is moved only when the reset itself
+// moved.
 const RESET_ALARM = 'reset-session';
+// The weekly limit and the per-model caps get one alarm per reset time (they
+// usually reset together), named after the first of them in NOTIF_BUCKETS, so
+// the weekly limit names the alert whenever it crossed too.
+const WEEKLY_RESET_ALARM = 'reset-weekly:';
 const RESET_ALARM_DELAY_MS = 60 * 1000;
 // An alarm that fires late (the browser was closed through the reset) no
 // longer means the session is at 0%: it only refreshes.
@@ -1166,6 +1174,38 @@ async function scheduleResetAlarm(session, warnAt) {
   chrome.alarms.create(RESET_ALARM, { when });
 }
 
+async function scheduleWeeklyResetAlarms(data, warnAt) {
+  const now = Date.now();
+  const wanted = [];
+  for (const [key] of NOTIF_BUCKETS) {
+    if (key === 'session') continue;
+    const pct = data?.[key]?.percentage;
+    const reset = Number(data?.[key]?.resetTime);
+    if (!(pct >= warnAt) || !(reset > now)) continue;
+    const when = reset + RESET_ALARM_DELAY_MS;
+    if (wanted.some(w => Math.abs(w.when - when) <= SAME_WINDOW_MS)) continue;
+    wanted.push({ name: WEEKLY_RESET_ALARM + key, when });
+  }
+  if (!wanted.length) return;
+  const existing = (await chrome.alarms.getAll()).filter(a => a.name.startsWith(WEEKLY_RESET_ALARM));
+  for (const { name, when } of wanted) {
+    // Same reset under another name: a cap crossed first and the weekly limit
+    // later. One alert per reset, named by the weekly limit.
+    for (const a of existing) {
+      if (a.name !== name && Math.abs(a.scheduledTime - when) <= SAME_WINDOW_MS) chrome.alarms.clear(a.name);
+    }
+    const same = existing.find(a => a.name === name);
+    if (same && Math.abs(same.scheduledTime - when) <= SAME_WINDOW_MS) continue;
+    chrome.alarms.create(name, { when });
+  }
+}
+
+async function clearResetAlarms() {
+  for (const a of await chrome.alarms.getAll()) {
+    if (a.name === RESET_ALARM || a.name.startsWith(WEEKLY_RESET_ALARM)) chrome.alarms.clear(a.name);
+  }
+}
+
 async function notifySessionReset(alarm) {
   const settings = await getNotifSettings();
   const late = Date.now() - (alarm?.scheduledTime ?? Date.now()) >= RESET_ALARM_LATE_MS;
@@ -1178,6 +1218,26 @@ async function notifySessionReset(alarm) {
     });
   }
   refreshUsage();
+}
+
+// The weekly alert is read again first: it says the limit is back, so a window
+// still running past the threshold (its reset moved) gets no alert. A read
+// that fails leaves the old window, whose reset has passed: the alert goes.
+async function notifyWeeklyReset(alarm) {
+  const key = alarm.name.slice(WEEKLY_RESET_ALARM.length);
+  const label = NOTIF_BUCKETS.find(([k]) => k === key)?.[1];
+  const late = Date.now() - (alarm?.scheduledTime ?? Date.now()) >= RESET_ALARM_LATE_MS;
+  await refreshUsage();
+  const settings = await getNotifSettings();
+  if (!label || late || !settings.enabled || !chrome.notifications) return;
+  const { claudeUsage } = await chrome.storage.local.get('claudeUsage');
+  if (badgePct(claudeUsage, key) >= settings.warnAt && Number(claudeUsage?.[key]?.resetTime) > Date.now()) return;
+  chrome.notifications.create('usage-reset-weekly', {
+    type: 'basic',
+    iconUrl: 'icons/icon128.png',
+    title: msg('notifResetWeeklyTitle', msg(label)),
+    message: msg('notifResetWeeklyBody'),
+  });
 }
 
 function showThresholdNotification(key, label, pct, resetTime, critical) {
@@ -1218,7 +1278,7 @@ function formatTimeUntil(epochMs) {
 async function onNotificationClicked(id) {
   if (!id.startsWith('usage-')) return;
   chrome.notifications.clear(id);
-  const chat = id === 'usage-reset-session' || await isFreePlan();
+  const chat = id.startsWith('usage-reset-') || await isFreePlan();
   const url = chat ? 'https://claude.ai/new' : 'https://claude.ai/settings/usage';
   chrome.tabs.create({ url, active: true });
 }

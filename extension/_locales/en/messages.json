@@ -580,6 +580,17 @@
   "notifResetBody": {
     "message": "Your Claude session is back to 0%."
   },
+  "notifResetWeeklyTitle": {
+    "message": "$P1$ reset",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "notifResetWeeklyBody": {
+    "message": "It's back to 0%."
+  },
   "forecastLine": {
     "message": "At this pace: limit at ~$P1$ (resets $P2$)",
     "placeholders": {
@@ -743,6 +754,6 @@
     "message": "Claude organization shown"
   },
   "optNotifHintReset": {
-    "message": "Applies to the session, weekly and per-model caps. Each alert fires once per reset window, and once more when a session that crossed the warning threshold resets."
+    "message": "Applies to the session, weekly and per-model caps. Each alert fires once per reset window, and once more when one of them resets after crossing the warning threshold."
   }
 }
