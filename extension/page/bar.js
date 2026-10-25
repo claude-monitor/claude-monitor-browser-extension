@@ -45,6 +45,9 @@
   const FORECAST_MAX_AGE_MS = 30 * 60 * 1000;
   const FORECAST_SHORT_MS   = 60 * 60 * 1000;
 
+  // Must match NOTIF_DEFAULTS.warnAt in background.js.
+  const WARN_AT_DEFAULT = 80;
+
   // Dates follow the UI language only where the UI is translated; otherwise an
   // English UI would show, say, Arabic or Russian dates (14 store-only locales).
   const UI_LANG = chrome.i18n.getUILanguage();
@@ -85,7 +88,8 @@
 
   // ── Data ─────────────────────────────────────────────────────────────────
   const KEYS = ['claudeUsage', 'claudePlan', 'authBackoff', 'fetchFailures', 'pageBar',
-    'forecast', 'msgLeft', 'reviewMoment', 'reviewNudgeDismissed', 'reviewNudgeSnoozedUntil', 'barFirstSeen'];
+    'forecast', 'msgLeft', 'reviewMoment', 'reviewNudgeDismissed', 'reviewNudgeSnoozedUntil', 'barFirstSeen',
+    'notifSettings'];
 
   let loaded = false;
   // barHealth as this page last read or wrote it. Read once: two tabs in
@@ -106,6 +110,7 @@
         reviewDismissed: Boolean(s.reviewNudgeDismissed),
         reviewSnoozedUntil: s.reviewNudgeSnoozedUntil,
         firstSeen: s.barFirstSeen,
+        notifSettings: s.notifSettings || null,
       };
       if (!loaded) {
         health = s.barHealth || null;
@@ -287,6 +292,23 @@
     if (!f || !session?.resetTime || !(state.forecast.at > now - FORECAST_MAX_AGE_MS)) return null;
     if (!(f.eta > now && f.eta < f.reset) || !(Math.abs(f.reset - session.resetTime) <= SAME_WINDOW_MS)) return null;
     return f;
+  }
+
+  // A per-model cap gets its own segment once it is the tightest weekly window:
+  // at or past the warning threshold and fuller than the weekly limit (the
+  // badge's rule). A chat in that model is cut off when the cap runs out,
+  // whatever the weekly limit says. Caps without a reset share the week's.
+  function tightestCap(usage, weekly) {
+    const raw = Math.round(Number(state.notifSettings?.warnAt));
+    const warnAt = Number.isFinite(raw) ? Math.min(100, Math.max(1, raw)) : WARN_AT_DEFAULT;
+    const names = { fable: msg('fableWeekly'), opus: msg('opusWeekly'), sonnet: msg('sonnetWeekly'), design: 'Claude Design' };
+    let best = null;
+    for (const [key, label] of Object.entries(names)) {
+      const b = bucket(usage?.[key], false);
+      if (!b || b.percentage < warnAt || b.percentage <= (weekly?.percentage ?? -1)) continue;
+      if (!best || b.percentage > best.b.percentage) best = { label, b: { ...b, resetTime: b.resetTime ?? weekly?.resetTime ?? null } };
+    }
+    return best;
   }
 
   function msgLeftFor(session, now) {
@@ -513,6 +535,8 @@
     if (session || weekly) {
       if (session) bar.append(segment(msg('sparkSession'), session, { compact: pill, ...sessionExtras(session) }));
       if (weekly)  bar.append(segment(msg('sparkWeekly'), weekly, { compact: pill }));
+      const cap = fromStream ? null : tightestCap(state.usage, weekly);
+      if (cap) bar.append(segment(cap.label, cap.b, { compact: pill }));
       if (stale && !pill) bar.append(el('span', 'note', msg('barStale')));
       if (!pill && !stale && reviewDue()) bar.append(reviewLine());
       if (mode) markFirstSeen();
