@@ -547,6 +547,7 @@ body {
 /* ── Progress bar ────────────────────────────────────────────────────────── */
 
 .progress-track {
+  position: relative;
   height: 6px;
   background: var(--bg-3);
   border-radius: 99px;
@@ -563,6 +564,21 @@ body {
 
 .progress-fill.yellow { background: var(--yellow); }
 .progress-fill.red    { background: var(--red); }
+
+/* Pace marker: where the fill would be now if the window were used evenly up
+   to its reset. A thin ink tick with a card-colored edge, so it reads against
+   the track and against any fill color. Positioned, so the fill's width
+   transition still reflows nothing. */
+.pace-tick {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  margin-left: -1px;
+  background: var(--text-pri);
+  box-shadow: 0 0 0 1px var(--bg-1);
+}
+.pace-tick[hidden] { display: none; }
 
 /* ── Sparkline ───────────────────────────────────────────────────────────── */
 /* Stretched to the card width via preserveAspectRatio="none", so strokes use
@@ -1147,6 +1163,8 @@ body {
 }
 .card-ring-val.yellow { stroke: var(--yellow); }
 .card-ring-val.red    { stroke: var(--red); }
+/* The bars' pace marker, as a radial tick across the ring. */
+.card-ring-pace { stroke: var(--text-pri); stroke-width: 1.6; stroke-linecap: round; }
 .card-ring-text {
   fill: var(--text-pri);
   font-size: 13px;

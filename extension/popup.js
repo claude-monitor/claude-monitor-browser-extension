@@ -162,6 +162,8 @@ const sessionReset = $('sessionReset');
 const sessionLabel = $('sessionLabel');
 const sessionForecast = $('sessionForecast');
 const sessionMsgs     = $('sessionMsgs');
+const sessionTick     = $('sessionTick');
+const sessionRingTick = $('sessionRingTick');
 
 // Weekly
 const weeklyPct   = $('weeklyPct');
@@ -169,6 +171,8 @@ const weeklyBar   = $('weeklyBar');
 const weeklyReset = $('weeklyReset');
 const weeklyLabel = $('weeklyLabel');
 const weeklyForecast = $('weeklyForecast');
+const weeklyTick     = $('weeklyTick');
+const weeklyRingTick = $('weeklyRingTick');
 
 // Sparklines
 const sessionSpark = $('sessionSpark');
@@ -176,6 +180,7 @@ const weeklySpark  = $('weeklySpark');
 const extraSpark   = $('extraSpark');
 const sparkTip     = $('sparkTip');
 const sparkToggle  = $('sparkToggle');
+const paceToggle   = $('paceToggle');
 
 // Fable
 const fableCard  = $('fableCard');
@@ -677,10 +682,92 @@ function setPaceRow(el, text, title) {
 }
 
 function renderPace(data) {
-  setPaceRow(sessionForecast, forecastText(forecastState?.session, data?.session));
-  setPaceRow(weeklyForecast, forecastText(forecastState?.weekly, data?.weekly));
+  setPaceRow(sessionForecast,
+    forecastText(forecastState?.session, data?.session) || aheadText(data?.session, SPARK_SESSION_SPAN));
+  setPaceRow(weeklyForecast,
+    forecastText(forecastState?.weekly, data?.weekly) || aheadText(data?.weekly, SPARK_WEEKLY_SPAN));
+  setPaceMark(sessionTick, sessionRingTick, evenPace(data?.session?.resetTime, SPARK_SESSION_SPAN));
+  setPaceMark(weeklyTick, weeklyRingTick, evenPace(data?.weekly?.resetTime, SPARK_WEEKLY_SPAN));
   const left = msgsLeftFor(data?.session);
   setPaceRow(sessionMsgs, left && msg('msgsLeft', left.n), left && msg('msgsLeftTitle', left.basedOn));
+}
+
+// ── Pace marker ──────────────────────────────────────────────────────────────
+// Where the bar would be now if the window's limit were used evenly from its
+// start to its reset: the 5-hour session runs from its first message to
+// resets_at, the week is the 7 days before resets_at. A fill past the mark is
+// using the window faster than it lasts. Only the reset is needed, so it works
+// from the first reading, Free plan included; a window that hasn't started
+// (no reset yet) has no mark.
+
+// The line under the bar says so only when the fill is well past the mark and
+// the window is far enough along: the first prompts of a session always jump
+// ahead of an even pace, and saying so every time would be noise.
+const PACE_AHEAD_POINTS  = 10;
+const PACE_AHEAD_FROM    = 25;   // % of the window gone
+const PACE_RING_INNER    = 15.5; // ring stroke spans r 17 to 21 (r 19, width 4)
+const PACE_RING_OUTER    = 22;   // the viewBox edge
+
+// On by default, like the trend line.
+let showPaceMarker = true;
+
+function evenPace(resetTime, spanMs) {
+  const reset = Number(resetTime);
+  const now = Date.now();
+  if (!Number.isFinite(reset) || reset <= now) return null;
+  const gone = 1 - (reset - now) / spanMs;
+  // A reset further away than one window is not this window's: no mark.
+  return gone >= 0 ? Math.min(1, gone) * 100 : null;
+}
+
+function aheadText(bucket, spanMs) {
+  if (!showPaceMarker) return null;
+  const pct = bucket?.percentage;
+  const even = evenPace(bucket?.resetTime, spanMs);
+  if (pct === null || pct === undefined || even === null || pct >= 100) return null;
+  if (even < PACE_AHEAD_FROM || pct - even < PACE_AHEAD_POINTS) return null;
+  return msg('paceAhead', Math.round(even));
+}
+
+function setPaceMark(tickEl, ringTickEl, even) {
+  const on = showPaceMarker && even !== null;
+  const title = on ? msg('paceEven', Math.round(even)) : '';
+  if (tickEl) {
+    tickEl.hidden = !on;
+    if (on) tickEl.style.left = `${even}%`;
+    tickEl.parentElement.title = title;
+  }
+  if (ringTickEl) {
+    ringTickEl.setAttribute('visibility', on ? 'visible' : 'hidden');
+    if (on) {
+      // The ring starts at 12 o'clock and fills clockwise.
+      const angle = (even / 100) * 2 * Math.PI;
+      const x = (r) => (22 + r * Math.sin(angle)).toFixed(2);
+      const y = (r) => (22 - r * Math.cos(angle)).toFixed(2);
+      ringTickEl.setAttribute('x1', x(PACE_RING_INNER));
+      ringTickEl.setAttribute('y1', y(PACE_RING_INNER));
+      ringTickEl.setAttribute('x2', x(PACE_RING_OUTER));
+      ringTickEl.setAttribute('y2', y(PACE_RING_OUTER));
+    }
+    const ring = ringTickEl.ownerSVGElement;
+    if (ring) {
+      // The ring is decorative (aria-hidden); the title is for the mouse only.
+      let tip = ring.querySelector('title');
+      if (!tip) { tip = document.createElementNS(SVG_NS, 'title'); ring.prepend(tip); }
+      tip.textContent = title;
+    }
+  }
+}
+
+function renderPaceToggle() {
+  paceToggle?.classList.toggle('on', showPaceMarker);
+}
+
+function togglePaceMarker() {
+  showPaceMarker = !showPaceMarker;
+  chrome.storage.local.set({ showPaceMarker });
+  renderPaceToggle();
+  if (lastData) renderPace(lastData);
 }
 
 // ── Sparklines ───────────────────────────────────────────────────────────────
@@ -1221,7 +1308,7 @@ const STORED_KEYS = [
   'claudeUsage', 'refreshInterval', 'authBackoff', 'fetchFailures', 'cardPrefs', 'claudePlan',
   'claudeOrgs', 'claudeOrgId', 'lastRefresh', 'theme', 'layout', 'installedAt',
   'reviewNudgeDismissed', 'reviewNudgeSnoozedUntil', 'reviewMoment', 'reviewOpenDays',
-  'usageHistory', 'historyCutAt', 'showSparkline', 'forecast', 'msgLeft', 'pageBar',
+  'usageHistory', 'historyCutAt', 'showSparkline', 'showPaceMarker', 'forecast', 'msgLeft', 'pageBar',
   'whatsNew', 'pinHintDismissed', 'winPromoDismissed', 'winPromoUpdate',
   'waitlistNudgeDismissed', 'notifSettings', 'alertsNudgeDismissed', 'alertsNudgeFirstSeen',
 ];
@@ -1236,11 +1323,13 @@ function loadData() {
     historySeries = Array.isArray(s.usageHistory) ? s.usageHistory : [];
     historyCutAt = Number(s.historyCutAt) || 0;
     showSparkline = s.showSparkline !== false;   // absent means on
+    showPaceMarker = s.showPaceMarker !== false;
     forecastState = s.forecast || null;
     msgLeftState = s.msgLeft || null;
     lastRefreshState = s.lastRefresh || null;
     authBackoffState = s.authBackoff || null;
     renderSparkToggle();
+    renderPaceToggle();
     applyTheme(s.theme);
     if (s.theme) mirrorTheme(s.theme);
     applyLayout(s.layout);
@@ -1654,6 +1743,7 @@ viewMenu?.addEventListener('click', (e) => {
   if (opt) {
     e.stopPropagation();
     if (opt.dataset.opt === 'spark') toggleSparkline();
+    if (opt.dataset.opt === 'pace') togglePaceMarker();
     return;
   }
   const item = e.target.closest('.view-menu-item');
@@ -1864,6 +1954,11 @@ chrome.storage.onChanged.addListener((changes) => {
     showSparkline = changes.showSparkline.newValue !== false;
     renderSparkToggle();
     renderSparklines(lastData);
+  }
+  if (changes.showPaceMarker) {
+    showPaceMarker = changes.showPaceMarker.newValue !== false;
+    renderPaceToggle();
+    if (lastData) renderPace(lastData);
   }
 });
 

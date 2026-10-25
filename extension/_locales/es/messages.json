@@ -75,6 +75,9 @@
   "trendLine": {
     "message": "Línea de tendencia"
   },
+  "paceMarker": {
+    "message": "Marcador de ritmo"
+  },
   "menuTheme": {
     "message": "Tema"
   },
@@ -620,6 +623,22 @@
   },
   "msgsLeftTitle": {
     "message": "Estimado a partir de tus últimos $P1$ mensajes; varía según el modelo y la extensión",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "paceEven": {
+    "message": "Ritmo parejo hasta el reinicio: $P1$% a esta altura",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "paceAhead": {
+    "message": "Por encima del ritmo parejo ($P1$% a esta altura)",
     "placeholders": {
       "p1": {
         "content": "$1"

@@ -131,6 +131,13 @@
                 <span data-i18n="trendLine">Trend line</span>
               </span>
             </button>
+            <button class="view-menu-item view-menu-opt" data-opt="pace" id="paceToggle">
+              <span class="view-check"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+              <span class="view-menu-label">
+                <svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="2" y1="12" x2="22" y2="12"/><line x1="14" y1="6" x2="14" y2="18"/></svg>
+                <span data-i18n="paceMarker">Pace marker</span>
+              </span>
+            </button>
           </div>
           <div class="view-menu-divider"></div>
           <div class="view-menu-section">
@@ -250,17 +257,18 @@
             <span class="card-title" data-i18n="currentSession">Current Session</span>
           </div>
           <span class="card-pct" id="sessionPct">–</span>
-          <svg class="card-ring" viewBox="0 0 44 44" aria-hidden="true"><circle class="card-ring-track" cx="22" cy="22" r="19"/><circle class="card-ring-val" id="sessionRing" cx="22" cy="22" r="19" pathLength="100" stroke-dasharray="0 100" transform="rotate(-90 22 22)"/><text class="card-ring-text" id="sessionRingTxt" x="22" y="22">–</text></svg>
+          <svg class="card-ring" viewBox="0 0 44 44" aria-hidden="true"><circle class="card-ring-track" cx="22" cy="22" r="19"/><circle class="card-ring-val" id="sessionRing" cx="22" cy="22" r="19" pathLength="100" stroke-dasharray="0 100" transform="rotate(-90 22 22)"/><line class="card-ring-pace" id="sessionRingTick" x1="22" y1="22" x2="22" y2="22" visibility="hidden"/><text class="card-ring-text" id="sessionRingTxt" x="22" y="22">–</text></svg>
         </div>
         <div class="progress-track">
           <div class="progress-fill" id="sessionBar" style="width:0%"></div>
+          <div class="pace-tick" id="sessionTick" hidden></div>
         </div>
         <svg class="spark" id="sessionSpark" viewBox="0 0 100 24" preserveAspectRatio="none"
              role="img" style="display:none"></svg>
         <div class="reset-row">
           <span id="sessionReset">–</span>
         </div>
-        <!-- Worker-computed pace forecast and messages-left estimate; hidden unless valid -->
+        <!-- Pace forecast (or the ahead-of-even-pace line) and messages-left estimate; hidden unless valid -->
         <div class="pace-row" id="sessionForecast" hidden></div>
         <div class="pace-row" id="sessionMsgs" hidden></div>
         <div class="reset-label" id="sessionLabel"></div>
@@ -280,11 +288,12 @@
             <span class="card-title" data-i18n="weeklyAll">Weekly · all models</span>
           </div>
           <span class="card-pct" id="weeklyPct">–</span>
-          <svg class="card-ring" viewBox="0 0 44 44" aria-hidden="true"><circle class="card-ring-track" cx="22" cy="22" r="19"/><circle class="card-ring-val" id="weeklyRing" cx="22" cy="22" r="19" pathLength="100" stroke-dasharray="0 100" transform="rotate(-90 22 22)"/><text class="card-ring-text" id="weeklyRingTxt" x="22" y="22">–</text></svg>
+          <svg class="card-ring" viewBox="0 0 44 44" aria-hidden="true"><circle class="card-ring-track" cx="22" cy="22" r="19"/><circle class="card-ring-val" id="weeklyRing" cx="22" cy="22" r="19" pathLength="100" stroke-dasharray="0 100" transform="rotate(-90 22 22)"/><line class="card-ring-pace" id="weeklyRingTick" x1="22" y1="22" x2="22" y2="22" visibility="hidden"/><text class="card-ring-text" id="weeklyRingTxt" x="22" y="22">–</text></svg>
         </div>
         <div class="card-subtitle" data-i18n="weeklyIncludes">Includes Fable 5, Opus, Sonnet &amp; Haiku</div>
         <div class="progress-track">
           <div class="progress-fill" id="weeklyBar" style="width:0%"></div>
+          <div class="pace-tick" id="weeklyTick" hidden></div>
         </div>
         <svg class="spark" id="weeklySpark" viewBox="0 0 100 24" preserveAspectRatio="none"
              role="img" style="display:none"></svg>

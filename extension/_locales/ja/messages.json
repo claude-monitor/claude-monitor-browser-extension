@@ -75,6 +75,9 @@
   "trendLine": {
     "message": "推移グラフ"
   },
+  "paceMarker": {
+    "message": "ペースの目安"
+  },
   "menuTheme": {
     "message": "テーマ"
   },
@@ -620,6 +623,22 @@
   },
   "msgsLeftTitle": {
     "message": "直近 $P1$ 件のメッセージから推定。モデルや長さによって変わります",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "paceEven": {
+    "message": "リセットまで均等に使う場合の目安：現時点で $P1$%",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "paceAhead": {
+    "message": "均等ペースより速め（目安は現時点で $P1$%）",
     "placeholders": {
       "p1": {
         "content": "$1"
