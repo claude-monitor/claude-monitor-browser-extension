@@ -75,6 +75,9 @@
   "trendLine": {
     "message": "추세선"
   },
+  "paceMarker": {
+    "message": "속도 기준선"
+  },
   "menuTheme": {
     "message": "테마"
   },
@@ -620,6 +623,22 @@
   },
   "msgsLeftTitle": {
     "message": "최근 메시지 $P1$개를 바탕으로 추정했으며, 모델과 길이에 따라 달라집니다",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "paceEven": {
+    "message": "초기화까지 고르게 쓸 때의 기준: 현재 $P1$%",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "paceAhead": {
+    "message": "고른 속도보다 빠름 (현재 기준 $P1$%)",
     "placeholders": {
       "p1": {
         "content": "$1"
