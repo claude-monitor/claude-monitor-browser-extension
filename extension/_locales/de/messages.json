@@ -580,6 +580,17 @@
   "notifResetBody": {
     "message": "Deine Claude-Sitzung steht wieder bei 0 %."
   },
+  "notifResetWeeklyTitle": {
+    "message": "$P1$ zurückgesetzt",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "notifResetWeeklyBody": {
+    "message": "Wieder bei 0 %."
+  },
   "forecastLine": {
     "message": "Bei diesem Tempo: Limit ~$P1$ (Reset $P2$)",
     "placeholders": {
@@ -743,6 +754,6 @@
     "message": "Angezeigte Claude-Organisation"
   },
   "optNotifHintReset": {
-    "message": "Gilt für Sitzung, Wochenlimit und Modelllimits. Jede Warnung kommt einmal pro Zeitraum, und noch einmal, wenn eine Sitzung zurückgesetzt wird, die die Warnschwelle überschritten hat."
+    "message": "Gilt für Sitzung, Wochenlimit und Modelllimits. Jede Warnung kommt einmal pro Zeitraum, und noch einmal, wenn eines davon zurückgesetzt wird, nachdem es die Warnschwelle überschritten hat."
   }
 }

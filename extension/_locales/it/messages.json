@@ -580,6 +580,17 @@
   "notifResetBody": {
     "message": "La tua sessione Claude è tornata allo 0%."
   },
+  "notifResetWeeklyTitle": {
+    "message": "$P1$ azzerato",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "notifResetWeeklyBody": {
+    "message": "Di nuovo allo 0%."
+  },
   "forecastLine": {
     "message": "A questo ritmo: limite ~$P1$ (azzeramento $P2$)",
     "placeholders": {
@@ -743,6 +754,6 @@
     "message": "Organizzazione Claude mostrata"
   },
   "optNotifHintReset": {
-    "message": "Vale per la sessione, il limite settimanale e i limiti per modello. Ogni avviso arriva una sola volta per periodo, più una volta quando si azzera una sessione che ha superato la soglia di avviso."
+    "message": "Vale per la sessione, il limite settimanale e i limiti per modello. Ogni avviso arriva una sola volta per periodo, più una volta quando uno di questi si azzera dopo aver superato la soglia di avviso."
   }
 }

@@ -580,6 +580,17 @@
   "notifResetBody": {
     "message": "Claude セッションが 0% に戻りました。"
   },
+  "notifResetWeeklyTitle": {
+    "message": "$P1$ がリセットされました",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "notifResetWeeklyBody": {
+    "message": "0% に戻りました。"
+  },
   "forecastLine": {
     "message": "このペースだと ~$P1$ に上限到達（リセット $P2$）",
     "placeholders": {
@@ -743,6 +754,6 @@
     "message": "表示中の Claude 組織"
   },
   "optNotifHintReset": {
-    "message": "セッション、週間、モデル別の上限に適用されます。各アラートはリセット期間ごとに1回だけ送信され、警告のしきい値を超えたセッションがリセットされたときにもう1回送信されます。"
+    "message": "セッション、週間、モデル別の上限に適用されます。各アラートはリセット期間ごとに1回だけ送信され、警告のしきい値を超えた上限がリセットされたときにもう1回送信されます。"
   }
 }

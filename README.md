@@ -47,7 +47,7 @@ Every successful refresh is recorded locally as one sample, so the popup can dra
 
 ## Notifications
 
-Desktop alerts fire at 80% and 95% for your session, weekly and per-model caps, once per threshold per reset window. A session that crossed the warning threshold also gets one notification when it resets. Thresholds are configurable in the settings page, and the whole feature can be turned off. The `notifications` permission is optional and requested at runtime, so the extension never asks for it until you enable alerts.
+Desktop alerts fire at 80% and 95% for your session, weekly and per-model caps, once per threshold per reset window. A session, weekly limit or per-model cap that crossed the warning threshold also gets one notification when it resets, and a click on it opens a new chat. Thresholds are configurable in the settings page, and the whole feature can be turned off. The `notifications` permission is optional and requested at runtime, so the extension never asks for it until you enable alerts.
 
 ## How it works
 
@@ -69,7 +69,7 @@ The extension refreshes usage through Claude.ai's internal authenticated API.
 - Popup with current session and weekly usage cards.
 - Per-model weekly sub-limit cards (Fable, Opus, Sonnet and Claude Design), offered on paid plans.
 - Usage history with a trend line under the session, weekly and spend bars, hover readout, configurable retention and JSON/CSV export.
-- Desktop notifications at 80% and 95%, with configurable thresholds, and one when a session that crossed the warning threshold resets.
+- Desktop notifications at 80% and 95%, with configurable thresholds, and one when a session, weekly limit or per-model cap that crossed the warning threshold resets.
 - Pace forecast: when your session (or week) is filling fast enough to hit the limit before it resets, the popup, the bar and the toolbar tooltip show roughly when.
 - Estimated messages left in the session, from the usage figures of your last replies (with the bar on).
 - Organization picker in the popup header for accounts with more than one Claude organization.

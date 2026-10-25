@@ -580,6 +580,17 @@
   "notifResetBody": {
     "message": "Claude 세션이 0%로 돌아왔습니다."
   },
+  "notifResetWeeklyTitle": {
+    "message": "$P1$ 초기화됨",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "notifResetWeeklyBody": {
+    "message": "0%로 돌아왔습니다."
+  },
   "forecastLine": {
     "message": "이 속도면 ~$P1$에 한도 도달 (초기화 $P2$)",
     "placeholders": {
@@ -743,6 +754,6 @@
     "message": "표시 중인 Claude 조직"
   },
   "optNotifHintReset": {
-    "message": "세션, 주간, 모델별 한도에 적용됩니다. 각 알림은 초기화 기간마다 한 번만 표시되며, 경고 기준을 넘은 세션이 초기화될 때 한 번 더 표시됩니다."
+    "message": "세션, 주간, 모델별 한도에 적용됩니다. 각 알림은 초기화 기간마다 한 번만 표시되며, 경고 기준을 넘은 한도가 초기화될 때 한 번 더 표시됩니다."
   }
 }

@@ -580,6 +580,17 @@
   "notifResetBody": {
     "message": "Votre session Claude est revenue à 0 %."
   },
+  "notifResetWeeklyTitle": {
+    "message": "Réinitialisation : $P1$",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "notifResetWeeklyBody": {
+    "message": "De retour à 0 %."
+  },
   "forecastLine": {
     "message": "À ce rythme : limite ~$P1$ (réinitialisation $P2$)",
     "placeholders": {
@@ -743,6 +754,6 @@
     "message": "Organisation Claude affichée"
   },
   "optNotifHintReset": {
-    "message": "S'applique à la session, à la limite hebdo et aux plafonds par modèle. Chaque alerte n'est envoyée qu'une fois par période, plus une fois quand une session qui a dépassé le seuil d'avertissement se réinitialise."
+    "message": "S'applique à la session, à la limite hebdo et aux plafonds par modèle. Chaque alerte n'est envoyée qu'une fois par période, plus une fois quand l'un d'eux se réinitialise après avoir dépassé le seuil d'avertissement."
   }
 }

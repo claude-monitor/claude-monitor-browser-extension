@@ -580,6 +580,17 @@
   "notifResetBody": {
     "message": "Tu sesión de Claude volvió a 0%."
   },
+  "notifResetWeeklyTitle": {
+    "message": "$P1$ reiniciado",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "notifResetWeeklyBody": {
+    "message": "Volvió a 0%."
+  },
   "forecastLine": {
     "message": "A este ritmo: límite ~$P1$ (reinicio $P2$)",
     "placeholders": {
@@ -743,6 +754,6 @@
     "message": "Organización de Claude que se muestra"
   },
   "optNotifHintReset": {
-    "message": "Se aplica a la sesión, al límite semanal y a los topes por modelo. Cada alerta se envía una sola vez por período, y una vez más cuando se reinicia una sesión que pasó el umbral de aviso."
+    "message": "Se aplica a la sesión, al límite semanal y a los topes por modelo. Cada alerta se envía una sola vez por período, y una vez más cuando cualquiera de ellos se reinicia después de pasar el umbral de aviso."
   }
 }
