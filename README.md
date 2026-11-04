@@ -16,7 +16,7 @@ Manifest V3, MIT licensed, unminified: all code in this repo is exactly what run
 
 ## On claude.ai, and on the Free plan
 
-Turn on the optional usage bar (one click on the welcome page that opens at install, or later from the popup or Settings) and your session and weekly limits sit right above claude.ai's chat box, in chats, projects and Claude Code on the web, so you see them while you type. If the bar can't find the chat box, it shows as a small pill in the bottom-right corner instead.
+Turn on the optional usage bar (one click on the welcome page that opens at install, or later from the popup or Settings) and your session and weekly limits sit right above claude.ai's chat box, in chats, projects and Claude Code on the web, so you see them while you type. When a per-model weekly cap (Fable 5, Opus, Sonnet or Claude Design) reaches your warning threshold and is fuller than the weekly limit, the bar shows that cap too, since it is the one that cuts that model off. If the bar can't find the chat box, it shows as a small pill in the bottom-right corner instead.
 
 ![The usage bar above claude.ai's chat box, showing session and weekly usage with reset times](docs/screenshots/on-page-bar.png)
 
@@ -64,7 +64,7 @@ The extension refreshes usage through Claude.ai's internal authenticated API.
 ## Features
 
 - Toolbar badge showing the current session percentage: green under 50%, yellow 50 to 80%, red above 80%. When a weekly limit or per-model cap has reached your alert threshold and is fuller than the session, the badge shows that one instead, in red with a W prefix (e.g. `W95`). Hover the icon for both windows and when each resets.
-- Optional usage bar above the claude.ai chat box, following Claude's light or dark theme.
+- Optional usage bar above the claude.ai chat box, following Claude's light or dark theme, with the per-model cap closest to its limit added once it reaches your warning threshold.
 - Free plan support through the usage bar.
 - Popup with current session and weekly usage cards.
 - Per-model weekly sub-limit cards (Fable, Opus, Sonnet and Claude Design), offered on paid plans.
