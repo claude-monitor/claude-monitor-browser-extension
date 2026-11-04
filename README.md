@@ -71,9 +71,10 @@ The extension refreshes usage through Claude.ai's internal authenticated API.
 - Usage history with a trend line under the session, weekly and spend bars, hover readout, configurable retention and JSON/CSV export.
 - Desktop notifications at 80% and 95%, with configurable thresholds, and one when a session that crossed the warning threshold resets.
 - Pace forecast: when your session (or week) is filling fast enough to hit the limit before it resets, the popup, the bar and the toolbar tooltip show roughly when.
+- Pace marker: a tick on the session and weekly bars (and rings) marks where an even pace to the reset would be by now, so a fill past it means the window is going faster than it lasts. Well past it, the card says so. Turn it off under **Pace marker** in the view menu.
 - Estimated messages left in the session, from the usage figures of your last replies (with the bar on).
 - Organization picker in the popup header for accounts with more than one Claude organization.
-- **Display options** menu in the popup: a **Metrics** section to show/hide optional cards (per-model weekly limits, daily routine runs and extra credits, with Select all / Deselect all), a **Design** section for the four layouts and the trend line, and a **Theme** section with six color palettes; your choices are remembered.
+- **Display options** menu in the popup: a **Metrics** section to show/hide optional cards (per-model weekly limits, daily routine runs and extra credits, with Select all / Deselect all), a **Design** section for the four layouts, the trend line and the pace marker, and a **Theme** section with six color palettes; your choices are remembered.
 - Daily routine-runs card (`used / limit`), shown only on plans that include routine runs.
 - Paid extra-credits card with spend, monthly limit and prepaid balance.
 - Subscription badge in the header (Max, Pro, Team, etc.).

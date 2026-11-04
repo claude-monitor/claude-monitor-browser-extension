@@ -75,6 +75,9 @@
   "trendLine": {
     "message": "Trendlinie"
   },
+  "paceMarker": {
+    "message": "Tempo-Markierung"
+  },
   "menuTheme": {
     "message": "Farbschema"
   },
@@ -620,6 +623,22 @@
   },
   "msgsLeftTitle": {
     "message": "Geschätzt aus deinen letzten $P1$ Nachrichten; hängt von Modell und Länge ab",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "paceEven": {
+    "message": "Gleichmäßiges Tempo bis zum Reset: $P1$ % bis jetzt",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "paceAhead": {
+    "message": "Schneller als gleichmäßig ($P1$ % bis jetzt)",
     "placeholders": {
       "p1": {
         "content": "$1"

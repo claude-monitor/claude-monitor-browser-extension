@@ -75,6 +75,9 @@
   "trendLine": {
     "message": "Trend line"
   },
+  "paceMarker": {
+    "message": "Pace marker"
+  },
   "menuTheme": {
     "message": "Theme"
   },
@@ -620,6 +623,22 @@
   },
   "msgsLeftTitle": {
     "message": "Estimated from your last $P1$ messages; varies with model and length",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "paceEven": {
+    "message": "Even pace to the reset: $P1$% by now",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "paceAhead": {
+    "message": "Ahead of an even pace ($P1$% by now)",
     "placeholders": {
       "p1": {
         "content": "$1"

@@ -45,6 +45,11 @@
   const FORECAST_MAX_AGE_MS = 30 * 60 * 1000;
   const FORECAST_SHORT_MS   = 60 * 60 * 1000;
 
+  // Pace marker, the popup's twin: a tick where the fill would be now if the
+  // window were used evenly up to its reset.
+  const SESSION_SPAN_MS = 5 * 60 * 60 * 1000;
+  const WEEKLY_SPAN_MS  = 7 * 24 * 60 * 60 * 1000;
+
   // Dates follow the UI language only where the UI is translated; otherwise an
   // English UI would show, say, Arabic or Russian dates (14 store-only locales).
   const UI_LANG = chrome.i18n.getUILanguage();
@@ -85,7 +90,8 @@
 
   // ── Data ─────────────────────────────────────────────────────────────────
   const KEYS = ['claudeUsage', 'claudePlan', 'authBackoff', 'fetchFailures', 'pageBar',
-    'forecast', 'msgLeft', 'reviewMoment', 'reviewNudgeDismissed', 'reviewNudgeSnoozedUntil', 'barFirstSeen'];
+    'forecast', 'msgLeft', 'reviewMoment', 'reviewNudgeDismissed', 'reviewNudgeSnoozedUntil', 'barFirstSeen',
+    'showPaceMarker'];
 
   let loaded = false;
   // barHealth as this page last read or wrote it. Read once: two tabs in
@@ -106,6 +112,7 @@
         reviewDismissed: Boolean(s.reviewNudgeDismissed),
         reviewSnoozedUntil: s.reviewNudgeSnoozedUntil,
         firstSeen: s.barFirstSeen,
+        paceMarker: s.showPaceMarker !== false,
       };
       if (!loaded) {
         health = s.barHealth || null;
@@ -289,6 +296,16 @@
     return f;
   }
 
+  // Share of the window gone, as a percentage of the bar; null without a reset
+  // in this window.
+  function evenPace(b, spanMs) {
+    const reset = Number(b?.resetTime);
+    const now = Date.now();
+    if (!state.paceMarker || !Number.isFinite(reset) || reset <= now) return null;
+    const gone = 1 - (reset - now) / spanMs;
+    return gone >= 0 ? Math.min(1, gone) * 100 : null;
+  }
+
   function msgLeftFor(session, now) {
     const left = state.msgLeft;
     if (!left || !(session?.resetTime > now) || !(left.n >= 1)) return null;
@@ -334,8 +351,9 @@
     .pill .track { display: none; }
     .seg { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
     .label, .reset, .note { color: var(--dim); }
-    .track { width: 56px; height: 4px; border-radius: 2px; background: var(--track); overflow: hidden; }
+    .track { position: relative; width: 56px; height: 4px; border-radius: 2px; background: var(--track); overflow: hidden; }
     .fill { display: block; height: 100%; border-radius: 2px; }
+    .tick { position: absolute; top: 0; bottom: 0; width: 2px; margin-left: -1px; background: var(--text); }
     .pct { font-weight: 600; font-variant-numeric: tabular-nums; }
     .brand { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; color: var(--dim); border-radius: 4px; }
     .brand svg { display: block; width: 16px; height: 16px; flex: none; }
@@ -402,16 +420,22 @@
     return node;
   }
 
-  function segment(label, b, { compact = false, extraTitle = '', notes = [] } = {}) {
+  function segment(label, b, { compact = false, extraTitle = '', notes = [], pace = null } = {}) {
     const pct = Math.min(100, Math.max(0, Math.round(b.percentage)));
     const reset = b.resetTime ? until(b.resetTime) : '';
     const seg = el('span', 'seg');
-    seg.title = (reset ? msg('barTitleReset', label, pct, reset) : msg('barTitle', label, pct)) + extraTitle;
+    const paceTitle = pace === null ? '' : `\n${msg('paceEven', Math.round(pace))}`;
+    seg.title = (reset ? msg('barTitleReset', label, pct, reset) : msg('barTitle', label, pct)) + extraTitle + paceTitle;
     const track = el('span', 'track');
     const fill = el('span', 'fill');
     fill.style.width = `${pct}%`;
     fill.style.background = colorFor(pct);
     track.append(fill);
+    if (pace !== null) {
+      const tick = el('span', 'tick');
+      tick.style.left = `${pace}%`;
+      track.append(tick);
+    }
     const pctEl = el('span', 'pct', `${pct}%`);
     pctEl.style.color = colorFor(pct);
     seg.append(el('span', 'label', label), track, pctEl);
@@ -511,8 +535,11 @@
     bar.setAttribute('aria-label', msg('barAria'));
     bar.append(brand(pill));
     if (session || weekly) {
-      if (session) bar.append(segment(msg('sparkSession'), session, { compact: pill, ...sessionExtras(session) }));
-      if (weekly)  bar.append(segment(msg('sparkWeekly'), weekly, { compact: pill }));
+      if (session) {
+        bar.append(segment(msg('sparkSession'), session,
+          { compact: pill, pace: evenPace(session, SESSION_SPAN_MS), ...sessionExtras(session) }));
+      }
+      if (weekly) bar.append(segment(msg('sparkWeekly'), weekly, { compact: pill, pace: evenPace(weekly, WEEKLY_SPAN_MS) }));
       if (stale && !pill) bar.append(el('span', 'note', msg('barStale')));
       if (!pill && !stale && reviewDue()) bar.append(reviewLine());
       if (mode) markFirstSeen();
