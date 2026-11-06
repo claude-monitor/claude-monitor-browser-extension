@@ -156,6 +156,7 @@ const PAGE_BAR_PERMS = { origins: ['https://claude.ai/*'], permissions: ['script
 let pageBarOn = false;
 
 // Session
+const sessionCard  = $('sessionCard');
 const sessionPct   = $('sessionPct');
 const sessionBar   = $('sessionBar');
 const sessionReset = $('sessionReset');
@@ -541,6 +542,9 @@ function render(data) {
   noDataEl.style.display = 'none';
 
   // ── Session ──────────────────────────────────────────────────────────
+  // Verified Ultra accounts have no 5-hour limit, so no card either, as on
+  // claude.ai's own usage page.
+  sessionCard.style.display = data.meta?.noSession ? 'none' : '';
   const sPct = session?.percentage ?? null;
   if (sPct !== null) {
     const p = Math.min(100, Math.max(0, Math.round(sPct)));

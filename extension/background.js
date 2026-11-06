@@ -13,7 +13,7 @@ const POLL_MAX   = 60;
 const ORG_ID_TTL_MS    = 24 * 60 * 60 * 1000; // re-validate cached orgId once a day
 const AUTH_BACKOFF_MAX = 6;                    // cap consecutive auth-failure skips
 const FETCH_FAIL_STALE = 2;                    // consecutive non-auth failures before the data counts as stale
-const PLAN_SCHEMA      = 2;                    // bump to re-derive cached plans after a derivation change
+const PLAN_SCHEMA      = 3;                    // bump to re-derive cached plans after a derivation change
 
 // Daily routine-run budget lives behind the Claude Code gateway (/v1/code/...),
 // NOT in /usage. The route 404s without the ccr-triggers beta + anthropic-version
@@ -649,7 +649,8 @@ async function refreshUsageFromApi({ force = false } = {}) {
       }
     }
 
-    const data = mapApiUsageToStoredShape(usage);
+    const { claudePlan } = await chrome.storage.local.get('claudePlan');
+    const data = mapApiUsageToStoredShape(usage, claudePlan);
     // The secondary reads only matter when /usage had figures (the Free plan
     // answers all null, and the refresh is rejected below anyway).
     if (data.meta.ready) {
@@ -702,7 +703,8 @@ async function getClaudeOrgId() {
   // existing install (org id already cached) still fetches the list once to
   // populate the plan badge and the org picker. PLAN_SCHEMA forces one refetch
   // after an update that changes how the plan is derived (v2: Free accounts
-  // read as tier default_claude_ai). A pin that isn't the active org yet too.
+  // read as tier default_claude_ai; v3: the Ultra and Max names). A pin that
+  // isn't the active org yet too.
   if (claudeOrgId && fresh && claudePlan?.v === PLAN_SCHEMA && Array.isArray(claudeOrgs) &&
       (!claudeOrgPinned || claudeOrgPinned === claudeOrgId)) return claudeOrgId;
 
@@ -797,8 +799,10 @@ function availableSubcaps(tier, caps) {
 
 function planLabel(tier, caps, ravenType) {
   const t = String(tier || '').toLowerCase();
-  if (t.includes('max_20x'))    return 'Max 20x';
-  if (t.includes('max_5x'))     return 'Max 5x';
+  // Max 20x is now called Ultra and Max 5x just Max. The Max tier kept its old
+  // string (default_claude_max_5x, read 2026-11-06), so Ultra should have too;
+  // no Ultra account has been read yet, hence the second test.
+  if (t.includes('max_20x') || t.includes('ultra')) return 'Ultra';
   if (t.includes('max'))        return 'Max';
   if (t.includes('team'))       return 'Team';
   if (t.includes('enterprise')) return 'Enterprise';
@@ -834,9 +838,20 @@ async function fetchClaudeJson(url) {
   return response.json();
 }
 
-function mapApiUsageToStoredShape(usage) {
+// Verified Ultra accounts have no 5-hour limit: the official usage page, which
+// renders `limits`, has no Current session row for them. Whether other plans
+// keep that entry before a session starts hasn't been seen, so only Ultra is
+// read this way; anywhere else a missing entry still falls back to five_hour.
+function hasNoSessionWindow(usage, plan) {
+  const limits = usage?.limits;
+  return plan?.label === 'Ultra' && Array.isArray(limits) && limits.length > 0 &&
+    !limits.some(limit => limit?.kind === 'session');
+}
+
+function mapApiUsageToStoredShape(usage, plan) {
   const scoped = mapLimitsArray(usage?.limits);
-  const session = pickBucket(scoped.session, usage?.five_hour);
+  const noSession = hasNoSessionWindow(usage, plan);
+  const session = noSession ? null : pickBucket(scoped.session, usage?.five_hour);
   const weekly  = pickBucket(scoped.weekly,  usage?.seven_day);
   const opus    = pickBucket(scoped.opus,    usage?.seven_day_opus);
   const sonnet  = pickBucket(scoped.sonnet,  usage?.seven_day_sonnet);
@@ -851,7 +866,7 @@ function mapApiUsageToStoredShape(usage) {
     design:  storedBucket(usage?.seven_day_omelette),
     extra: mapExtraUsage(usage?.extra_usage),
   };
-  data.meta = { ready: data.session.percentage !== null || data.weekly.percentage !== null };
+  data.meta = { ready: data.session.percentage !== null || data.weekly.percentage !== null, noSession };
   return data;
 }
 
@@ -1503,6 +1518,7 @@ function sanitizeUsageData(data) {
     routine: sanitizeRoutine(data.routine),
     meta: {
       ready: Boolean(data.meta?.ready),
+      noSession: Boolean(data.meta?.noSession),
     },
     // 'stream' = read from a reply on claude.ai (Free plan); never refreshed in
     // between, so readers treat a passed reset as 0% rather than the old figure.
@@ -1588,13 +1604,16 @@ const BADGE_NAME = chrome.runtime.getManifest().action.default_title;
 // The badge shows the session, unless a weekly cap has reached the user's
 // warning threshold and is fuller than the session: a green "0%" next to a
 // weekly cap at 95% read as wrong data. That figure takes the badge in red
-// with a W prefix ("W95"), and the tooltip spells out both windows.
+// with a W prefix ("W95"), and the tooltip spells out both windows. With no
+// session figure at all (verified Ultra accounts have no 5-hour limit) the
+// fullest weekly window stands in for it, W prefix included, in the usual colors.
 async function updateBadge(data) {
   const pct = badgePct(data, 'session');
   const weekly = fullestWeekly(data);
   const { warnAt } = await getNotifSettings();
   const { forecast } = await chrome.storage.local.get('forecast');
-  chrome.action.setTitle({ title: badgeTitle(data, pct, weekly, shownForecast(forecast, 'session', data)) });
+  const pace = shownForecast(forecast, pct === null ? 'weekly' : 'session', data);
+  chrome.action.setTitle({ title: badgeTitle(data, pct, weekly, pace) });
 
   if (weekly && weekly.pct >= warnAt && weekly.pct > (pct ?? -1)) {
     chrome.action.setBadgeText({ text: `W${Math.round(weekly.pct)}` });
@@ -1602,18 +1621,19 @@ async function updateBadge(data) {
     return;
   }
 
-  if (pct === null) {
+  const shown = pct ?? weekly?.pct ?? null;
+  if (shown === null) {
     chrome.action.setBadgeText({ text: '?' });
     chrome.action.setBadgeBackgroundColor({ color: '#555555' });
     return;
   }
 
-  chrome.action.setBadgeText({ text: `${Math.round(pct)}%` });
+  chrome.action.setBadgeText({ text: pct === null ? `W${Math.round(shown)}` : `${Math.round(shown)}%` });
 
   let color;
-  if (pct < 50)       color = '#22c55e';   // green
-  else if (pct < 80)  color = '#f59e0b';   // yellow/amber
-  else                color = '#ef4444';   // red
+  if (shown < 50)       color = '#22c55e';   // green
+  else if (shown < 80)  color = '#f59e0b';   // yellow/amber
+  else                  color = '#ef4444';   // red
 
   chrome.action.setBadgeBackgroundColor({ color });
 }
@@ -1637,22 +1657,23 @@ function fullestWeekly(data) {
 }
 
 // One line per window, then the name. The session reset is a countdown; the
-// weekly one is a day and time, which stays right between polls. The session
-// pace forecast, when there is one, goes right under the session line.
-function badgeTitle(data, sessionPct, weekly, sessionForecast) {
+// weekly one is a day and time, which stays right between polls. The pace
+// forecast, when there is one, goes right under the session line, or under the
+// weekly one when there is no session figure.
+function badgeTitle(data, sessionPct, weekly, pace) {
   const lines = [];
+  const paceLine = pace ? msg('forecastLine', formatClock(pace.eta), formatClock(pace.reset)) : null;
   if (sessionPct !== null) {
     const pct = Math.round(sessionPct);
     const resetsIn = formatTimeUntil(data.session.resetTime);
     lines.push(resetsIn ? msg('barTitleReset', msg('nbSession'), pct, resetsIn) : msg('barTitle', msg('nbSession'), pct));
-    if (sessionForecast) {
-      lines.push(msg('forecastLine', formatClock(sessionForecast.eta), formatClock(sessionForecast.reset)));
-    }
+    if (paceLine) lines.push(paceLine);
   }
   if (weekly) {
     const pct = Math.round(weekly.pct);
     const resetsAt = formatResetAt(weekly.resetTime);
     lines.push(resetsAt ? msg('tipResetsAt', msg(weekly.label), pct, resetsAt) : msg('barTitle', msg(weekly.label), pct));
+    if (paceLine && sessionPct === null) lines.push(paceLine);
   }
   lines.push(BADGE_NAME);
   return lines.join('\n');

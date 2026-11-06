@@ -31,7 +31,7 @@ It displays your usage buckets:
 - **Per-model weekly sub-limits**: Fable, Opus, Sonnet and Claude Design weekly usage (on paid plans). Show or hide each from the **Metrics** section of the popup's options menu.
 - **Daily routine runs**: included Claude Code routine runs as a `used / limit` count (on plans that include them).
 - **Paid extra credits**: spend against your monthly limit, plus your remaining prepaid balance, when your plan has them enabled.
-- **Your plan**: a badge in the popup header shows your Claude subscription (e.g. *Max 5x*).
+- **Your plan**: a badge in the popup header shows your Claude subscription (e.g. *Max*).
 
 ## Usage history
 
@@ -56,7 +56,7 @@ The extension refreshes usage through Claude.ai's internal authenticated API.
 - Automatic refresh at a configurable interval: 2, 5, 10 or 60 minutes. Session and weekly usage are read on every refresh; routine runs, credits and the prepaid balance change slowly and are re-read every 30 minutes (or on a manual refresh).
 - Manual refresh is available from the popup.
 - The popup shows the extension version so you can confirm which local build is loaded.
-- A badge in the header shows your Claude plan (e.g. Max 5x).
+- A badge in the header shows your Claude plan (e.g. Max).
 - When your claude.ai session expires, or refreshes keep failing, an inline banner says so, the badge turns gray, and the last known data stays visible, marked as stale, instead of being replaced by zeros.
 - Switching claude.ai to another account clears the previous account's data instead of showing it as current.
 - On the Free plan, where the usage endpoint returns nothing, the optional page script reads the limits Claude attaches to each reply: the `message_limit` event of the chat completion stream, or the limit frame of the newer `StreamTimeline` stream. It extracts only the limit fields (utilization and reset of the 5-hour and 7-day windows); it never stores or sends anything else, and the reply text is never parsed or kept (compressed frames, which carry the reply, are skipped without being decompressed).
