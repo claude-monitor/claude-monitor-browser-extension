@@ -122,7 +122,7 @@ There are no `web_accessible_resources` and no `externally_connectable`.
 | Daily routine-run count                              | Billing management or payment methods                     |
 | Extra-usage credit spend + prepaid balance           | API key management (a different domain, see threat model)  |
 | Your organization UUIDs and names (for the popup's picker, kept on this device) | Any non-`claude.ai` domain                  |
-| Your plan tier label (e.g. `Max 5x`)                 | The value of your session cookie or auth token            |
+| Your plan tier label (e.g. `Max`)                    | The value of your session cookie or auth token            |
 
 The right-hand column is what the code does. The browser backs the last three
 rows only for this manifest: with no `cookies` permission the extension cannot
