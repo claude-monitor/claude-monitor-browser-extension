@@ -984,12 +984,15 @@ function sparkPath(className, d) {
 }
 
 // A hole this long means refreshes failed; the line is cut there rather than
-// interpolated across data we never read.
+// interpolated across data we never read. Unless both sides read the same: every
+// curve is drawn inside one reset window, where usage only grows, so equal ends
+// pin every value in between and the joined line is exact. A computer asleep
+// overnight with no usage would otherwise cut the curve for nothing.
 function splitOnGaps(points, gapMs) {
   const segments = [];
   let current = [points[0]];
   for (let i = 1; i < points.length; i++) {
-    if (points[i].t - points[i - 1].t > gapMs) {
+    if (points[i].t - points[i - 1].t > gapMs && points[i].v !== points[i - 1].v) {
       segments.push(current);
       current = [];
     }
