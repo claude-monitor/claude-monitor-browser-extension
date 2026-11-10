@@ -58,6 +58,15 @@
   const UI_BASES = ['es', 'de', 'fr', 'it', 'ja', 'ko'];
   const LOCALE = (UI_LANG === 'pt-BR' || UI_BASES.includes(UI_LANG.split('-')[0])) ? UI_LANG : 'en-US';
 
+  // The popup's "Something wrong?" page, in the UI language (siteUrl() in
+  // popup.js), next to the review ask: a problem gets a way to us that isn't a
+  // review.
+  const HELP_URL = (() => {
+    const base = UI_LANG.split('-')[0];
+    const prefix = UI_LANG === 'pt-BR' ? '/pt-br' : UI_BASES.includes(base) ? `/${base}` : '';
+    return `https://claude-monitor.com${prefix}/${prefix === '/es' ? 'guia-de-instalacion' : 'getting-started'}#troubleshooting`;
+  })();
+
   let state = { usage: null, plan: null, authBackoff: null, fetchFailures: null, enabled: true };
   let host = null;
   let root = null;
@@ -168,8 +177,34 @@
   let missingSince = 0;     // when this route last had no anchor (0: it has one)
   let pillTimer = null;
 
+  // ── Extension updated underneath this page ───────────────────────────────
+  // An update leaves this copy running with its extension gone, and the new
+  // version's copy starts beside it in a world of its own, where the guard at
+  // the top can't see this one. Both then claimed "right above the chat box"
+  // and swapped places on every DOM change, two strips fighting. A dead copy
+  // removes its strip and stops; a live one hides strips it didn't make and
+  // sits above them, which also stills a copy from before this check.
+  function alive() {
+    try { return Boolean(chrome.runtime?.id); } catch { return false; }
+  }
+
+  function retire() {
+    observer.disconnect();
+    clearInterval(ticker);
+    clearTimeout(pillTimer);
+    unmount();
+  }
+
+  function hideLeftovers() {
+    for (const node of document.querySelectorAll(`#${HOST_ID}`)) {
+      if (node !== host) node.style.setProperty('display', 'none', 'important');
+    }
+  }
+
   function ensureMounted() {
+    if (!alive()) { retire(); return; }
     if (!loaded) return;
+    hideLeftovers();
     const path = location.pathname;
     if (path !== lastPath) {
       lastPath = path;
@@ -208,8 +243,13 @@
 
   function mountInline(target) {
     ensureHost();
-    const moved = host.nextElementSibling !== target || host.parentElement !== target.parentElement;
-    if (moved) target.parentElement.insertBefore(host, target);
+    // Above a leftover strip, so the old copy finds itself in place and stays.
+    let before = target;
+    while (before.previousElementSibling?.id === HOST_ID && before.previousElementSibling !== host) {
+      before = before.previousElementSibling;
+    }
+    const moved = host.nextElementSibling !== before || host.parentElement !== target.parentElement;
+    if (moved) target.parentElement.insertBefore(host, before);
     // After the move: the background comes from the new surroundings.
     if (mode !== 'inline' || moved) {
       mode = 'inline';
@@ -243,14 +283,15 @@
   }
 
   let scheduled = false;
-  new MutationObserver(() => {
+  const observer = new MutationObserver(() => {
     if (scheduled) return;
     scheduled = true;
     setTimeout(() => { scheduled = false; ensureMounted(); }, 50);
-  }).observe(document.documentElement, { childList: true, subtree: true });
+  });
+  observer.observe(document.documentElement, { childList: true, subtree: true });
 
   // Countdowns tick without new data.
-  setInterval(render, 30 * 1000);
+  const ticker = setInterval(() => (alive() ? render() : retire()), 30 * 1000);
 
   // ── Rendering ────────────────────────────────────────────────────────────
   // Strings live in the extension's _locales; content scripts can read them.
@@ -382,12 +423,15 @@
     .brand:hover .brand-name { color: var(--text); }
     .review { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
     .stars { color: var(--amber); text-decoration: none; letter-spacing: 1px; white-space: nowrap; }
+    .bar.tight .clock { display: none; }
+    .help { color: var(--dim); margin-left: 4px; }
+    .help:hover { color: var(--text); }
     .close {
       all: unset; cursor: pointer; color: var(--dim); font-size: 11px; line-height: 1;
       padding: 2px 4px; border-radius: 4px;
     }
     .close:hover, .stars:hover { color: var(--text); }
-    .brand:focus-visible, .stars:focus-visible, .close:focus-visible { outline: 2px solid var(--brand); outline-offset: 1px; }
+    .brand:focus-visible, .stars:focus-visible, .help:focus-visible, .close:focus-visible { outline: 2px solid var(--brand); outline-offset: 1px; }
     @media (max-width: 900px) { .brand-name { display: none; } }
     @media (max-width: 640px) { .review { display: none; } }
     @media (max-width: 520px) { .reset { display: none; } }
@@ -442,12 +486,21 @@
     return node;
   }
 
-  function segment(label, b, { compact = false, extraTitle = '', notes = [], pace = null } = {}) {
+  // "2h 23m (12:23)": the countdown, and the clock for whoever doesn't want to
+  // do the sum. Every tooltip has both; the strip only for the session (with
+  // the weekly's too it no longer fits on one line above the chat box), and
+  // only while it fits (fitClocks).
+  function countdown(epochMs) {
+    const left = until(epochMs);
+    return left ? `${left} (${clock(epochMs)})` : '';
+  }
+
+  function segment(label, b, { compact = false, withClock = false, extraTitle = '', notes = [], pace = null } = {}) {
     const pct = Math.min(100, Math.max(0, Math.round(b.percentage)));
     const reset = b.resetTime ? until(b.resetTime) : '';
     const seg = el('span', 'seg');
     const paceTitle = pace === null ? '' : `\n${msg('paceEven', Math.round(pace))}`;
-    seg.title = (reset ? msg('barTitleReset', label, pct, reset) : msg('barTitle', label, pct)) + extraTitle + paceTitle;
+    seg.title = (reset ? msg('barTitleReset', label, pct, countdown(b.resetTime)) : msg('barTitle', label, pct)) + extraTitle + paceTitle;
     const track = el('span', 'track');
     const fill = el('span', 'fill');
     fill.style.width = `${pct}%`;
@@ -461,7 +514,11 @@
     const pctEl = el('span', 'pct', `${pct}%`);
     pctEl.style.color = colorFor(pct);
     seg.append(el('span', 'label', label), track, pctEl);
-    if (reset && !compact) seg.append(el('span', 'reset', reset));
+    if (reset && !compact) {
+      const resetEl = el('span', 'reset', reset);
+      if (withClock) resetEl.append(el('span', 'clock', ` (${clock(b.resetTime)})`));
+      seg.append(resetEl);
+    }
     if (!compact) seg.append(...notes);
     return seg;
   }
@@ -475,7 +532,11 @@
     const forecast = forecastFor(session, now);
     if (forecast) {
       extraTitle = `\n${msg('forecastLine', clock(forecast.eta), clock(forecast.reset))}`;
-      if (forecast.eta - now <= FORECAST_SHORT_MS) notes.push(el('span', 'note', msg('barForecastShort', clock(forecast.eta))));
+      if (forecast.eta - now <= FORECAST_SHORT_MS) {
+        const note = el('span', 'note', msg('barForecastShort', clock(forecast.eta)));
+        note.append(el('span', 'clock', ` (${until(forecast.eta)})`));
+        notes.push(note);
+      }
     }
     const left = msgLeftFor(session, now);
     if (left) {
@@ -516,7 +577,12 @@
       store({ reviewNudgeDismissed: true });
       setTimeout(render, 0);
     });
-    line.append(el('span', 'note', msg('reviewDays')), stars, closeButton(msg('notNow'), dismissReview));
+    const help = el('a', 'help', msg('somethingWrong'));
+    help.href = HELP_URL;
+    help.target = '_blank';
+    help.rel = 'noopener noreferrer';
+    help.referrerPolicy = 'no-referrer';
+    line.append(el('span', 'note', msg('reviewDays')), stars, help, closeButton(msg('notNow'), dismissReview));
     return line;
   }
 
@@ -559,7 +625,7 @@
     if (session || weekly) {
       if (session) {
         bar.append(segment(msg('sparkSession'), session,
-          { compact: pill, pace: evenPace(session, SESSION_SPAN_MS), ...sessionExtras(session) }));
+          { compact: pill, withClock: true, pace: evenPace(session, SESSION_SPAN_MS), ...sessionExtras(session) }));
       }
       if (weekly) bar.append(segment(msg('sparkWeekly'), weekly, { compact: pill, pace: evenPace(weekly, WEEKLY_SPAN_MS) }));
       if (stale && !pill) bar.append(el('span', 'note', msg('barStale')));
@@ -575,6 +641,22 @@
     if (pill) bar.append(closeButton(msg('barPillHide'), () => { pillClosed = true; unmount(); }));
     const style = el('style', null, STYLE);
     root.replaceChildren(style, bar);
+    fitClocks(bar);
+  }
+
+  // A second line pushes claude.ai's chat up, so the clocks in brackets go
+  // first, unless the strip wraps without them too. Read before the strip is
+  // on the page, every box is empty and it counts as fitting; mounting
+  // renders again.
+  function fitClocks(bar) {
+    if (!bar.querySelector('.clock')) return;
+    const oneLine = () => {
+      const tops = [...bar.children].map(n => n.getBoundingClientRect()).filter(r => r.width > 0).map(r => r.top);
+      return tops.every(top => top < tops[0] + 8);
+    };
+    if (oneLine()) return;
+    bar.classList.add('tight');
+    if (!oneLine()) bar.classList.remove('tight');
   }
 
   load();
