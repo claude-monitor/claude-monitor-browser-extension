@@ -361,6 +361,9 @@
   "reviewDays": {
     "message": "Utile ? Notez-nous"
   },
+  "reviewWhereEdge": {
+    "message": "Faites défiler la page de la boutique"
+  },
   "errAuth": {
     "message": "Échec de l'actualisation : connectez-vous à claude.ai"
   },
