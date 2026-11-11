@@ -686,13 +686,15 @@ function setPaceRow(el, text, title) {
 }
 
 function renderPace(data) {
-  setPaceRow(sessionForecast,
-    forecastText(forecastState?.session, data?.session) || aheadText(data?.session, SPARK_SESSION_SPAN));
+  // A spent weekly limit blocks every chat: the session's pace says nothing then.
+  const spent = (data?.weekly?.percentage ?? 0) >= 100 && !(Number(data.weekly.resetTime) <= Date.now());
+  setPaceRow(sessionForecast, spent ? null
+    : forecastText(forecastState?.session, data?.session) || aheadText(data?.session, SPARK_SESSION_SPAN));
   setPaceRow(weeklyForecast,
     forecastText(forecastState?.weekly, data?.weekly) || aheadText(data?.weekly, SPARK_WEEKLY_SPAN));
   setPaceMark(sessionTick, sessionRingTick, evenPace(data?.session?.resetTime, SPARK_SESSION_SPAN));
   setPaceMark(weeklyTick, weeklyRingTick, evenPace(data?.weekly?.resetTime, SPARK_WEEKLY_SPAN));
-  const left = msgsLeftFor(data?.session);
+  const left = spent ? null : msgsLeftFor(data?.session);
   setPaceRow(sessionMsgs, left && msg('msgsLeft', left.n), left && msg('msgsLeftTitle', left.basedOn));
 }
 
