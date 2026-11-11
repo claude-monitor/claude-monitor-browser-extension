@@ -323,7 +323,8 @@ async function updateMsgEstimate(data) {
   const count = entries.length;
   const reset = Number(usage?.session?.resetTime);
   let estimate = null;
-  if (count >= MSG_EST_MIN_COUNT && reset > Date.now() && Math.abs(reset - msgLog.reset) <= SAME_WINDOW_MS) {
+  if (count >= MSG_EST_MIN_COUNT && reset > Date.now() && Math.abs(reset - msgLog.reset) <= SAME_WINDOW_MS
+    && !weeklySpent(usage)) {
     const last = Number(entries[count - 1].u);
     const delta = last - Number(entries[0].u);
     if (delta >= MSG_EST_MIN_DELTA - 1e-9) {
@@ -1448,6 +1449,7 @@ function windowForecast(key, data, history, now, span, minSpan, cutAt) {
   const cur = badgePct(data, key);
   const reset = Number(data?.[key]?.resetTime);
   if (cur === null || cur >= 100 || !reset || reset <= now) return null;
+  if (key === 'session' && weeklySpent(data)) return null;
   const from = Math.max(now - span, Number(cutAt) || 0);
   let first = null;
   for (const sample of history) {
@@ -1604,18 +1606,20 @@ const BADGE_NAME = chrome.runtime.getManifest().action.default_title;
 // The badge shows the session, unless a weekly cap has reached the user's
 // warning threshold and is fuller than the session: a green "0%" next to a
 // weekly cap at 95% read as wrong data. That figure takes the badge in red
-// with a W prefix ("W95"), and the tooltip spells out both windows. With no
-// session figure at all (verified Ultra accounts have no 5-hour limit) the
-// fullest weekly window stands in for it, W prefix included, in the usual colors.
+// with a W prefix ("W95"), and the tooltip spells out both windows, the one on
+// the badge first. With no session figure at all (verified Ultra accounts have
+// no 5-hour limit) the fullest weekly window stands in for it, W prefix
+// included, in the usual colors.
 async function updateBadge(data) {
   const pct = badgePct(data, 'session');
   const weekly = fullestWeekly(data);
   const { warnAt } = await getNotifSettings();
   const { forecast } = await chrome.storage.local.get('forecast');
   const pace = shownForecast(forecast, pct === null ? 'weekly' : 'session', data);
-  chrome.action.setTitle({ title: badgeTitle(data, pct, weekly, pace) });
+  const weeklyLeads = Boolean(weekly && weekly.pct >= warnAt && weekly.pct > (pct ?? -1));
+  chrome.action.setTitle({ title: badgeTitle(data, pct, weekly, pace, weeklyLeads) });
 
-  if (weekly && weekly.pct >= warnAt && weekly.pct > (pct ?? -1)) {
+  if (weeklyLeads) {
     chrome.action.setBadgeText({ text: `W${Math.round(weekly.pct)}` });
     chrome.action.setBadgeBackgroundColor({ color: '#ef4444' });
     return;
@@ -1645,6 +1649,13 @@ function badgePct(data, key) {
   return bucket?.percentage ?? null;
 }
 
+// A spent weekly limit stops every chat until it resets, whatever the session
+// says, so the session's forecast and messages-left estimate would promise
+// messages that can't be sent. (A per-model cap stops one model only.)
+function weeklySpent(data) {
+  return (badgePct(data, 'weekly') ?? 0) >= 100;
+}
+
 // The fullest weekly window: all models or a per-model cap, named as in alerts.
 function fullestWeekly(data) {
   let best = null;
@@ -1659,22 +1670,26 @@ function fullestWeekly(data) {
 // One line per window, then the name. The session reset is a countdown; the
 // weekly one is a day and time, which stays right between polls. The pace
 // forecast, when there is one, goes right under the session line, or under the
-// weekly one when there is no session figure.
-function badgeTitle(data, sessionPct, weekly, pace) {
-  const lines = [];
+// weekly one when there is no session figure. The weekly line comes first when
+// the badge shows it (weeklyLeads): a spent weekly limit read second, under a
+// session at 92%, looked like room left.
+function badgeTitle(data, sessionPct, weekly, pace, weeklyLeads = false) {
+  const sessionLines = [];
+  const weeklyLines = [];
   const paceLine = pace ? msg('forecastLine', formatClock(pace.eta), formatClock(pace.reset)) : null;
   if (sessionPct !== null) {
     const pct = Math.round(sessionPct);
     const resetsIn = formatTimeUntil(data.session.resetTime);
-    lines.push(resetsIn ? msg('barTitleReset', msg('nbSession'), pct, resetsIn) : msg('barTitle', msg('nbSession'), pct));
-    if (paceLine) lines.push(paceLine);
+    sessionLines.push(resetsIn ? msg('barTitleReset', msg('nbSession'), pct, resetsIn) : msg('barTitle', msg('nbSession'), pct));
+    if (paceLine) sessionLines.push(paceLine);
   }
   if (weekly) {
     const pct = Math.round(weekly.pct);
     const resetsAt = formatResetAt(weekly.resetTime);
-    lines.push(resetsAt ? msg('tipResetsAt', msg(weekly.label), pct, resetsAt) : msg('barTitle', msg(weekly.label), pct));
-    if (paceLine && sessionPct === null) lines.push(paceLine);
+    weeklyLines.push(resetsAt ? msg('tipResetsAt', msg(weekly.label), pct, resetsAt) : msg('barTitle', msg(weekly.label), pct));
+    if (paceLine && sessionPct === null) weeklyLines.push(paceLine);
   }
+  const lines = weeklyLeads ? [...weeklyLines, ...sessionLines] : [...sessionLines, ...weeklyLines];
   lines.push(BADGE_NAME);
   return lines.join('\n');
 }

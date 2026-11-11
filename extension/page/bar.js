@@ -193,6 +193,7 @@
     clearInterval(ticker);
     clearTimeout(pillTimer);
     unmount();
+    noticeResize?.disconnect();
   }
 
   function hideLeftovers() {
@@ -256,7 +257,36 @@
       host.removeAttribute('style');
       render();
     }
+    anchored = target;
+    clearNotice();
     noteHealth(true, 'inline');
+  }
+
+  // ── claude.ai's limit notice ─────────────────────────────────────────────
+  // Near a limit (90%) and once one has run out, claude.ai shows a notice
+  // ("Over 90% of your 5-hour limit used", "You are out of free messages until
+  // 10:50 AM") that hangs from the top of the chat box: absolutely positioned,
+  // growing upward, right over the strip (observed 2026-11-11). At 100% it has
+  // no close button, so the strip was gone until the reset. While a notice
+  // hangs there, the strip clears it with a bottom margin of its height.
+  const NOTICE = '[data-alert-band-wrapper]';
+  let anchored = null;      // the box the strip sits on
+  let noticeSeen = null;
+  const noticeResize = typeof ResizeObserver === 'function' ? new ResizeObserver(() => clearNotice()) : null;
+
+  function clearNotice() {
+    const notice = mode === 'inline' && anchored?.isConnected ? anchored.querySelector(NOTICE) : null;
+    if (notice !== noticeSeen) {
+      if (noticeSeen) noticeResize?.unobserve(noticeSeen);
+      if (notice) noticeResize?.observe(notice);
+      noticeSeen = notice;
+    }
+    if (!host) return;
+    const r = notice && !notice.hidden ? notice.getBoundingClientRect() : null;
+    // Only a notice above the box takes the strip's place; one below it doesn't.
+    const lift = r && r.height > 0 && r.bottom <= anchored.getBoundingClientRect().top + 2 ? Math.ceil(r.height) : 0;
+    const want = lift ? `${lift}px` : '';
+    if (host.style.marginBottom !== want) host.style.marginBottom = want;
   }
 
   function mountPill() {
@@ -271,6 +301,8 @@
   function unmount() {
     host?.remove();
     mode = null;
+    anchored = null;
+    clearNotice();
   }
 
   // Where the bar ended up, for the uninstall diagnosis (no URLs, no ids).
@@ -623,11 +655,20 @@
     bar.setAttribute('aria-label', msg('barAria'));
     bar.append(brand(pill));
     if (session || weekly) {
+      // A spent weekly limit blocks every chat until it resets: it goes first,
+      // with the clock of its reset, and the session drops its clock, forecast
+      // and messages left, which would promise messages that can't be sent.
+      const spent = (weekly?.percentage ?? 0) >= 100;
+      const segs = [];
       if (session) {
-        bar.append(segment(msg('sparkSession'), session,
-          { compact: pill, withClock: true, pace: evenPace(session, SESSION_SPAN_MS), ...sessionExtras(session) }));
+        segs.push(segment(msg('sparkSession'), session, { compact: pill, withClock: !spent,
+          pace: evenPace(session, SESSION_SPAN_MS), ...(spent ? {} : sessionExtras(session)) }));
       }
-      if (weekly) bar.append(segment(msg('sparkWeekly'), weekly, { compact: pill, pace: evenPace(weekly, WEEKLY_SPAN_MS) }));
+      if (weekly) {
+        const seg = segment(msg('sparkWeekly'), weekly, { compact: pill, withClock: spent, pace: evenPace(weekly, WEEKLY_SPAN_MS) });
+        if (spent) segs.unshift(seg); else segs.push(seg);
+      }
+      bar.append(...segs);
       if (stale && !pill) bar.append(el('span', 'note', msg('barStale')));
       if (!pill && !stale && reviewDue()) bar.append(reviewLine());
       if (mode) markFirstSeen();
