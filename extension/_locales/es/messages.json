@@ -361,6 +361,9 @@
   "reviewDays": {
     "message": "¿Te resulta útil? Califícanos"
   },
+  "reviewWhereEdge": {
+    "message": "Baja en la página de la tienda"
+  },
   "errAuth": {
     "message": "Error al actualizar: inicia sesión en claude.ai"
   },

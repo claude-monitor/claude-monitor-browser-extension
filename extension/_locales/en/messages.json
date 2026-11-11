@@ -361,6 +361,9 @@
   "reviewDays": {
     "message": "Finding it useful? Rate us"
   },
+  "reviewWhereEdge": {
+    "message": "Scroll down the store page"
+  },
   "errAuth": {
     "message": "Refresh failed: sign in to claude.ai"
   },

@@ -361,6 +361,9 @@
   "reviewDays": {
     "message": "Nützlich? Bewerte uns"
   },
+  "reviewWhereEdge": {
+    "message": "Auf der Store-Seite nach unten scrollen"
+  },
   "errAuth": {
     "message": "Aktualisierung fehlgeschlagen: bei claude.ai anmelden"
   },

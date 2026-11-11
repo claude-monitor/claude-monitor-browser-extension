@@ -361,6 +361,9 @@
   "reviewDays": {
     "message": "お役に立っていますか？評価をお願いします"
   },
+  "reviewWhereEdge": {
+    "message": "ストアのページを下にスクロール"
+  },
   "errAuth": {
     "message": "更新に失敗しました：claude.ai にログインしてください"
   },

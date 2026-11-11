@@ -361,6 +361,9 @@
   "reviewDays": {
     "message": "유용하신가요? 평가해 주세요"
   },
+  "reviewWhereEdge": {
+    "message": "스토어 페이지를 아래로 스크롤하세요"
+  },
   "errAuth": {
     "message": "새로고침 실패: claude.ai에 로그인하세요"
   },

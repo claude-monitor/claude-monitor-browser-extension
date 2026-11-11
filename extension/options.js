@@ -328,11 +328,15 @@ exportCsvBtn.addEventListener('click', async () => {
 
 const reviewLink = document.getElementById('reviewLink');
 if (reviewLink) {
+  // Firefox goes to the add-on's page, where the rating box is; Edge has no
+  // link to its reviews, so the hint says where to scroll (see popup.js).
+  const isEdge = navigator.userAgent.includes('Edg/');
   reviewLink.href = navigator.userAgent.includes('Firefox')
-    ? 'https://addons.mozilla.org/firefox/addon/claude-usage-meter/reviews/'
-    : navigator.userAgent.includes('Edg/')
+    ? 'https://addons.mozilla.org/firefox/addon/claude-usage-meter/'
+    : isEdge
       ? 'https://microsoftedge.microsoft.com/addons/detail/ilidbhklkpefboidlfeoiiacepcefinp'
       : 'https://chromewebstore.google.com/detail/bfhdcfiigpaaopklllpobkheakpigbfo/reviews?utm_source=extension&utm_medium=options&utm_campaign=review';
+  if (isEdge) reviewLink.after(` · ${msg('reviewWhereEdge')}`);
 }
 
 // ─── Pro waitlist link ───────────────────────────────────────────────────────

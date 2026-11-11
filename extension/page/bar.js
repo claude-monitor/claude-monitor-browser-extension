@@ -35,9 +35,11 @@
   const REVIEW_BAR_AFTER_MS     = 7 * 24 * 60 * 60 * 1000;
   const REVIEW_SNOOZE_MS        = 14 * 24 * 60 * 60 * 1000;
   // Edge runs the Chrome package but has its own store; its UA carries "Edg/".
+  // Firefox goes to the add-on's page, where the rating box is (see popup.js).
+  const IS_EDGE = navigator.userAgent.includes('Edg/');
   const REVIEW_URL = navigator.userAgent.includes('Firefox')
-    ? 'https://addons.mozilla.org/firefox/addon/claude-usage-meter/reviews/'
-    : navigator.userAgent.includes('Edg/')
+    ? 'https://addons.mozilla.org/firefox/addon/claude-usage-meter/'
+    : IS_EDGE
       ? 'https://microsoftedge.microsoft.com/addons/detail/ilidbhklkpefboidlfeoiiacepcefinp'
       : 'https://chromewebstore.google.com/detail/bfhdcfiigpaaopklllpobkheakpigbfo/reviews?utm_source=extension&utm_medium=bar&utm_campaign=review';
 
@@ -600,8 +602,11 @@
     // No Referer from claude.ai (the chat's URL) to the store.
     stars.rel = 'noopener noreferrer';
     stars.referrerPolicy = 'no-referrer';
-    stars.title = msg('rateInStore');
-    stars.setAttribute('aria-label', msg('rateInStore'));
+    // Edge's reviews sit far down its store page. The hint goes in the tooltip,
+    // not the strip, so the line keeps its length and the bar stays one row.
+    const rateLabel = IS_EDGE ? `${msg('rateInStore')} · ${msg('reviewWhereEdge')}` : msg('rateInStore');
+    stars.title = rateLabel;
+    stars.setAttribute('aria-label', rateLabel);
     // Rating ends the ask for good, here and in the popup. The line goes away
     // after the click has opened the store.
     stars.addEventListener('click', () => {

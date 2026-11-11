@@ -28,8 +28,11 @@ const REVIEW_NUDGE_MIN_DAYS = 3;
 // Edge runs the Chrome package but has its own store; its UA carries "Edg/".
 // The Chrome link is tagged so the store dashboard can tell these visits, from
 // people who already have the extension, apart from new visitors.
+// AMO's /reviews/ page only lists reviews: the rating box is on the add-on's
+// own page. Edge has no link to its reviews (the page drops any #anchor), so
+// the ask there says where to scroll.
 const REVIEW_URL = navigator.userAgent.includes('Firefox')
-  ? 'https://addons.mozilla.org/firefox/addon/claude-usage-meter/reviews/'
+  ? 'https://addons.mozilla.org/firefox/addon/claude-usage-meter/'
   : navigator.userAgent.includes('Edg/')
     ? 'https://microsoftedge.microsoft.com/addons/detail/ilidbhklkpefboidlfeoiiacepcefinp'
     : 'https://chromewebstore.google.com/detail/bfhdcfiigpaaopklllpobkheakpigbfo/reviews?utm_source=extension&utm_medium=popup&utm_campaign=review';
@@ -1560,7 +1563,15 @@ const REVIEW_COPY = {
 };
 
 function showReviewNudge(copyKey) {
-  if (reviewNudgeText) reviewNudgeText.textContent = msg(copyKey);
+  if (reviewNudgeText) {
+    reviewNudgeText.textContent = msg(copyKey);
+    if (navigator.userAgent.includes('Edg/')) {
+      const where = document.createElement('span');
+      where.className = 'review-nudge-sub';
+      where.textContent = msg('reviewWhereEdge');
+      reviewNudgeText.append(' ', where);
+    }
+  }
   reviewNudge.style.display = 'flex';
 }
 
