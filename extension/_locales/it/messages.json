@@ -78,6 +78,14 @@
   "trendWaiting": {
     "message": "Cronologia ancora breve"
   },
+  "trendWaitingFor": {
+    "message": "$P1$: cronologia ancora breve",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
   "paceMarker": {
     "message": "Indicatore di ritmo"
   },

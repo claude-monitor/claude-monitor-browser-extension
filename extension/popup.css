@@ -403,9 +403,10 @@ body {
 
 .view-menu-label svg { width: 12px; height: 12px; opacity: 0.65; flex-shrink: 0; color: var(--text-sec); }
 
-/* Under "Trend line" while it is on and no curve has enough history to draw
-   yet (renderSparklines): otherwise the switch seems to do nothing. The ring
-   layouts never draw curves, so they never say so. */
+/* Under "Trend line" while it is on and a curve is missing because its
+   history starts late (renderSparklines): otherwise the switch, or the
+   weekly curve, seems broken. The ring layouts never draw curves, so they
+   never say so. */
 .view-menu-text { display: flex; flex-direction: column; line-height: 1.25; min-width: 0; }
 .view-menu-hint { font-size: 10px; color: var(--text-dim); white-space: normal; }
 .view-menu-hint[hidden] { display: none; }

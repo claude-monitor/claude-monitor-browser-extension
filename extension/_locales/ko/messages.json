@@ -78,6 +78,14 @@
   "trendWaiting": {
     "message": "아직 기록이 부족합니다"
   },
+  "trendWaitingFor": {
+    "message": "$P1$: 아직 기록이 부족합니다",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
   "paceMarker": {
     "message": "속도 기준선"
   },

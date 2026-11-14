@@ -878,11 +878,13 @@ function renderSparklines(data) {
       label: msg('sparkSpent'), fmt: (v) => formatCredits(v, currency),
       from: monthStart, to: now },
   );
-  // Trend line on and no curve on the cards, because the history is still
-  // too short: the menu says why. Once one curve is drawn, the switch shows
-  // what it does.
-  const states = [sessionState, weeklyState];
-  if (hint) hint.hidden = states.includes('drawn') || !states.includes('waiting');
+  // A curve missing because its history starts late (renderSpark 'waiting'):
+  // the menu says which, or just why when both are.
+  const waiting = [[sessionState, 'sparkSession'], [weeklyState, 'sparkWeekly']].filter(([s]) => s === 'waiting');
+  if (hint) {
+    hint.hidden = !waiting.length;
+    hint.textContent = waiting.length === 1 ? msg('trendWaitingFor', msg(waiting[0][1])) : msg('trendWaiting');
+  }
 }
 
 // Start of the live reset window, so the curve never crosses a reset: that would
@@ -917,8 +919,9 @@ function seriesFor(fromTs, valueOf) {
 // 15% on a fixed 0-100 axis is a 3px sliver. The tooltip states the real range.
 const SPARK_MIN_COVER = 0.5;
 
-// Returns 'drawn', 'waiting' (a reading, but too little history to draw) or
-// 'empty' (nothing worth drawing).
+// Returns 'drawn', 'waiting' (not drawn because the history starts late in
+// the window: a fresh install, a copy that was off) or 'empty' (nothing worth
+// drawing, or a window that just reset and has no curve yet, which is normal).
 function renderSpark(el, points, opts) {
   if (!el) return 'empty';
   while (el.firstChild) el.removeChild(el.firstChild);
@@ -928,8 +931,12 @@ function renderSpark(el, points, opts) {
   const maxV = values.length ? Math.max(...values) : 0;
   const minV = values.length ? Math.min(...values) : 0;
   if (!points.length || (opts.hideWhenFlatZero && maxV <= 0)) { el.style.display = 'none'; return 'empty'; }
-  if (points.length < SPARK_MIN_POINTS || (Number.isFinite(opts.from) && Number.isFinite(opts.to)
-      && opts.to - points[0].t < SPARK_MIN_COVER * (opts.to - opts.from))) { el.style.display = 'none'; return 'waiting'; }
+  const anchored = Number.isFinite(opts.from) && Number.isFinite(opts.to);
+  if (points.length < SPARK_MIN_POINTS || (anchored && opts.to - points[0].t < SPARK_MIN_COVER * (opts.to - opts.from))) {
+    el.style.display = 'none';
+    // Late means a hole at the start longer than the one that cuts a curve.
+    return anchored && points[0].t - opts.from > SPARK_GAP_MIN_MS ? 'waiting' : 'empty';
+  }
 
   const top = Math.min(opts.max ?? Infinity, Math.max(opts.floor, maxV * 1.3));
   const t0 = Number.isFinite(opts.from) ? opts.from : points[0].t;

@@ -78,6 +78,14 @@
   "trendWaiting": {
     "message": "履歴がまだ足りません"
   },
+  "trendWaitingFor": {
+    "message": "$P1$：履歴がまだ足りません",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
   "paceMarker": {
     "message": "ペースの目安"
   },

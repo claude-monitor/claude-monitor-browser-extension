@@ -78,6 +78,14 @@
   "trendWaiting": {
     "message": "Ainda há pouco histórico"
   },
+  "trendWaitingFor": {
+    "message": "$P1$: ainda há pouco histórico",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
   "paceMarker": {
     "message": "Marcador de ritmo"
   },
