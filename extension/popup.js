@@ -900,17 +900,24 @@ function seriesFor(fromTs, valueOf) {
 }
 
 // X is anchored to the drawn window (opts.from/opts.to), not to the samples: a
-// weekly curve with only a few hours of history has to stay a stub on the right,
-// or it gets stretched to full width and reads exactly like the 5h session one.
+// weekly curve stretched over a few hours of history would read exactly like
+// the 5h session one. So a curve whose history starts late in its window (a
+// fresh install, a copy that was off for days) would be a stub on the right
+// and a card of empty space: it waits until the samples cover half of what it
+// would draw (SPARK_MIN_COVER).
 // Y is the opposite call: the card already shows the exact figure, so the curve
 // is scaled to its own range (with a floor) to stay readable at low usage, since
 // 15% on a fixed 0-100 axis is a 3px sliver. The tooltip states the real range.
+const SPARK_MIN_COVER = 0.5;
+
 function renderSpark(el, points, opts) {
   if (!el) return;
   while (el.firstChild) el.removeChild(el.firstChild);
   sparkMeta.delete(el);
 
   if (points.length < SPARK_MIN_POINTS) { el.style.display = 'none'; return; }
+  if (Number.isFinite(opts.from) && Number.isFinite(opts.to)
+      && opts.to - points[0].t < SPARK_MIN_COVER * (opts.to - opts.from)) { el.style.display = 'none'; return; }
   const values = points.map(p => p.v);
   const maxV = Math.max(...values);
   const minV = Math.min(...values);
