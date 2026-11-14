@@ -656,6 +656,9 @@ body {
 
 .pace-row[hidden] { display: none; }
 
+/* Ahead of an even pace is measured, not estimated: the usage amber. */
+.pace-row.ahead { color: var(--yellow); }
+
 .reset-label {
   color: var(--text-dim);
   font-style: italic;

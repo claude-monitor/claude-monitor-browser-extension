@@ -659,6 +659,14 @@
       }
     }
   },
+  "paceWithin": {
+    "message": "均等ペースの範囲内（目安は現時点で $P1$%）",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
   "barPillHide": {
     "message": "ページを再読み込みするまで非表示"
   },

@@ -659,6 +659,14 @@
       }
     }
   },
+  "paceWithin": {
+    "message": "Dentro do ritmo constante ($P1$% a esta altura)",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
   "barPillHide": {
     "message": "Ocultar até recarregar a página"
   },

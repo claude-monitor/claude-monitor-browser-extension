@@ -659,6 +659,14 @@
       }
     }
   },
+  "paceWithin": {
+    "message": "Im gleichmäßigen Tempo ($P1$ % bis jetzt)",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
   "barPillHide": {
     "message": "Ausblenden, bis die Seite neu geladen wird"
   },

@@ -659,6 +659,14 @@
       }
     }
   },
+  "paceWithin": {
+    "message": "고른 속도 이내 (현재 기준 $P1$%)",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
   "barPillHide": {
     "message": "페이지를 새로 고칠 때까지 숨기기"
   },
