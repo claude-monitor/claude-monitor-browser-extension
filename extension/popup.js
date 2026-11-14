@@ -1803,6 +1803,10 @@ viewMenu?.addEventListener('click', (e) => {
     e.stopPropagation();
     if (opt.dataset.opt === 'spark') toggleSparkline();
     if (opt.dataset.opt === 'pace') togglePaceMarker();
+    // What these change (the curves, the marks on the bars) sits under the
+    // open menu: closing it lets the click show its effect.
+    closeViewMenu();
+    viewBtn?.focus();
     return;
   }
   const item = e.target.closest('.view-menu-item');
