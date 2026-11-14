@@ -1614,11 +1614,10 @@ async function updateBadge(data) {
   const pct = badgePct(data, 'session');
   const weekly = fullestWeekly(data);
   const { warnAt } = await getNotifSettings();
-  const { forecast, showPaceMarker } = await chrome.storage.local.get(['forecast', 'showPaceMarker']);
+  const { forecast } = await chrome.storage.local.get('forecast');
   const pace = shownForecast(forecast, pct === null ? 'weekly' : 'session', data);
   const weeklyLeads = Boolean(weekly && weekly.pct >= warnAt && weekly.pct > (pct ?? -1));
-  const weeklyPace = showPaceMarker === false ? null : weeklyPaceLine(weekly);
-  chrome.action.setTitle({ title: badgeTitle(data, pct, weekly, pace, weeklyLeads, weeklyPace) });
+  chrome.action.setTitle({ title: badgeTitle(data, pct, weekly, pace, weeklyLeads, weeklyPaceLine(weekly)) });
 
   if (weeklyLeads) {
     chrome.action.setBadgeText({ text: `W${Math.round(weekly.pct)}` });
@@ -1669,9 +1668,10 @@ function fullestWeekly(data) {
 }
 
 // Where the weekly window on the tooltip stands against an even pace, as the
-// popup's line under the weekly bar says it: from a quarter of the week on,
-// ahead or within, point by point. A week moves under a point an hour, so the
-// figure stays right between polls (a session's would not).
+// popup's hover on the weekly bar says it: from a quarter of the week on,
+// ahead or within, point by point. A tooltip takes no room, so it stays with
+// the pace marker off. A week moves under a point an hour, so the figure stays
+// right between polls (a session's would not).
 const PACE_WEEK_MS   = 7 * 24 * 60 * 60 * 1000;
 const PACE_FROM      = 25;   // % of the window gone
 

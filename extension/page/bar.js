@@ -50,13 +50,13 @@
   const FORECAST_SHORT_MS   = 60 * 60 * 1000;
 
   // Pace marker, the popup's twin: a tick where the fill would be now if the
-  // window were used evenly up to its reset. Its tooltip line follows the
-  // popup's line under the bar: from a quarter of the window on, the weekly
-  // says ahead or within point by point, the session only when well ahead.
+  // window were used evenly up to its reset. The tooltip says where the
+  // reading stands against it, as the popup's hover does: from a quarter of
+  // the window on, within or ahead, point by point. The tooltip stays with
+  // the marker off; only the tick goes.
   const SESSION_SPAN_MS = 5 * 60 * 60 * 1000;
   const WEEKLY_SPAN_MS  = 7 * 24 * 60 * 60 * 1000;
-  const PACE_AHEAD_FROM   = 25;   // % of the window gone
-  const PACE_AHEAD_POINTS = 10;   // session only
+  const PACE_AHEAD_FROM = 25;   // % of the window gone
 
   // Dates follow the UI language only where the UI is translated; otherwise an
   // English UI would show, say, Arabic or Russian dates (14 store-only locales).
@@ -402,18 +402,15 @@
   function evenPace(b, spanMs) {
     const reset = Number(b?.resetTime);
     const now = Date.now();
-    if (!state.paceMarker || !Number.isFinite(reset) || reset <= now) return null;
+    if (!Number.isFinite(reset) || reset <= now) return null;
     const gone = 1 - (reset - now) / spanMs;
     return gone >= 0 ? Math.min(1, gone) * 100 : null;
   }
 
-  function paceTitle(b, even, weekly) {
+  function paceTitle(b, even) {
     const by = Math.round(even);
     const pct = Number(b.percentage);
-    if (even >= PACE_AHEAD_FROM && pct < 100) {
-      if (weekly ? pct > by : pct - even >= PACE_AHEAD_POINTS) return msg('paceAhead', by);
-      if (weekly) return msg('paceWithin', by);
-    }
+    if (even >= PACE_AHEAD_FROM && pct < 100) return msg(pct > by ? 'paceAhead' : 'paceWithin', by);
     return msg('paceEven', by);
   }
 
@@ -543,18 +540,18 @@
     return left ? `${left} (${clock(epochMs)})` : '';
   }
 
-  function segment(label, b, { compact = false, withClock = false, extraTitle = '', notes = [], pace = null, weekly = false } = {}) {
+  function segment(label, b, { compact = false, withClock = false, extraTitle = '', notes = [], pace = null } = {}) {
     const pct = Math.min(100, Math.max(0, Math.round(b.percentage)));
     const reset = b.resetTime ? until(b.resetTime) : '';
     const seg = el('span', 'seg');
-    const paceLine = pace === null ? '' : `\n${paceTitle(b, pace, weekly)}`;
+    const paceLine = pace === null ? '' : `\n${paceTitle(b, pace)}`;
     seg.title = (reset ? msg('barTitleReset', label, pct, countdown(b.resetTime)) : msg('barTitle', label, pct)) + extraTitle + paceLine;
     const track = el('span', 'track');
     const fill = el('span', 'fill');
     fill.style.width = `${pct}%`;
     fill.style.background = colorFor(pct);
     track.append(fill);
-    if (pace !== null) {
+    if (pace !== null && state.paceMarker) {
       const tick = el('span', 'tick');
       tick.style.left = `${pace}%`;
       track.append(tick);
@@ -684,7 +681,7 @@
           pace: evenPace(session, SESSION_SPAN_MS), ...(spent ? {} : sessionExtras(session)) }));
       }
       if (weekly) {
-        const seg = segment(msg('sparkWeekly'), weekly, { compact: pill, withClock: spent, pace: evenPace(weekly, WEEKLY_SPAN_MS), weekly: true });
+        const seg = segment(msg('sparkWeekly'), weekly, { compact: pill, withClock: spent, pace: evenPace(weekly, WEEKLY_SPAN_MS) });
         if (spent) segs.unshift(seg); else segs.push(seg);
       }
       bar.append(...segs);
