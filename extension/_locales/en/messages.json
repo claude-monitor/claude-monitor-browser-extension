@@ -75,6 +75,17 @@
   "trendLine": {
     "message": "Trend line"
   },
+  "trendWaiting": {
+    "message": "Not enough history yet"
+  },
+  "trendWaitingFor": {
+    "message": "$P1$: not enough history yet",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
   "paceMarker": {
     "message": "Pace marker"
   },
@@ -653,6 +664,14 @@
   },
   "paceAhead": {
     "message": "Ahead of an even pace ($P1$% by now)",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "paceWithin": {
+    "message": "Within an even pace ($P1$% by now)",
     "placeholders": {
       "p1": {
         "content": "$1"

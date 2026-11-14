@@ -75,6 +75,17 @@
   "trendLine": {
     "message": "Courbe de tendance"
   },
+  "trendWaiting": {
+    "message": "Historique encore court"
+  },
+  "trendWaitingFor": {
+    "message": "$P1$ : historique encore court",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
   "paceMarker": {
     "message": "Repère de rythme"
   },
@@ -653,6 +664,14 @@
   },
   "paceAhead": {
     "message": "Plus vite qu'un rythme régulier ($P1$ % à ce stade)",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "paceWithin": {
+    "message": "Rythme régulier respecté ($P1$ % à ce stade)",
     "placeholders": {
       "p1": {
         "content": "$1"

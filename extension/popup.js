@@ -681,22 +681,23 @@ function msgsLeftFor(session) {
   return Math.abs(Number(m.reset) - reset) <= SAME_WINDOW_MS ? m : null;
 }
 
-function setPaceRow(el, text, title) {
+function setPaceRow(el, text, title, ahead = false) {
   if (!el) return;
   el.textContent = text || '';
   el.title = title || '';
   el.hidden = !text;
+  el.classList.toggle('ahead', ahead);
 }
 
 function renderPace(data) {
   // A spent weekly limit blocks every chat: the session's pace says nothing then.
   const spent = (data?.weekly?.percentage ?? 0) >= 100 && !(Number(data.weekly.resetTime) <= Date.now());
-  setPaceRow(sessionForecast, spent ? null
-    : forecastText(forecastState?.session, data?.session) || aheadText(data?.session, SPARK_SESSION_SPAN));
-  setPaceRow(weeklyForecast,
-    forecastText(forecastState?.weekly, data?.weekly) || aheadText(data?.weekly, SPARK_WEEKLY_SPAN));
-  setPaceMark(sessionTick, sessionRingTick, evenPace(data?.session?.resetTime, SPARK_SESSION_SPAN));
-  setPaceMark(weeklyTick, weeklyRingTick, evenPace(data?.weekly?.resetTime, SPARK_WEEKLY_SPAN));
+  const session = spent ? null : paceLine(forecastState?.session, data?.session, SPARK_SESSION_SPAN, false);
+  const weekly = paceLine(forecastState?.weekly, data?.weekly, SPARK_WEEKLY_SPAN, true);
+  setPaceRow(sessionForecast, session?.text, '', Boolean(session?.ahead));
+  setPaceRow(weeklyForecast, weekly?.text, '', Boolean(weekly?.ahead));
+  setPaceMark(sessionTick, sessionRingTick, paceStanding(data?.session, SPARK_SESSION_SPAN));
+  setPaceMark(weeklyTick, weeklyRingTick, paceStanding(data?.weekly, SPARK_WEEKLY_SPAN));
   const left = spent ? null : msgsLeftFor(data?.session);
   setPaceRow(sessionMsgs, left && msg('msgsLeft', left.n), left && msg('msgsLeftTitle', left.basedOn));
 }
@@ -709,10 +710,14 @@ function renderPace(data) {
 // from the first reading, Free plan included; a window that hasn't started
 // (no reset yet) has no mark.
 
-// The line under the bar says so only when the fill is well past the mark and
-// the window is far enough along: the first prompts of a session always jump
-// ahead of an even pace, and saying so every time would be noise.
-const PACE_AHEAD_POINTS  = 10;
+// Once a quarter of the window is gone, the reading is judged against the
+// mark: within or ahead, point by point. Hovering the bar or the ring always
+// says which, even with the marker off, since a tooltip takes no room. A line
+// under the bar appears only to warn: the weekly one as soon as it is ahead (a
+// week is long, and a few points ahead by midweek is worth knowing), the
+// session's only when well ahead (its first prompts always jump ahead of an
+// even pace, and saying so every time would be noise).
+const PACE_AHEAD_POINTS  = 10;   // session line only
 const PACE_AHEAD_FROM    = 25;   // % of the window gone
 const PACE_RING_INNER    = 15.5; // ring stroke spans r 17 to 21 (r 19, width 4)
 const PACE_RING_OUTER    = 22;   // the viewBox edge
@@ -729,18 +734,42 @@ function evenPace(resetTime, spanMs) {
   return gone >= 0 ? Math.min(1, gone) * 100 : null;
 }
 
-function aheadText(bucket, spanMs) {
-  if (!showPaceMarker) return null;
-  const pct = bucket?.percentage;
+// Null without a reset in this window. `by` is the share as shown (rounded);
+// ahead and within only once the window is far enough along to judge.
+function paceStanding(bucket, spanMs) {
   const even = evenPace(bucket?.resetTime, spanMs);
-  if (pct === null || pct === undefined || even === null || pct >= 100) return null;
-  if (even < PACE_AHEAD_FROM || pct - even < PACE_AHEAD_POINTS) return null;
-  return msg('paceAhead', Math.round(even));
+  if (even === null) return null;
+  const by = Math.round(even);
+  const pct = bucket?.percentage;
+  const judged = even >= PACE_AHEAD_FROM && Number.isFinite(pct) && pct < 100;
+  return { even, by, ahead: judged && pct > by, within: judged && pct <= by, pct };
 }
 
-function setPaceMark(tickEl, ringTickEl, even) {
-  const on = showPaceMarker && even !== null;
-  const title = on ? msg('paceEven', Math.round(even)) : '';
+// The forecast when there is one (it says more); otherwise a warning when the
+// reading is ahead of an even pace (`weekly`: by any point; the session: by
+// PACE_AHEAD_POINTS). Ahead is measured, not estimated, so it takes the usage
+// amber (.pace-row.ahead). Within an even pace there is no line: the hover
+// says so.
+function paceLine(win, bucket, spanMs, weekly) {
+  const forecast = forecastText(win, bucket);
+  if (forecast) return { text: forecast, ahead: false };
+  if (!showPaceMarker) return null;
+  const s = paceStanding(bucket, spanMs);
+  if (!s?.ahead || (!weekly && s.pct - s.even < PACE_AHEAD_POINTS)) return null;
+  return { text: msg('paceAhead', s.by), ahead: true };
+}
+
+function paceTitle(s) {
+  if (!s) return '';
+  if (s.ahead) return msg('paceAhead', s.by);
+  if (s.within) return msg('paceWithin', s.by);
+  return msg('paceEven', s.by);
+}
+
+function setPaceMark(tickEl, ringTickEl, standing) {
+  const on = showPaceMarker && standing !== null;
+  const even = standing?.even;
+  const title = paceTitle(standing);
   if (tickEl) {
     tickEl.hidden = !on;
     if (on) tickEl.style.left = `${even}%`;
@@ -766,6 +795,9 @@ function setPaceMark(tickEl, ringTickEl, even) {
       tip.textContent = title;
     }
   }
+  // The bar is 6px tall: the card's big figure is the easier thing to hover.
+  const pctEl = (tickEl || ringTickEl)?.closest('.card')?.querySelector('.card-pct');
+  if (pctEl) pctEl.title = title;
 }
 
 function renderPaceToggle() {
@@ -811,15 +843,17 @@ let showSparkline = true;
 for (const el of [sessionSpark, weeklySpark, extraSpark]) bindSparkHover(el);
 
 function renderSparklines(data) {
+  const hint = $('sparkHint');
   if (!showSparkline) {
     for (const el of [sessionSpark, weeklySpark, extraSpark]) {
       if (el) { el.style.display = 'none'; sparkMeta.delete(el); }
     }
+    if (hint) hint.hidden = true;
     return;
   }
   const now = Date.now();
   const sessionFrom = windowStart(data?.session?.resetTime, SPARK_SESSION_SPAN);
-  renderSpark(
+  const sessionState = renderSpark(
     sessionSpark,
     seriesFor(sessionFrom, s => s.buckets?.session?.pct),
     // The API reports whole percentages, so light use reads 0 for a long while.
@@ -828,7 +862,7 @@ function renderSparklines(data) {
       label: msg('sparkSession'), fmt: pctText, from: sessionFrom, to: now },
   );
   const weeklyFrom = windowStart(data?.weekly?.resetTime, SPARK_WEEKLY_SPAN);
-  renderSpark(
+  const weeklyState = renderSpark(
     weeklySpark,
     seriesFor(weeklyFrom, s => s.buckets?.weekly?.pct),
     { max: 100, floor: 10, hideWhenFlatZero: true, gapMs: gapFor(SPARK_WEEKLY_SPAN),
@@ -844,6 +878,13 @@ function renderSparklines(data) {
       label: msg('sparkSpent'), fmt: (v) => formatCredits(v, currency),
       from: monthStart, to: now },
   );
+  // A curve missing because its history starts late (renderSpark 'waiting'):
+  // the menu says which, or just why when both are.
+  const waiting = [[sessionState, 'sparkSession'], [weeklyState, 'sparkWeekly']].filter(([s]) => s === 'waiting');
+  if (hint) {
+    hint.hidden = !waiting.length;
+    hint.textContent = waiting.length === 1 ? msg('trendWaitingFor', msg(waiting[0][1])) : msg('trendWaiting');
+  }
 }
 
 // Start of the live reset window, so the curve never crosses a reset: that would
@@ -868,21 +909,34 @@ function seriesFor(fromTs, valueOf) {
 }
 
 // X is anchored to the drawn window (opts.from/opts.to), not to the samples: a
-// weekly curve with only a few hours of history has to stay a stub on the right,
-// or it gets stretched to full width and reads exactly like the 5h session one.
+// weekly curve stretched over a few hours of history would read exactly like
+// the 5h session one. So a curve whose history starts late in its window (a
+// fresh install, a copy that was off for days) would be a stub on the right
+// and a card of empty space: it waits until the samples cover half of what it
+// would draw (SPARK_MIN_COVER).
 // Y is the opposite call: the card already shows the exact figure, so the curve
 // is scaled to its own range (with a floor) to stay readable at low usage, since
 // 15% on a fixed 0-100 axis is a 3px sliver. The tooltip states the real range.
+const SPARK_MIN_COVER = 0.5;
+
+// Returns 'drawn', 'waiting' (not drawn because the history starts late in
+// the window: a fresh install, a copy that was off) or 'empty' (nothing worth
+// drawing, or a window that just reset and has no curve yet, which is normal).
 function renderSpark(el, points, opts) {
-  if (!el) return;
+  if (!el) return 'empty';
   while (el.firstChild) el.removeChild(el.firstChild);
   sparkMeta.delete(el);
 
-  if (points.length < SPARK_MIN_POINTS) { el.style.display = 'none'; return; }
   const values = points.map(p => p.v);
-  const maxV = Math.max(...values);
-  const minV = Math.min(...values);
-  if (opts.hideWhenFlatZero && maxV <= 0) { el.style.display = 'none'; return; }
+  const maxV = values.length ? Math.max(...values) : 0;
+  const minV = values.length ? Math.min(...values) : 0;
+  if (!points.length || (opts.hideWhenFlatZero && maxV <= 0)) { el.style.display = 'none'; return 'empty'; }
+  const anchored = Number.isFinite(opts.from) && Number.isFinite(opts.to);
+  if (points.length < SPARK_MIN_POINTS || (anchored && opts.to - points[0].t < SPARK_MIN_COVER * (opts.to - opts.from))) {
+    el.style.display = 'none';
+    // Late means a hole at the start longer than the one that cuts a curve.
+    return anchored && points[0].t - opts.from > SPARK_GAP_MIN_MS ? 'waiting' : 'empty';
+  }
 
   const top = Math.min(opts.max ?? Infinity, Math.max(opts.floor, maxV * 1.3));
   const t0 = Number.isFinite(opts.from) ? opts.from : points[0].t;
@@ -909,6 +963,7 @@ function renderSpark(el, points, opts) {
 
   el.setAttribute('aria-label', msg('sparkRange', opts.label, opts.fmt(minV), opts.fmt(maxV)));
   el.style.display = 'block';
+  return 'drawn';
 }
 
 // ── Sparkline hover readout ──────────────────────────────────────────────────
@@ -1764,6 +1819,10 @@ viewMenu?.addEventListener('click', (e) => {
     e.stopPropagation();
     if (opt.dataset.opt === 'spark') toggleSparkline();
     if (opt.dataset.opt === 'pace') togglePaceMarker();
+    // What these change (the curves, the marks on the bars) sits under the
+    // open menu: closing it lets the click show its effect.
+    closeViewMenu();
+    viewBtn?.focus();
     return;
   }
   const item = e.target.closest('.view-menu-item');

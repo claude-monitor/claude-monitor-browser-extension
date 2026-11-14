@@ -75,6 +75,17 @@
   "trendLine": {
     "message": "Linha de tendência"
   },
+  "trendWaiting": {
+    "message": "Ainda há pouco histórico"
+  },
+  "trendWaitingFor": {
+    "message": "$P1$: ainda há pouco histórico",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
   "paceMarker": {
     "message": "Marcador de ritmo"
   },
@@ -653,6 +664,14 @@
   },
   "paceAhead": {
     "message": "Acima do ritmo constante ($P1$% a esta altura)",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "paceWithin": {
+    "message": "Dentro do ritmo constante ($P1$% a esta altura)",
     "placeholders": {
       "p1": {
         "content": "$1"

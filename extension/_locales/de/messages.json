@@ -75,6 +75,17 @@
   "trendLine": {
     "message": "Trendlinie"
   },
+  "trendWaiting": {
+    "message": "Noch zu wenig Verlauf"
+  },
+  "trendWaitingFor": {
+    "message": "$P1$: noch zu wenig Verlauf",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
   "paceMarker": {
     "message": "Tempo-Markierung"
   },
@@ -653,6 +664,14 @@
   },
   "paceAhead": {
     "message": "Schneller als gleichmäßig ($P1$ % bis jetzt)",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "paceWithin": {
+    "message": "Im gleichmäßigen Tempo ($P1$ % bis jetzt)",
     "placeholders": {
       "p1": {
         "content": "$1"

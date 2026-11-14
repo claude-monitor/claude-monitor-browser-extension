@@ -1617,7 +1617,7 @@ async function updateBadge(data) {
   const { forecast } = await chrome.storage.local.get('forecast');
   const pace = shownForecast(forecast, pct === null ? 'weekly' : 'session', data);
   const weeklyLeads = Boolean(weekly && weekly.pct >= warnAt && weekly.pct > (pct ?? -1));
-  chrome.action.setTitle({ title: badgeTitle(data, pct, weekly, pace, weeklyLeads) });
+  chrome.action.setTitle({ title: badgeTitle(data, pct, weekly, pace, weeklyLeads, weeklyPaceLine(weekly)) });
 
   if (weeklyLeads) {
     chrome.action.setBadgeText({ text: `W${Math.round(weekly.pct)}` });
@@ -1667,13 +1667,32 @@ function fullestWeekly(data) {
   return best;
 }
 
+// Where the weekly window on the tooltip stands against an even pace, as the
+// popup's hover on the weekly bar says it: from a quarter of the week on,
+// ahead or within, point by point. A tooltip takes no room, so it stays with
+// the pace marker off. A week moves under a point an hour, so the figure stays
+// right between polls (a session's would not).
+const PACE_WEEK_MS   = 7 * 24 * 60 * 60 * 1000;
+const PACE_FROM      = 25;   // % of the window gone
+
+function weeklyPaceLine(weekly) {
+  const reset = Number(weekly?.resetTime);
+  const now = Date.now();
+  if (!weekly || !(weekly.pct < 100) || !Number.isFinite(reset) || reset <= now) return null;
+  const even = (1 - (reset - now) / PACE_WEEK_MS) * 100;
+  if (!(even >= PACE_FROM)) return null;
+  const by = Math.round(even);
+  return msg(weekly.pct > by ? 'paceAhead' : 'paceWithin', by);
+}
+
 // One line per window, then the name. The session reset is a countdown; the
 // weekly one is a day and time, which stays right between polls. The pace
 // forecast, when there is one, goes right under the session line, or under the
-// weekly one when there is no session figure. The weekly line comes first when
-// the badge shows it (weeklyLeads): a spent weekly limit read second, under a
-// session at 92%, looked like room left.
-function badgeTitle(data, sessionPct, weekly, pace, weeklyLeads = false) {
+// weekly one when there is no session figure; otherwise the weekly line gets
+// its standing against an even pace (weeklyPaceLine). The weekly line comes
+// first when the badge shows it (weeklyLeads): a spent weekly limit read
+// second, under a session at 92%, looked like room left.
+function badgeTitle(data, sessionPct, weekly, pace, weeklyLeads = false, weeklyPace = null) {
   const sessionLines = [];
   const weeklyLines = [];
   const paceLine = pace ? msg('forecastLine', formatClock(pace.eta), formatClock(pace.reset)) : null;
@@ -1688,6 +1707,7 @@ function badgeTitle(data, sessionPct, weekly, pace, weeklyLeads = false) {
     const resetsAt = formatResetAt(weekly.resetTime);
     weeklyLines.push(resetsAt ? msg('tipResetsAt', msg(weekly.label), pct, resetsAt) : msg('barTitle', msg(weekly.label), pct));
     if (paceLine && sessionPct === null) weeklyLines.push(paceLine);
+    else if (weeklyPace) weeklyLines.push(weeklyPace);
   }
   const lines = weeklyLeads ? [...weeklyLines, ...sessionLines] : [...sessionLines, ...weeklyLines];
   lines.push(BADGE_NAME);
