@@ -75,6 +75,9 @@
   "trendLine": {
     "message": "Courbe de tendance"
   },
+  "trendWaiting": {
+    "message": "Historique encore court"
+  },
   "paceMarker": {
     "message": "Repère de rythme"
   },

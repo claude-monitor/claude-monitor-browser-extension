@@ -75,6 +75,9 @@
   "trendLine": {
     "message": "추세선"
   },
+  "trendWaiting": {
+    "message": "아직 기록이 부족합니다"
+  },
   "paceMarker": {
     "message": "속도 기준선"
   },

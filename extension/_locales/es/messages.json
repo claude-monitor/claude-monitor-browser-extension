@@ -75,6 +75,9 @@
   "trendLine": {
     "message": "Línea de tendencia"
   },
+  "trendWaiting": {
+    "message": "Aún hay poco historial"
+  },
   "paceMarker": {
     "message": "Marcador de ritmo"
   },

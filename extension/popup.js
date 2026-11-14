@@ -843,15 +843,17 @@ let showSparkline = true;
 for (const el of [sessionSpark, weeklySpark, extraSpark]) bindSparkHover(el);
 
 function renderSparklines(data) {
+  const hint = $('sparkHint');
   if (!showSparkline) {
     for (const el of [sessionSpark, weeklySpark, extraSpark]) {
       if (el) { el.style.display = 'none'; sparkMeta.delete(el); }
     }
+    if (hint) hint.hidden = true;
     return;
   }
   const now = Date.now();
   const sessionFrom = windowStart(data?.session?.resetTime, SPARK_SESSION_SPAN);
-  renderSpark(
+  const sessionState = renderSpark(
     sessionSpark,
     seriesFor(sessionFrom, s => s.buckets?.session?.pct),
     // The API reports whole percentages, so light use reads 0 for a long while.
@@ -860,7 +862,7 @@ function renderSparklines(data) {
       label: msg('sparkSession'), fmt: pctText, from: sessionFrom, to: now },
   );
   const weeklyFrom = windowStart(data?.weekly?.resetTime, SPARK_WEEKLY_SPAN);
-  renderSpark(
+  const weeklyState = renderSpark(
     weeklySpark,
     seriesFor(weeklyFrom, s => s.buckets?.weekly?.pct),
     { max: 100, floor: 10, hideWhenFlatZero: true, gapMs: gapFor(SPARK_WEEKLY_SPAN),
@@ -876,6 +878,11 @@ function renderSparklines(data) {
       label: msg('sparkSpent'), fmt: (v) => formatCredits(v, currency),
       from: monthStart, to: now },
   );
+  // Trend line on and no curve on the cards, because the history is still
+  // too short: the menu says why. Once one curve is drawn, the switch shows
+  // what it does.
+  const states = [sessionState, weeklyState];
+  if (hint) hint.hidden = states.includes('drawn') || !states.includes('waiting');
 }
 
 // Start of the live reset window, so the curve never crosses a reset: that would
@@ -910,18 +917,19 @@ function seriesFor(fromTs, valueOf) {
 // 15% on a fixed 0-100 axis is a 3px sliver. The tooltip states the real range.
 const SPARK_MIN_COVER = 0.5;
 
+// Returns 'drawn', 'waiting' (a reading, but too little history to draw) or
+// 'empty' (nothing worth drawing).
 function renderSpark(el, points, opts) {
-  if (!el) return;
+  if (!el) return 'empty';
   while (el.firstChild) el.removeChild(el.firstChild);
   sparkMeta.delete(el);
 
-  if (points.length < SPARK_MIN_POINTS) { el.style.display = 'none'; return; }
-  if (Number.isFinite(opts.from) && Number.isFinite(opts.to)
-      && opts.to - points[0].t < SPARK_MIN_COVER * (opts.to - opts.from)) { el.style.display = 'none'; return; }
   const values = points.map(p => p.v);
-  const maxV = Math.max(...values);
-  const minV = Math.min(...values);
-  if (opts.hideWhenFlatZero && maxV <= 0) { el.style.display = 'none'; return; }
+  const maxV = values.length ? Math.max(...values) : 0;
+  const minV = values.length ? Math.min(...values) : 0;
+  if (!points.length || (opts.hideWhenFlatZero && maxV <= 0)) { el.style.display = 'none'; return 'empty'; }
+  if (points.length < SPARK_MIN_POINTS || (Number.isFinite(opts.from) && Number.isFinite(opts.to)
+      && opts.to - points[0].t < SPARK_MIN_COVER * (opts.to - opts.from))) { el.style.display = 'none'; return 'waiting'; }
 
   const top = Math.min(opts.max ?? Infinity, Math.max(opts.floor, maxV * 1.3));
   const t0 = Number.isFinite(opts.from) ? opts.from : points[0].t;
@@ -948,6 +956,7 @@ function renderSpark(el, points, opts) {
 
   el.setAttribute('aria-label', msg('sparkRange', opts.label, opts.fmt(minV), opts.fmt(maxV)));
   el.style.display = 'block';
+  return 'drawn';
 }
 
 // ── Sparkline hover readout ──────────────────────────────────────────────────

@@ -75,6 +75,9 @@
   "trendLine": {
     "message": "推移グラフ"
   },
+  "trendWaiting": {
+    "message": "履歴がまだ足りません"
+  },
   "paceMarker": {
     "message": "ペースの目安"
   },
