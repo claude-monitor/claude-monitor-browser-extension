@@ -229,12 +229,14 @@ async function applyStreamLimits(limits, meta = {}) {
   const eventKey = typeof meta?.eventKey === 'string' && /^[0-9a-f]{8}$/.test(meta.eventKey) ? meta.eventKey : null;
   const reply = meta?.reply !== false;
   await logStreamMessage(parseStreamWindow(limits?.session), eventKey, reply);
+  const verdict = await rememberStreamVerdict(limits);
 
   // The refresh is also how a plan not known yet turns out to be Free, so a
   // Free account's first reply isn't dropped on the paid path.
   let usage = claudeUsage;
   let free = claudePlan?.label === 'Free';
-  if (!free && (!claudeUsage?.lastUpdated || Date.now() - claudeUsage.lastUpdated > STREAM_REFRESH_GAP_MS)) {
+  if (!free && (!claudeUsage?.lastUpdated || Date.now() - claudeUsage.lastUpdated > STREAM_REFRESH_GAP_MS
+      || verdictDisagrees(claudeUsage, verdict))) {
     free = (await refreshUsage())?.reason === 'free-plan';
     if (free) ({ claudeUsage: usage } = await chrome.storage.local.get('claudeUsage'));
   }
@@ -265,6 +267,55 @@ async function applyStreamLimits(limits, meta = {}) {
     }
   }
   await updateMsgEstimate();
+}
+
+// Whether the last reply found each window used up. On paid plans /usage gives
+// whole numbers, and its 100 can be a window that still takes messages (seen
+// 2026-11-18: the bar said weekly 100% and spent, the user kept chatting). A
+// reply's figure is 100 only when claude.ai says the window ran out (see
+// page/stream.js), so it settles what a 100 from /usage means.
+async function rememberStreamVerdict(limits) {
+  const verdict = {};
+  for (const key of ['session', 'weekly']) {
+    const win = parseStreamWindow(limits?.[key]);
+    if (win) verdict[key] = { resetTime: win.resetTime, spent: win.percentage >= 100, at: Date.now() };
+  }
+  const { streamVerdict } = await chrome.storage.local.get('streamVerdict');
+  if (!verdict.session && !verdict.weekly) return streamVerdict ?? null;
+  const merged = { ...streamVerdict, ...verdict };
+  await chrome.storage.local.set({ streamVerdict: merged });
+  return merged;
+}
+
+// The percentage a /usage bucket should show given the last reply's verdict on
+// the same window, or null when the verdict doesn't apply. A 100 shows as 99
+// while that reply said the window still took messages: 100 is what the bar,
+// the popup and the badge read as "spent". After an hour without replies the
+// 100 stands, since the rest may have gone through Claude Code or the app,
+// which this browser doesn't see. A send refused at the limit makes it 100 for
+// the rest of the window: claude.ai can stop a window short of 100%.
+const STREAM_VERDICT_MAX_AGE_MS = 60 * 60 * 1000;
+function verdictPct(bucket, verdict) {
+  const pct = normalizePct(bucket?.percentage);
+  if (pct === null || !verdict) return null;
+  if (!(Math.abs(Number(bucket.resetTime) - verdict.resetTime) <= SAME_WINDOW_MS)) return null;
+  if (verdict.spent) return pct < 100 ? 100 : null;
+  if (pct >= 100 && Date.now() - verdict.at <= STREAM_VERDICT_MAX_AGE_MS) return 99;
+  return null;
+}
+
+async function applyStreamVerdict(data) {
+  const { streamVerdict } = await chrome.storage.local.get('streamVerdict');
+  for (const key of ['session', 'weekly']) {
+    const pct = verdictPct(data?.[key], streamVerdict?.[key]);
+    if (pct !== null) data[key].percentage = pct;
+  }
+}
+
+// The stored reading says otherwise than the reply just read: worth a refresh
+// even inside the usual gap, so the bar doesn't sit on "spent" (or miss it).
+function verdictDisagrees(usage, verdict) {
+  return ['session', 'weekly'].some(key => verdictPct(usage?.[key], verdict?.[key]) !== null);
 }
 
 // Validates one window from the page (the page world is not trusted with
@@ -668,6 +719,7 @@ async function refreshUsageFromApi({ force = false } = {}) {
       data.extra = mergeCreditSources(data.extra, extras.overage);
       // Prepaid balance ("current balance"), shown next to the credits card.
       data.prepaidBalance = extras.prepaid;
+      await applyStreamVerdict(data);
     }
     const stored = await persistAndBadge(data);
     return {
@@ -732,7 +784,7 @@ async function getClaudeOrgId() {
   // state, the estimates and the cached secondary reads tied to it. History is
   // kept but cut: the forecast and the sparklines ignore what came before.
   if (claudeOrgId && orgId && orgId !== claudeOrgId) {
-    await chrome.storage.local.remove(['claudeUsage', 'fetchFailures', 'notifState', 'msgLog', 'msgLeft', 'forecast', 'extrasCache']);
+    await chrome.storage.local.remove(['claudeUsage', 'fetchFailures', 'notifState', 'msgLog', 'msgLeft', 'forecast', 'extrasCache', 'streamVerdict']);
     await chrome.storage.local.set({ historyCutAt: Date.now() });
     clearResetAlarms();  // those resets are not this org's
     chrome.action.setBadgeText({ text: '' });

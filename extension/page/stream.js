@@ -167,10 +167,16 @@
     const resetsAt = Number(win.resets_at);
     if (!Number.isFinite(utilization) || !Number.isFinite(resetsAt) || resetsAt <= 0) return null;
     return {
-      percentage: win.status === 'exceeded_limit' ? 100 : Math.round(utilization * 100),
+      percentage: usedUp(utilization, win.status === 'exceeded_limit') ? 100 : Math.min(99, Math.round(utilization * 100)),
       resetTime: resetsAt * 1000,
       utilization,
     };
+  }
+
+  // 100 means "used up" to every reader (the bar, the popup, the badge), so a
+  // window that still takes messages tops out at 99 even when 99.6% rounds up.
+  function usedUp(utilization, exceeded) {
+    return exceeded || utilization >= 1;
   }
 
   // Every completion is a sent message, so `reply` is always true here; the org
@@ -275,7 +281,7 @@
     if (!win) return null;
     const utilization = win.utilization ?? 0;
     return {
-      percentage: utilization >= 1 ? 100 : Math.round(utilization * 100),
+      percentage: usedUp(utilization, false) ? 100 : Math.min(99, Math.round(utilization * 100)),
       resetTime: win.resetsAt * 1000,
       utilization,
     };
