@@ -341,10 +341,10 @@ if (reviewLink) {
 
 // ─── Pro waitlist link ───────────────────────────────────────────────────────
 
-// claude-monitor.com comes in the same languages as this UI. Spanish keeps the
-// slugs of the first Spanish site, the rest put /<lang> before the English
-// slug, and every other UI language (shown in English) gets the English page.
-// Same rule as siteUrl() in popup.js.
+// claude-monitor.com comes in fewer languages than this UI: the list below plus
+// pt-BR, no Chinese. Spanish keeps the slugs of the first Spanish site, the rest
+// put /<lang> before the English slug, and every other browser language gets
+// the English page. Same rule as siteUrl() in popup.js.
 function siteUrl(page, rest = '') {
   const lang = chrome.i18n.getUILanguage();
   const base = lang.split('-')[0];

@@ -3,8 +3,798 @@
     "message": "Claude Monitor: 用量追蹤器，工作階段和每週使用限制",
     "description": "Extension name on the Chrome Web Store and Edge Add-ons (max 75 characters)."
   },
+  "extNameFirefox": {
+    "message": "Claude Monitor: 工作階段和每週使用限制",
+    "description": "Extension name on Firefox Add-ons (max 50 characters)."
+  },
+  "extNameEdge": {
+    "message": "Claude Monitor: 用量追蹤器",
+    "description": "Extension name on Microsoft Edge Add-ons (short, no feature list)."
+  },
   "extDescription": {
     "message": "即時查看 Claude 使用限制：工作階段和每週用量百分比、重設倒數計時、80/95% 提醒。支援 Free、Pro、Max 和 Claude Code。",
     "description": "Short description shown in the stores and the browser (max 132 characters)."
+  },
+  "intervalTitle": {
+    "message": "自動更新間隔"
+  },
+  "displayOptions": {
+    "message": "顯示選項"
+  },
+  "metrics": {
+    "message": "指標"
+  },
+  "selectAll": {
+    "message": "全選"
+  },
+  "deselectAll": {
+    "message": "取消全選"
+  },
+  "fableWeekly": {
+    "message": "Fable 5 每週"
+  },
+  "opusWeekly": {
+    "message": "Opus 每週"
+  },
+  "sonnetWeekly": {
+    "message": "Sonnet 每週"
+  },
+  "routineRuns": {
+    "message": "例行工作次數"
+  },
+  "extraCredits": {
+    "message": "額外用量額度"
+  },
+  "menuDesign": {
+    "message": "版面"
+  },
+  "layoutClassic": {
+    "message": "經典"
+  },
+  "layoutClassicDesc": {
+    "message": "原始版面"
+  },
+  "layoutMixed": {
+    "message": "混合"
+  },
+  "layoutMixedDesc": {
+    "message": "圓環＋清單"
+  },
+  "layoutGrid": {
+    "message": "網格"
+  },
+  "layoutGridDesc": {
+    "message": "圓環卡片"
+  },
+  "layoutList": {
+    "message": "清單"
+  },
+  "layoutListDesc": {
+    "message": "精簡排列"
+  },
+  "trendLine": {
+    "message": "趨勢線"
+  },
+  "trendWaiting": {
+    "message": "歷史記錄還不夠"
+  },
+  "trendWaitingFor": {
+    "message": "$P1$：歷史記錄還不夠",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "paceMarker": {
+    "message": "步調標記"
+  },
+  "menuTheme": {
+    "message": "主題"
+  },
+  "themeAria": {
+    "message": "$P1$ 主題",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "settingsHistory": {
+    "message": "設定與歷史記錄"
+  },
+  "refreshTitle": {
+    "message": "重新整理使用量資料"
+  },
+  "signedOutStale": {
+    "message": "已登出：資料不是最新的"
+  },
+  "lastUpdateUnknown": {
+    "message": "上次更新時間不明"
+  },
+  "signIn": {
+    "message": "登入 →"
+  },
+  "couldntRefresh": {
+    "message": "無法更新：資料不是最新的"
+  },
+  "retry": {
+    "message": "重試"
+  },
+  "currentSession": {
+    "message": "目前工作階段"
+  },
+  "weeklyAll": {
+    "message": "每週 · 所有模型"
+  },
+  "weeklyIncludes": {
+    "message": "包含 Fable 5、Opus、Sonnet 和 Haiku"
+  },
+  "subcapNote": {
+    "message": "各模型的限制會與每週限制一起重設"
+  },
+  "dailyRoutineRuns": {
+    "message": "每日例行工作次數"
+  },
+  "rateInStore": {
+    "message": "到商店評分"
+  },
+  "notNow": {
+    "message": "暫時不要"
+  },
+  "waitlistText": {
+    "message": "Pro：在手機上查看你的限制"
+  },
+  "joinWaitlist": {
+    "message": "加入候補名單 →"
+  },
+  "dontShowAgain": {
+    "message": "不再顯示"
+  },
+  "dismiss": {
+    "message": "關閉"
+  },
+  "alsoOnWindows": {
+    "message": "也有 Windows 版"
+  },
+  "winPromoBody": {
+    "message": "關閉瀏覽器，也能在時鐘旁查看使用量。"
+  },
+  "tryFree": {
+    "message": "免費試用 →"
+  },
+  "neverUpdated": {
+    "message": "尚未更新"
+  },
+  "opensClaudeTab": {
+    "message": "在新分頁開啟 claude.ai"
+  },
+  "openUsagePage": {
+    "message": "開啟使用量頁面"
+  },
+  "freeTitle": {
+    "message": "查看你的 Free 方案限制"
+  },
+  "freeTextOff": {
+    "message": "Free 方案無法使用 Claude 的使用量頁面，但每則回覆仍會附上你的限制。在 claude.ai 開啟用量列，傳送下一則訊息後，限制就會顯示在這裡。"
+  },
+  "freeTextOn": {
+    "message": "claude.ai 上的用量列已開啟。在那裡傳送一則訊息，你的限制就會顯示在這裡。"
+  },
+  "turnOn": {
+    "message": "開啟"
+  },
+  "alertsNudgeText": {
+    "message": "在 $P1$% 和 $P2$% 時收到提醒",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      },
+      "p2": {
+        "content": "$2"
+      }
+    }
+  },
+  "openClaude": {
+    "message": "開啟 claude.ai"
+  },
+  "noDataLine1": {
+    "message": "還沒有使用量資料。"
+  },
+  "noDataLine2": {
+    "message": "按下方按鈕載入你的資料。"
+  },
+  "openUsagePageBtn": {
+    "message": "開啟 Claude 使用量頁面"
+  },
+  "resettingSoon": {
+    "message": "即將重設"
+  },
+  "resetsIn": {
+    "message": "$P1$後重設",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "durDH": {
+    "message": "$P1$ 天 $P2$ 小時",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      },
+      "p2": {
+        "content": "$2"
+      }
+    }
+  },
+  "durHM": {
+    "message": "$P1$ 小時 $P2$ 分鐘",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      },
+      "p2": {
+        "content": "$2"
+      }
+    }
+  },
+  "durH": {
+    "message": "$P1$ 小時",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "durM": {
+    "message": "$P1$ 分鐘",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "intervalOpt": {
+    "message": "$P1$ 分",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "justUpdated": {
+    "message": "剛剛更新"
+  },
+  "updatedAgo": {
+    "message": "$P1$前更新",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "updatedAt": {
+    "message": "更新時間：$P1$",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "lastUpdateAgo": {
+    "message": "上次更新：$P1$前",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "lastUpdateAt": {
+    "message": "上次更新：$P1$",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "lastUpdateNow": {
+    "message": "上次更新：剛剛"
+  },
+  "noDataCaptured": {
+    "message": "尚未取得資料"
+  },
+  "notYetUsed": {
+    "message": "尚未使用"
+  },
+  "weeklyLimitLbl": {
+    "message": "每週限制"
+  },
+  "resetTimeUnknown": {
+    "message": "重設時間不明"
+  },
+  "resetDayUnknown": {
+    "message": "重設日期不明"
+  },
+  "balance": {
+    "message": "餘額 $P1$",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "resetsMonthly": {
+    "message": "每月重設"
+  },
+  "sparkSession": {
+    "message": "工作階段"
+  },
+  "sparkWeekly": {
+    "message": "每週"
+  },
+  "sparkSpent": {
+    "message": "本月支出"
+  },
+  "sparkRange": {
+    "message": "$P1$：$P2$ 至 $P3$",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      },
+      "p2": {
+        "content": "$2"
+      },
+      "p3": {
+        "content": "$3"
+      }
+    }
+  },
+  "spendLimitMonthly": {
+    "message": "已達每月支出上限"
+  },
+  "spendLimitOrg": {
+    "message": "已達支出上限（組織）"
+  },
+  "spendLimit": {
+    "message": "已達支出上限"
+  },
+  "resetsDaily": {
+    "message": "每日重設"
+  },
+  "reviewAlert": {
+    "message": "提醒得及時嗎？為我們評分"
+  },
+  "reviewFree": {
+    "message": "看到 Free 方案的限制了嗎？為我們評分"
+  },
+  "reviewDays": {
+    "message": "覺得實用嗎？為我們評分"
+  },
+  "reviewWhereEdge": {
+    "message": "請在商店頁面向下捲動"
+  },
+  "errAuth": {
+    "message": "更新失敗：請登入 claude.ai"
+  },
+  "errOrg": {
+    "message": "更新失敗：找不到組織"
+  },
+  "errFree": {
+    "message": "Free 方案：每則訊息後更新"
+  },
+  "errRejected": {
+    "message": "更新失敗：claude.ai 的回應不符預期"
+  },
+  "errUnreachable": {
+    "message": "更新失敗：無法連線到 claude.ai"
+  },
+  "optTitle": {
+    "message": "Claude Monitor：設定"
+  },
+  "optNotifications": {
+    "message": "通知"
+  },
+  "optAlertMe": {
+    "message": "使用量超過門檻時提醒我"
+  },
+  "optWarn": {
+    "message": "警告門檻"
+  },
+  "optCrit": {
+    "message": "嚴重門檻"
+  },
+  "optNotifHint": {
+    "message": "適用於工作階段、每週和各模型的限制。每個重設週期內，每種提醒只會傳送一次。"
+  },
+  "optSendTest": {
+    "message": "傳送測試通知"
+  },
+  "optOnClaude": {
+    "message": "在 claude.ai 上"
+  },
+  "optShowBar": {
+    "message": "在聊天輸入框上方顯示用量列"
+  },
+  "optBarHint": {
+    "message": "預設為關閉。開啟時會新增 scripting 權限（Chrome 已透過使用量端點授予 claude.ai 的存取權）。用量列只會擷取 Claude 附在每則回覆中的用量數字，絕不會儲存或傳送你的訊息。在 Free 方案中，這是唯一會顯示限制的地方。"
+  },
+  "optHistory": {
+    "message": "歷史記錄"
+  },
+  "optKeepFor": {
+    "message": "保留歷史記錄"
+  },
+  "optDays": {
+    "message": "$P1$ 天",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "optSnapshots": {
+    "message": "已儲存的記錄數"
+  },
+  "optHistoryHint": {
+    "message": "每次成功更新時，都會在本機記錄使用量、付費支出和預付餘額，大約每 10 分鐘一次。歷史記錄只儲存在這個瀏覽器中。匯出時，缺少的值會留空：表示當時無法取得資料，而不是零。"
+  },
+  "optExportJson": {
+    "message": "匯出 JSON"
+  },
+  "optExportCsv": {
+    "message": "匯出 CSV"
+  },
+  "optClearHistory": {
+    "message": "清除歷史記錄"
+  },
+  "optReviewTitle": {
+    "message": "覺得實用嗎？"
+  },
+  "optReviewText": {
+    "message": "其他 Claude 使用者主要是透過簡短的評論找到這個擴充功能。只要一分鐘。"
+  },
+  "optLeaveReview": {
+    "message": "撰寫評論 ★★★★★"
+  },
+  "optProTitle": {
+    "message": "Pro 版即將推出。"
+  },
+  "optProText": {
+    "message": "在手機上查看你的 Claude 限制，並在達到限制之前透過 Slack 或 Discord 收到通知。付費選用；這個擴充功能會繼續免費。"
+  },
+  "optWinTitle": {
+    "message": "也有 Windows 版。"
+  },
+  "optWinText": {
+    "message": "UsagePeek 會在時鐘旁顯示你的使用量，關閉瀏覽器也看得到，並在限制重設時立即重新開啟你的 Claude Code 專案。"
+  },
+  "optTryFree7": {
+    "message": "免費試用 7 天 →"
+  },
+  "stPermDenied": {
+    "message": "未授予權限"
+  },
+  "stSaved": {
+    "message": "已儲存"
+  },
+  "stHistoryCleared": {
+    "message": "已清除歷史記錄"
+  },
+  "stNoHistory": {
+    "message": "還沒有歷史記錄"
+  },
+  "stExported": {
+    "message": "已匯出"
+  },
+  "testSuffix": {
+    "message": "（測試）"
+  },
+  "nbSession": {
+    "message": "Claude 工作階段"
+  },
+  "nbWeekly": {
+    "message": "Claude 每週限制"
+  },
+  "nbFable": {
+    "message": "Fable 5 每週限制"
+  },
+  "nbOpus": {
+    "message": "Opus 每週限制"
+  },
+  "nbSonnet": {
+    "message": "Sonnet 每週限制"
+  },
+  "nbDesign": {
+    "message": "Claude Design 每週限制"
+  },
+  "notifTitle": {
+    "message": "$P1$：$P2$%",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      },
+      "p2": {
+        "content": "$2"
+      }
+    }
+  },
+  "almostResets": {
+    "message": "即將達到上限，$P1$後重設",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "almostLimit": {
+    "message": "即將達到上限"
+  },
+  "approaching": {
+    "message": "接近上限"
+  },
+  "barTitle": {
+    "message": "$P1$：已使用 $P2$%",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      },
+      "p2": {
+        "content": "$2"
+      }
+    }
+  },
+  "barTitleReset": {
+    "message": "$P1$：已使用 $P2$%，$P3$ 後重設",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      },
+      "p2": {
+        "content": "$2"
+      },
+      "p3": {
+        "content": "$3"
+      }
+    }
+  },
+  "barStale": {
+    "message": "資料不是最新的"
+  },
+  "barFreeWaiting": {
+    "message": "傳送下一則訊息後，就會顯示你的 Free 方案限制"
+  },
+  "barNotLoaded": {
+    "message": "尚未載入使用量"
+  },
+  "barAria": {
+    "message": "Claude 使用量"
+  },
+  "tipResetsAt": {
+    "message": "$P1$：已使用 $P2$%，$P3$ 重設",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      },
+      "p2": {
+        "content": "$2"
+      },
+      "p3": {
+        "content": "$3"
+      }
+    }
+  },
+  "tipSignIn": {
+    "message": "登入 claude.ai 以更新"
+  },
+  "tipFreeBarOff": {
+    "message": "開啟用量列即可查看你的 Free 方案限制"
+  },
+  "notifResetTitle": {
+    "message": "Claude 工作階段已重設"
+  },
+  "notifResetBody": {
+    "message": "你的 Claude 工作階段已回到 0%。"
+  },
+  "notifResetWeeklyTitle": {
+    "message": "$P1$已重設",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "notifResetWeeklyBody": {
+    "message": "已回到 0%。"
+  },
+  "forecastLine": {
+    "message": "依目前步調：約 $P1$ 達到上限（$P2$ 重設）",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      },
+      "p2": {
+        "content": "$2"
+      }
+    }
+  },
+  "forecastAt": {
+    "message": "依目前步調：約 $P1$ 達到上限",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "barBrandTitle": {
+    "message": "Claude Monitor（瀏覽器擴充功能，非 Anthropic 開發）：按一下查看詳細資料"
+  },
+  "barForecastShort": {
+    "message": "~$P1$ 用完",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "msgsLeft": {
+    "message": "剩 ~$P1$ 則訊息",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "msgsLeftTitle": {
+    "message": "根據你最近的 $P1$ 則訊息估算；會因模型和長度而異",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "paceEven": {
+    "message": "平均用到重設的步調：目前應為 $P1$%",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "paceAhead": {
+    "message": "快於平均步調（目前應為 $P1$%）",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "paceWithin": {
+    "message": "在平均步調之內（目前應為 $P1$%）",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "barPillHide": {
+    "message": "隱藏到頁面重新載入為止"
+  },
+  "wcPageTitle": {
+    "message": "歡迎使用 Claude Monitor"
+  },
+  "wcIntro": {
+    "message": "只要幾個簡單步驟，工作時就能隨時看到你的 Claude 限制。"
+  },
+  "wcSignTitle": {
+    "message": "登入 Claude"
+  },
+  "wcSignChecking": {
+    "message": "正在檢查你的 claude.ai 登入狀態…"
+  },
+  "wcSignOk": {
+    "message": "已登入 claude.ai"
+  },
+  "wcSignNeeded": {
+    "message": "Claude Monitor 透過你的 claude.ai 登入讀取限制。請先登入，再回到這個分頁。"
+  },
+  "wcSignBtn": {
+    "message": "登入 claude.ai"
+  },
+  "wcBarTitle": {
+    "message": "在 Claude 中顯示我的限制"
+  },
+  "wcBarNote": {
+    "message": "只在 claude.ai 上運作。只會從每則回覆中擷取用量數字，絕不會儲存或傳送你的訊息。隨時可以關閉。"
+  },
+  "wcBarOn": {
+    "message": "已開啟。你的限制會顯示在 claude.ai 的聊天輸入框上方。"
+  },
+  "wcBarDenied": {
+    "message": "尚未開啟。之後可以在設定中開啟。"
+  },
+  "wcPinTitle": {
+    "message": "釘選到工具列"
+  },
+  "wcPinHow": {
+    "message": "按一下工具列中的拼圖圖示，再按橘色脈搏圖示旁的圖釘。"
+  },
+  "wcPinHowEdge": {
+    "message": "按一下工具列中的拼圖圖示，再按橘色脈搏圖示旁的眼睛圖示。"
+  },
+  "wcPinHowFirefox": {
+    "message": "按一下工具列中的拼圖圖示，再按橘色脈搏圖示旁的齒輪，然後選擇「釘選到工具列」。"
+  },
+  "wcPinOk": {
+    "message": "已釘選。徽章讓你一眼就能看到工作階段的使用量。"
+  },
+  "wcAlertsOk": {
+    "message": "提醒已開啟。"
+  },
+  "wcFreeNote": {
+    "message": "在 Free 方案中，用量列是唯一會顯示限制的地方。"
+  },
+  "wcDone": {
+    "message": "完成"
+  },
+  "whatsNewTitle": {
+    "message": "v$P1$ 的新功能",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "wn121Bar": {
+    "message": "限制會顯示在聊天輸入框上方，現在 claude.ai 上的 Claude Code 也有"
+  },
+  "wn121Pace": {
+    "message": "如果依目前步調會在重設前達到上限，會顯示大約的時間；用量較多的工作階段重設時也會提醒你"
+  },
+  "wn121Msgs": {
+    "message": "開啟用量列後：顯示工作階段估計還剩幾則訊息"
+  },
+  "wnTurnOnBar": {
+    "message": "開啟用量列"
+  },
+  "pinHintText": {
+    "message": "釘選 Claude Monitor，隨時看到徽章"
+  },
+  "pinHintHow": {
+    "message": "按拼圖圖示，再按橘色圖示旁的圖釘"
+  },
+  "pinHintHowEdge": {
+    "message": "按拼圖圖示，再按橘色圖示旁的眼睛圖示"
+  },
+  "pinHintHowFirefox": {
+    "message": "按拼圖圖示，再按橘色圖示旁的齒輪，選擇「釘選到工具列」"
+  },
+  "somethingWrong": {
+    "message": "遇到問題？"
+  },
+  "emptySignedOutTitle": {
+    "message": "請登入 claude.ai"
+  },
+  "emptySignedOutText": {
+    "message": "Claude Monitor 透過你的 claude.ai 登入讀取限制。請先登入，再重新開啟這個視窗。"
+  },
+  "emptyOrgTitle": {
+    "message": "找不到這個帳號的 Claude 組織"
+  },
+  "emptyOrgText": {
+    "message": "請用你聊天時使用的帳號登入 claude.ai，然後重試。"
+  },
+  "emptyFailTitle": {
+    "message": "還無法讀取你的使用量"
+  },
+  "emptyLoading": {
+    "message": "正在從 claude.ai 讀取你的使用量…"
+  },
+  "orgSelectTitle": {
+    "message": "目前顯示的 Claude 組織"
+  },
+  "optNotifHintReset": {
+    "message": "適用於工作階段、每週和各模型的限制。每個重設週期內，每種提醒只會傳送一次；其中任何一項在超過警告門檻後重設時，會再傳送一次。"
   }
 }

@@ -82,7 +82,7 @@ The extension refreshes usage through Claude.ai's internal authenticated API.
 - Manual refresh button.
 - Quick link to `https://claude.ai/settings/usage`.
 - Local storage caching so the last known value remains visible between refreshes.
-- Interface, notifications and store listing in English, Spanish, Brazilian Portuguese, German, French, Italian, Japanese and Korean, following the browser language. The store listing is also available in 14 more languages, where the interface stays in English.
+- Interface, notifications and store listing in English, Spanish, Brazilian Portuguese, German, French, Italian, Japanese, Korean and Chinese (Simplified and Traditional), following the browser language. The store listing is also available in 12 more languages, where the interface stays in English.
 
 | Four layouts: Classic, Mixed, Grid, List | Six color themes |
 |---|---|
@@ -142,7 +142,7 @@ For a permanent install, use the published add-on at <https://addons.mozilla.org
 - `extension/popup.js`: popup rendering, sparklines and their hover readout, manual refresh flow, and storage listeners.
 - `extension/options.html` and `extension/options.js`: settings page with notification thresholds, the usage-bar toggle, history retention, export and clear.
 - `extension/page/bar.js`: the optional usage bar on claude.ai (isolated world, closed shadow root, no network requests).
-- `extension/_locales/`: translated strings (`messages.json`) for the eight supported languages.
+- `extension/_locales/`: translated strings (`messages.json`) for the ten supported languages (the other folders carry only the store name and description).
 - `extension/page/stream.js`: the optional page-world reader for the limits attached to each reply (the `message_limit` event of chat completion streams and the limit frame of `StreamTimeline` streams); it extracts only the limit fields and never stores or sends anything else.
 - `extension/welcome.html`, `extension/welcome.js` and `extension/welcome.css`: the packaged welcome page opened once at install (sign-in check, the bar in one click, pinning, alerts).
 

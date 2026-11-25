@@ -6,11 +6,11 @@ const SIGN_IN_URL = 'https://claude.ai/login';
 const CHAT_URL    = 'https://claude.ai/new';
 const HELP_URL    = siteUrl('getting-started', '#troubleshooting');
 
-// claude-monitor.com comes in the same languages as this UI (UI_BASES below,
-// plus pt-BR). Spanish keeps the slugs of the first Spanish site, the rest put
-// /<lang> before the English slug, and every other UI language (shown in
-// English) gets the English page. Reads the language itself because it runs
-// before the i18n block. Same rule as siteUrl() in options.js.
+// claude-monitor.com comes in fewer languages than this UI: the list below plus
+// pt-BR, no Chinese. Spanish keeps the slugs of the first Spanish site, the rest
+// put /<lang> before the English slug, and every other browser language gets
+// the English page. Reads the language itself because it runs before the i18n
+// block. Same rule as siteUrl() in options.js.
 function siteUrl(page, rest = '') {
   const lang = chrome.i18n.getUILanguage();
   const base = lang.split('-')[0];
@@ -48,10 +48,13 @@ const FETCH_FAIL_STALE = 2;
 // ── i18n ──────────────────────────────────────────────────────────────────
 // Strings live in _locales/<lang>/messages.json; the browser picks the locale.
 // Dates follow the UI language only where the UI is translated; otherwise an
-// English UI would show, say, Arabic or Russian dates (14 store-only locales).
+// English UI would show, say, Arabic or Russian dates (12 store-only locales).
+// UI_REGIONAL are the translations with a region in their folder name: they
+// match only exactly (a browser in zh-HK would find no zh_HK and no zh).
 const UI_LANG = chrome.i18n.getUILanguage();
 const UI_BASES = ['es', 'de', 'fr', 'it', 'ja', 'ko'];
-const LOCALE = (UI_LANG === 'pt-BR' || UI_BASES.includes(UI_LANG.split('-')[0])) ? UI_LANG : 'en-US';
+const UI_REGIONAL = ['pt-BR', 'zh-CN', 'zh-TW'];
+const LOCALE = (UI_REGIONAL.includes(UI_LANG) || UI_BASES.includes(UI_LANG.split('-')[0])) ? UI_LANG : 'en-US';
 
 function msg(key, ...subs) {
   return chrome.i18n.getMessage(key, subs.map(String)) || key;

@@ -35,10 +35,13 @@ const AUTO_REFRESH_GAP_MS  = 60 * 1000;
 const WHATS_NEW_VERSIONS = ['1.21.0']; // Must match the keys of WHATS_NEW in popup.js.
 
 // Dates follow the UI language only where the UI is translated; otherwise an
-// English UI would show, say, Arabic or Russian dates (14 store-only locales).
+// English UI would show, say, Arabic or Russian dates (12 store-only locales).
+// UI_REGIONAL are the translations with a region in their folder name: they
+// match only exactly (a browser in zh-HK would find no zh_HK and no zh).
 const UI_LANG = chrome.i18n.getUILanguage();
 const UI_BASES = ['es', 'de', 'fr', 'it', 'ja', 'ko'];
-const LOCALE = (UI_LANG === 'pt-BR' || UI_BASES.includes(UI_LANG.split('-')[0])) ? UI_LANG : 'en-US';
+const UI_REGIONAL = ['pt-BR', 'zh-CN', 'zh-TW'];
+const LOCALE = (UI_REGIONAL.includes(UI_LANG) || UI_BASES.includes(UI_LANG.split('-')[0])) ? UI_LANG : 'en-US';
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
